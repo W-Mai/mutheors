@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use std::ops::Rem;
     use simple_compose::*;
 
     #[test]
@@ -40,5 +39,14 @@ mod tests {
 
         let chord = tuning.common_chord(6);
         assert_eq!(chord.tonality, Tonality::Minor);
+    }
+
+    #[test]
+    fn test_breakdown_2() {
+        let tuning = Tuning::CSharpOrDFlat;
+        let chord = tuning.common_chord(1);
+        let notes = chord.breakdown(4);
+
+        assert_eq!(chord, Chord { tuning: Tuning::CSharpOrDFlat, tonality: Tonality::Major });
     }
 }
