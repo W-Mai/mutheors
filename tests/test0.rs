@@ -19,22 +19,22 @@ mod tests {
         assert_eq!(chord.tonality, Tonality::Major);
         let notes = chord.breakdown(4);
         assert_eq!(notes.len(), 3);
-        assert_eq!(notes[0].chord, Tuning::C);
+        assert_eq!(notes[0].tuning, Tuning::C);
         assert_eq!(notes[0].octave, 4);
-        assert_eq!(notes[1].chord, Tuning::E);
+        assert_eq!(notes[1].tuning, Tuning::E);
         assert_eq!(notes[1].octave, 4);
-        assert_eq!(notes[2].chord, Tuning::G);
+        assert_eq!(notes[2].tuning, Tuning::G);
         assert_eq!(notes[2].octave, 4);
 
         let chord = tuning.common_chord(2);
         assert_eq!(chord.tonality, Tonality::Minor);
         let notes = chord.breakdown(4);
         assert_eq!(notes.len(), 3);
-        assert_eq!(notes[0].chord, Tuning::D);
+        assert_eq!(notes[0].tuning, Tuning::D);
         assert_eq!(notes[0].octave, 4);
-        assert_eq!(notes[1].chord, Tuning::F);
+        assert_eq!(notes[1].tuning, Tuning::F);
         assert_eq!(notes[1].octave, 4);
-        assert_eq!(notes[2].chord, Tuning::A);
+        assert_eq!(notes[2].tuning, Tuning::A);
         assert_eq!(notes[2].octave, 4);
 
         let chord = tuning.common_chord(6);
@@ -49,11 +49,11 @@ mod tests {
 
         assert_eq!(chord, Chord { tuning: Tuning::CSharpOrDFlat, tonality: Tonality::Major });
         assert_eq!(notes.len(), 3);
-        assert_eq!(notes[0].chord, Tuning::CSharpOrDFlat);
+        assert_eq!(notes[0].tuning, Tuning::CSharpOrDFlat);
         assert_eq!(notes[0].octave, 4);
-        assert_eq!(notes[1].chord, Tuning::F);
+        assert_eq!(notes[1].tuning, Tuning::F);
         assert_eq!(notes[1].octave, 4);
-        assert_eq!(notes[2].chord, Tuning::GSharpOrAFlat);
+        assert_eq!(notes[2].tuning, Tuning::GSharpOrAFlat);
         assert_eq!(notes[2].octave, 4);
     }
 
