@@ -21,16 +21,10 @@ mod tests {
 
     #[test]
     fn test_measure_1() {
-        do_a_measure_test(4);
-        do_a_measure_test(4);
-        do_a_measure_test(4);
-        do_a_measure_test(4);
-        do_a_measure_test(4);
-        do_a_measure_test(4);
-        do_a_measure_test(4);
-        do_a_measure_test(4);
-        do_a_measure_test(4);
-        do_a_measure_test(4);
-        do_a_measure_test(4);
+        for i in 0..16 {
+            for _ in 0..8 {
+                do_a_measure_test(i);
+            }
+        }
     }
 }
