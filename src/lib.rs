@@ -4,11 +4,12 @@ mod tonality;
 mod tuning;
 
 mod duration;
-mod midi_player;
+
+mod midi;
 
 pub use chord::*;
 pub use duration::*;
-pub use midi_player::*;
+pub use midi::*;
 pub use note::*;
 pub use tonality::*;
 pub use tuning::*;
