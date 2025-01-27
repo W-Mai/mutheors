@@ -5,8 +5,8 @@ use std::fmt::Display;
 pub struct Note {
     pub tuning: Tuning,
     pub octave: u8,
-    pub(crate) duration: f32,
-    pub(crate) velocity: f32,
+    pub duration: f32,
+    pub velocity: f32,
 }
 
 impl Display for Note {
