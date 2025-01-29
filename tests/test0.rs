@@ -47,7 +47,13 @@ mod tests {
         let chord = tuning.common_chord(1);
         let notes = chord.breakdown(4);
 
-        assert_eq!(chord, Chord { tuning: Tuning::CSharpOrDFlat, tonality: Tonality::Major });
+        assert_eq!(
+            chord,
+            Chord {
+                tuning: Tuning::CSharpOrDFlat,
+                tonality: Tonality::Major
+            }
+        );
         assert_eq!(notes.len(), 3);
         assert_eq!(notes[0].tuning, Tuning::CSharpOrDFlat);
         assert_eq!(notes[0].octave, 4);

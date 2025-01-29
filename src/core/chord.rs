@@ -1,10 +1,9 @@
-use std::fmt::Display;
 use crate::note::Note;
 use crate::tonality::Tonality;
 use crate::tuning::Tuning;
+use std::fmt::Display;
 
-#[derive(Copy, Clone, Debug)]
-#[derive(PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Chord {
     pub tuning: Tuning,
     pub tonality: Tonality,
@@ -25,7 +24,7 @@ impl Display for Chord {
         let tonality_str = match self.tonality {
             Tonality::Major => "",
             Tonality::Minor => "m",
-            _ => "?"
+            _ => "?",
         };
 
         write!(f, "{}", format!("{}{}", tuning_str, tonality_str))
@@ -42,19 +41,49 @@ impl Chord {
         match self.tonality {
             Tonality::Major => {
                 vec![
-                    Note { tuning: self.tuning, octave, duration: 0.5, velocity: 0.5 },
-                    Note { tuning: self.tuning.modulation(4), octave: octave_eval(octave, self.tuning, 4), duration: 0.5, velocity: 0.5 },
-                    Note { tuning: self.tuning.modulation(7), octave: octave_eval(octave, self.tuning, 7), duration: 0.5, velocity: 0.5 },
+                    Note {
+                        tuning: self.tuning,
+                        octave,
+                        duration: 0.5,
+                        velocity: 0.5,
+                    },
+                    Note {
+                        tuning: self.tuning.modulation(4),
+                        octave: octave_eval(octave, self.tuning, 4),
+                        duration: 0.5,
+                        velocity: 0.5,
+                    },
+                    Note {
+                        tuning: self.tuning.modulation(7),
+                        octave: octave_eval(octave, self.tuning, 7),
+                        duration: 0.5,
+                        velocity: 0.5,
+                    },
                 ]
             }
             Tonality::Minor => {
                 vec![
-                    Note { tuning: self.tuning, octave, duration: 0.5, velocity: 0.5 },
-                    Note { tuning: self.tuning.modulation(3), octave: octave_eval(octave, self.tuning, 3), duration: 0.5, velocity: 0.5 },
-                    Note { tuning: self.tuning.modulation(7), octave: octave_eval(octave, self.tuning, 7), duration: 0.5, velocity: 0.5 },
+                    Note {
+                        tuning: self.tuning,
+                        octave,
+                        duration: 0.5,
+                        velocity: 0.5,
+                    },
+                    Note {
+                        tuning: self.tuning.modulation(3),
+                        octave: octave_eval(octave, self.tuning, 3),
+                        duration: 0.5,
+                        velocity: 0.5,
+                    },
+                    Note {
+                        tuning: self.tuning.modulation(7),
+                        octave: octave_eval(octave, self.tuning, 7),
+                        duration: 0.5,
+                        velocity: 0.5,
+                    },
                 ]
             }
-            _ => vec![]
+            _ => vec![],
         }
     }
 }

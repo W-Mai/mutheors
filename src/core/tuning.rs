@@ -1,6 +1,6 @@
-use std::fmt::Display;
 use crate::chord::Chord;
 use crate::tonality::Tonality;
+use std::fmt::Display;
 
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
@@ -44,8 +44,8 @@ impl From<u8> for Tuning {
 impl Tuning {
     pub fn modulation(&self, degree: i8) -> Tuning {
         match self {
-            Tuning::None => { Tuning::None }
-            _ => Tuning::from(((*self as i8 - 1 + 12 + degree) % 12 + 1) as u8)
+            Tuning::None => Tuning::None,
+            _ => Tuning::from(((*self as i8 - 1 + 12 + degree) % 12 + 1) as u8),
         }
     }
 
@@ -58,7 +58,10 @@ impl Tuning {
             _ => panic!("Invalid degree"),
         };
 
-        Chord { tuning: new_tuning, tonality }
+        Chord {
+            tuning: new_tuning,
+            tonality,
+        }
     }
 
     pub fn next_basic_degree(&self, nth: i8) -> Tuning {
@@ -67,7 +70,7 @@ impl Tuning {
 
         match self {
             Tuning::None => Tuning::C,
-            _ => Tuning::from((*self as i8 + basic_degrees[nth] - 1).rem_euclid(12) as u8 + 1)
+            _ => Tuning::from((*self as i8 + basic_degrees[nth] - 1).rem_euclid(12) as u8 + 1),
         }
     }
 }
@@ -88,7 +91,8 @@ impl Display for Tuning {
             Tuning::A => "A",
             Tuning::ASharpOrBFlat => "A#/Bb",
             Tuning::B => "B",
-        }.to_string();
+        }
+        .to_string();
         write!(f, "{}", str)
     }
 }
