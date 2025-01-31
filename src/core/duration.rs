@@ -1,30 +1,137 @@
+use super::MusicError;
 use std::fmt::{Display, Formatter};
 
 ///
 /// Duration represents the length of a note.
 ///
-/// `real duration = 6.0 / duration`
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[repr(u16)]
-pub enum Duration {
-    Whole = 6,
-    Half = 12,
-    Quarter = 24,
-    Eighth = 48,
-    Sixteenth = 96,
-    ThirtySecond = 192,
-    SixtyFourth = 384,
-    HundredTwentyEighth = 768,
+pub enum DurationBase {
+    Maxima,       // 8
+    Longa,        // 4
+    Breve,        // 2
+    Whole,        // 1
+    Half,         // 1 / 2
+    Quarter,      // 1 / 4
+    Eighth,       // 1 / 8
+    Sixteenth,    // 1 / 16
+    ThirtySecond, // 1 / 32
+    SixtyFourth,  // 1 / 64
+}
 
-    // Dotted notes
-    WholeDotted = 4,
-    HalfDotted = 8,
-    QuarterDotted = 16,
-    EighthDotted = 32,
-    SixteenthDotted = 64,
-    ThirtySecondDotted = 128,
-    SixtyFourthDotted = 256,
-    HundredTwentyEighthDotted = 512,
+/// Structure that represents a tuplet
+#[derive(Debug, Clone, PartialEq)]
+pub struct Tuplet {
+    pub actual_notes: u8,            // The number of actual notes played
+    pub base_notes: u8,              // Base number of notes
+    pub base_duration: DurationBase, // Basic note value type
+}
+
+impl Tuplet {
+    /// Creating a new legato configuration
+    /// # Parameters
+    /// - ratio: Actual note count/baseline note count (e.g., 3:2)
+    /// - base: Basic note value type (such as Quarter, indicating a note value based on the quarter note)
+    /// # Examples
+    /// ```
+    /// use simple_compose::{DurationBase, Tuplet};
+    /// let triplet = Tuplet::new(3, 2, DurationBase::Quarter).unwrap();
+    /// ```
+    ///
+    pub fn new(actual: u8, base: u8, duration: DurationBase) -> Result<Self, MusicError> {
+        if actual == 0 || base == 0 {
+            return Err(MusicError::InvalidTupletRatio { actual, base });
+        }
+
+        // Common Consonant Validity Check
+        match (actual, base) {
+            (3, 2) | (5, 4) | (6, 4) => Ok(()),
+            _ if actual > base => Ok(()), // Allow unconventional but mathematically valid ligatures
+            _ => Err(MusicError::UnsupportedTuplet),
+        }?;
+
+        Ok(Self {
+            actual_notes: actual,
+            base_notes: base,
+            base_duration: duration,
+        })
+    }
+
+    /// Calculate the legato ratio factor
+    /// Return value: the time value correction coefficient for a single note
+    pub fn ratio(&self) -> f32 {
+        // For example, a 3:2 tritone returns 2.0/3.0.
+        self.base_notes as f32 / self.actual_notes as f32
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Duration {
+    pub base: DurationBase,
+    pub dots: u8, // [0, 3]
+    pub tuplet: Option<Tuplet>,
+}
+
+impl Duration {
+    /// Create basic time values
+    pub fn new(base: DurationBase) -> Self {
+        Self {
+            base,
+            dots: 0,
+            tuplet: None,
+        }
+    }
+
+    /// Add a dot (each dot extends the duration of the previous note by half).
+    pub fn dotted(mut self, dots: u8) -> Self {
+        self.dots = dots.min(3); // limited to 3 dots
+        self
+    }
+
+    pub fn with_tuplet(mut self, tuplet: Tuplet) -> Self {
+        self.tuplet = Some(tuplet);
+        self
+    }
+
+    /// Calculate the actual duration value (unit: one quarter note equals one beat)
+    pub fn in_quarters(&self) -> f32 {
+        // Basic note value conversion (based on the quarter note)
+        let base_value = match self.base {
+            DurationBase::Maxima => 32.0,
+            DurationBase::Longa => 16.0,
+            DurationBase::Breve => 8.0,
+            DurationBase::Whole => 4.0,
+            DurationBase::Half => 2.0,
+            DurationBase::Quarter => 1.0,
+            DurationBase::Eighth => 0.5,
+            DurationBase::Sixteenth => 0.25,
+            DurationBase::ThirtySecond => 0.125,
+            DurationBase::SixtyFourth => 0.0625,
+        };
+
+        // Calculate the extension of the dot accent.
+        let dotted_value = (0..self.dots).fold(base_value, |acc, _| acc + acc / 2.0);
+
+        // Applicative tuplet ratio
+        match &self.tuplet {
+            Some(t) => {
+                // Check if the reference value matches.
+                if t.base_duration != self.base {
+                    // In practical application, an error should be returned, but here we simplify the processing.
+                    panic!("Tuplet base duration mismatch");
+                }
+                dotted_value * t.ratio()
+            }
+            None => dotted_value,
+        }
+    }
+
+    /// Conversion to seconds (considering BPM)
+    /// # Parameters
+    /// - tempo: Beat tempo (BPM, quarter notes per minute)
+    pub fn in_seconds(&self, tempo: f32) -> f32 {
+        let quarters = self.in_quarters();
+        (60.0 / tempo) * quarters
+    }
 }
 
 impl From<u16> for Duration {
