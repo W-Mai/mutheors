@@ -134,67 +134,42 @@ impl Duration {
     }
 }
 
-impl From<u16> for Duration {
-    fn from(value: u16) -> Self {
-        match value {
-            6 => Duration::Whole,
-            12 => Duration::Half,
-            24 => Duration::Quarter,
-            48 => Duration::Eighth,
-            96 => Duration::Sixteenth,
-            192 => Duration::ThirtySecond,
-            384 => Duration::SixtyFourth,
-            768 => Duration::HundredTwentyEighth,
-            // Dotted notes
-            4 => Duration::WholeDotted,
-            8 => Duration::HalfDotted,
-            16 => Duration::QuarterDotted,
-            32 => Duration::EighthDotted,
-            64 => Duration::SixteenthDotted,
-            128 => Duration::ThirtySecondDotted,
-            256 => Duration::SixtyFourthDotted,
-            512 => Duration::HundredTwentyEighthDotted,
-            _ => panic!("Invalid value"),
-        }
-    }
-}
-
 impl From<Duration> for f32 {
     fn from(duration: Duration) -> f32 {
-        6.0 / (duration as u16 as f32)
+        duration.in_quarters()
     }
 }
 
 impl From<Duration> for f64 {
     fn from(duration: Duration) -> f64 {
-        f32::from(duration) as f64
+        duration.in_quarters() as f64
     }
 }
 
 impl From<&Duration> for f32 {
     fn from(duration: &Duration) -> f32 {
-        f32::from(*duration)
+        duration.in_quarters()
     }
 }
 
 impl From<&Duration> for f64 {
     fn from(duration: &Duration) -> f64 {
-        f64::from(*duration)
+        duration.in_quarters() as f64
     }
 }
 
-impl From<f32> for Duration {
-    fn from(value: f32) -> Self {
-        let duration = (6.0 / value) as u16;
-        Duration::from(duration)
-    }
-}
-
-impl From<f64> for Duration {
-    fn from(value: f64) -> Self {
-        Duration::from(value as f32)
-    }
-}
+// impl From<f32> for Duration {
+//     fn from(value: f32) -> Self {
+//         let duration = (6.0 / value) as u16;
+//         Duration::from(duration)
+//     }
+// }
+//
+// impl From<f64> for Duration {
+//     fn from(value: f64) -> Self {
+//         Duration::from(value as f32)
+//     }
+// }
 
 impl std::ops::Add<Duration> for Duration {
     type Output = f32;
@@ -273,47 +248,47 @@ impl std::ops::AddAssign<f64> for Duration {
         *self = Duration::from(f64::from(*self) + rhs);
     }
 }
-
-impl Display for Duration {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let duration_str = match self {
-            Duration::Whole => "Whole",
-            Duration::Half => "½",
-            Duration::Quarter => "¼",
-            Duration::Eighth => "Eighth",
-            Duration::Sixteenth => "Sixteenth",
-            Duration::ThirtySecond => "ThirtySecond",
-            Duration::SixtyFourth => "SixtyFourth",
-            Duration::HundredTwentyEighth => "HundredTwentyEighth",
-            Duration::WholeDotted => "WholeDotted",
-            Duration::HalfDotted => "HalfDotted",
-            Duration::QuarterDotted => "QuarterDotted",
-            Duration::EighthDotted => "EighthDotted",
-            Duration::SixteenthDotted => "SixteenthDotted",
-            Duration::ThirtySecondDotted => "ThirtySecondDotted",
-            Duration::SixtyFourthDotted => "SixtyFourthDotted",
-            Duration::HundredTwentyEighthDotted => "HundredTwentyEighthDotted",
-        };
-
-        write!(f, "{}", duration_str)
-    }
-}
-
-impl Duration {
-    pub fn with_dot(&self) -> Duration {
-        match self {
-            Duration::Whole => Duration::WholeDotted,
-            Duration::Half => Duration::HalfDotted,
-            Duration::Quarter => Duration::QuarterDotted,
-            Duration::Eighth => Duration::EighthDotted,
-            Duration::Sixteenth => Duration::SixteenthDotted,
-            Duration::ThirtySecond => Duration::ThirtySecondDotted,
-            Duration::SixtyFourth => Duration::SixtyFourthDotted,
-            Duration::HundredTwentyEighth => Duration::HundredTwentyEighthDotted,
-            _ => *self,
-        }
-    }
-}
+//
+// impl Display for Duration {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+//         let duration_str = match self {
+//             Duration::Whole => "Whole",
+//             Duration::Half => "½",
+//             Duration::Quarter => "¼",
+//             Duration::Eighth => "Eighth",
+//             Duration::Sixteenth => "Sixteenth",
+//             Duration::ThirtySecond => "ThirtySecond",
+//             Duration::SixtyFourth => "SixtyFourth",
+//             Duration::HundredTwentyEighth => "HundredTwentyEighth",
+//             Duration::WholeDotted => "WholeDotted",
+//             Duration::HalfDotted => "HalfDotted",
+//             Duration::QuarterDotted => "QuarterDotted",
+//             Duration::EighthDotted => "EighthDotted",
+//             Duration::SixteenthDotted => "SixteenthDotted",
+//             Duration::ThirtySecondDotted => "ThirtySecondDotted",
+//             Duration::SixtyFourthDotted => "SixtyFourthDotted",
+//             Duration::HundredTwentyEighthDotted => "HundredTwentyEighthDotted",
+//         };
+//
+//         write!(f, "{}", duration_str)
+//     }
+// }
+//
+// impl Duration {
+//     pub fn with_dot(&self) -> Duration {
+//         match self {
+//             Duration::Whole => Duration::WholeDotted,
+//             Duration::Half => Duration::HalfDotted,
+//             Duration::Quarter => Duration::QuarterDotted,
+//             Duration::Eighth => Duration::EighthDotted,
+//             Duration::Sixteenth => Duration::SixteenthDotted,
+//             Duration::ThirtySecond => Duration::ThirtySecondDotted,
+//             Duration::SixtyFourth => Duration::SixtyFourthDotted,
+//             Duration::HundredTwentyEighth => Duration::HundredTwentyEighthDotted,
+//             _ => *self,
+//         }
+//     }
+// }
 
 pub mod duration_utils {
     use super::Duration;
