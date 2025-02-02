@@ -125,6 +125,51 @@ impl Duration {
         }
     }
 
+    /// Converts a given `f32` beat value to a `Duration` structure.
+    pub fn from_quarters(value: f32) -> Self {
+        // Define the base durations and their corresponding values
+        let duration_bases: Vec<(DurationBase, f32)> = vec![
+            (DurationBase::Maxima, 8.0),
+            (DurationBase::Longa, 4.0),
+            (DurationBase::Breve, 2.0),
+            (DurationBase::Whole, 1.0),
+            (DurationBase::Half, 0.5),
+            (DurationBase::Quarter, 0.25),
+            (DurationBase::Eighth, 0.125),
+            (DurationBase::Sixteenth, 0.0625),
+            (DurationBase::ThirtySecond, 0.03125),
+            (DurationBase::SixtyFourth, 0.015625),
+        ];
+
+        // Try to match the value to a base duration
+        let (base, base_value) = duration_bases
+            .iter()
+            .find(|(_, v)| (value - *v).abs() < 0.01) // Allow a small floating-point tolerance
+            .map(|(b, v)| (*b, *v))
+            .unwrap_or((DurationBase::Whole, 1.0)); // Default to Whole if no match
+
+        // Calculate dots if the value is not exactly matching a base duration
+        let mut dots = 0;
+        let mut remaining = value - base_value;
+        while remaining > 0.0 && dots < 3 {
+            remaining -= base_value / (2.0f32.powi(dots as i32));
+            dots += 1;
+        }
+
+        // Check if the remaining value can be represented as a tuplet
+        let tuplet = if remaining > 0.0 {
+            Some(Tuplet {
+                actual_notes: 3, // Example: Triplets
+                base_notes: 2,
+                base_duration: base,
+            })
+        } else {
+            None
+        };
+
+        Duration { base, dots, tuplet }
+    }
+
     /// Conversion to seconds (considering BPM)
     /// # Parameters
     /// - tempo: Beat tempo (BPM, quarter notes per minute)
@@ -158,18 +203,17 @@ impl From<&Duration> for f64 {
     }
 }
 
-// impl From<f32> for Duration {
-//     fn from(value: f32) -> Self {
-//         let duration = (6.0 / value) as u16;
-//         Duration::from(duration)
-//     }
-// }
-//
-// impl From<f64> for Duration {
-//     fn from(value: f64) -> Self {
-//         Duration::from(value as f32)
-//     }
-// }
+impl From<f32> for Duration {
+    fn from(value: f32) -> Self {
+        Duration::from_quarters(value)
+    }
+}
+
+impl From<f64> for Duration {
+    fn from(value: f64) -> Self {
+        Duration::from(value as f32)
+    }
+}
 
 impl std::ops::Add<Duration> for Duration {
     type Output = f32;
@@ -239,13 +283,13 @@ impl std::ops::AddAssign<&Duration> for f64 {
 
 impl std::ops::AddAssign<f32> for Duration {
     fn add_assign(&mut self, rhs: f32) {
-        *self = Duration::from(f32::from(*self) + rhs);
+        *self = Duration::from(self.in_quarters() + rhs);
     }
 }
 
 impl std::ops::AddAssign<f64> for Duration {
     fn add_assign(&mut self, rhs: f64) {
-        *self = Duration::from(f64::from(*self) + rhs);
+        *self = Duration::from(self.in_quarters() as f64 + rhs);
     }
 }
 //
