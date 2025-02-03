@@ -1,5 +1,5 @@
 use super::MusicError;
-use std::fmt::{Display, Formatter};
+use std::fmt::{write, Display, Formatter};
 
 ///
 /// Duration represents the length of a note.
@@ -292,47 +292,51 @@ impl std::ops::AddAssign<f64> for Duration {
         *self = Duration::from(self.in_quarters() as f64 + rhs);
     }
 }
-//
-// impl Display for Duration {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-//         let duration_str = match self {
-//             Duration::Whole => "Whole",
-//             Duration::Half => "½",
-//             Duration::Quarter => "¼",
-//             Duration::Eighth => "Eighth",
-//             Duration::Sixteenth => "Sixteenth",
-//             Duration::ThirtySecond => "ThirtySecond",
-//             Duration::SixtyFourth => "SixtyFourth",
-//             Duration::HundredTwentyEighth => "HundredTwentyEighth",
-//             Duration::WholeDotted => "WholeDotted",
-//             Duration::HalfDotted => "HalfDotted",
-//             Duration::QuarterDotted => "QuarterDotted",
-//             Duration::EighthDotted => "EighthDotted",
-//             Duration::SixteenthDotted => "SixteenthDotted",
-//             Duration::ThirtySecondDotted => "ThirtySecondDotted",
-//             Duration::SixtyFourthDotted => "SixtyFourthDotted",
-//             Duration::HundredTwentyEighthDotted => "HundredTwentyEighthDotted",
-//         };
-//
-//         write!(f, "{}", duration_str)
-//     }
-// }
-//
-// impl Duration {
-//     pub fn with_dot(&self) -> Duration {
-//         match self {
-//             Duration::Whole => Duration::WholeDotted,
-//             Duration::Half => Duration::HalfDotted,
-//             Duration::Quarter => Duration::QuarterDotted,
-//             Duration::Eighth => Duration::EighthDotted,
-//             Duration::Sixteenth => Duration::SixteenthDotted,
-//             Duration::ThirtySecond => Duration::ThirtySecondDotted,
-//             Duration::SixtyFourth => Duration::SixtyFourthDotted,
-//             Duration::HundredTwentyEighth => Duration::HundredTwentyEighthDotted,
-//             _ => *self,
-//         }
-//     }
-// }
+
+impl Display for DurationBase {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DurationBase::Maxima => write!(f, "𝅜𝅜𝅜𝅜"),
+            DurationBase::Longa => write!(f, "𝅜𝅜"),
+            DurationBase::Breve => write!(f, "𝅜"),
+            DurationBase::Whole => write!(f, "𝅝"),
+            DurationBase::Half => write!(f, "𝅗𝅥"),
+            DurationBase::Quarter => write!(f, "𝅘𝅥"),
+            DurationBase::Eighth => write!(f, "𝅘𝅥𝅮"),
+            DurationBase::Sixteenth => write!(f, "𝅘𝅥𝅯"),
+            DurationBase::ThirtySecond => write!(f, "𝅘𝅥𝅰"),
+            DurationBase::SixtyFourth => write!(f, "𝅘𝅥𝅱"),
+        }
+    }
+}
+
+impl Display for Duration {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let duration_base = &self.base;
+        write!(
+            f,
+            "{}{}",
+            duration_base,
+            "𝅭".to_string().repeat(self.dots as usize)
+        )
+    }
+}
+
+impl Duration {
+    pub fn with_dot(&self) -> Duration {
+        match self {
+            Duration::Whole => Duration::WholeDotted,
+            Duration::Half => Duration::HalfDotted,
+            Duration::Quarter => Duration::QuarterDotted,
+            Duration::Eighth => Duration::EighthDotted,
+            Duration::Sixteenth => Duration::SixteenthDotted,
+            Duration::ThirtySecond => Duration::ThirtySecondDotted,
+            Duration::SixtyFourth => Duration::SixtyFourthDotted,
+            Duration::HundredTwentyEighth => Duration::HundredTwentyEighthDotted,
+            _ => *self,
+        }
+    }
+}
 
 pub mod duration_utils {
     use super::Duration;
