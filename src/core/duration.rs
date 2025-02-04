@@ -322,24 +322,9 @@ impl Display for Duration {
     }
 }
 
-impl Duration {
-    pub fn with_dot(&self) -> Duration {
-        match self {
-            Duration::Whole => Duration::WholeDotted,
-            Duration::Half => Duration::HalfDotted,
-            Duration::Quarter => Duration::QuarterDotted,
-            Duration::Eighth => Duration::EighthDotted,
-            Duration::Sixteenth => Duration::SixteenthDotted,
-            Duration::ThirtySecond => Duration::ThirtySecondDotted,
-            Duration::SixtyFourth => Duration::SixtyFourthDotted,
-            Duration::HundredTwentyEighth => Duration::HundredTwentyEighthDotted,
-            _ => *self,
-        }
-    }
-}
-
 pub mod duration_utils {
     use super::Duration;
+    use crate::DurationBase;
     use rand::prelude::*;
 
     pub fn generate_one_measure(beat: u8) -> Vec<Duration> {
@@ -348,14 +333,15 @@ pub mod duration_utils {
         let mut rng = thread_rng();
         let mut duration_sum = 0.0;
         while duration_sum < beat {
-            let duration = *[Duration::Half, Duration::Quarter]
+            let duration_base = *[DurationBase::Half, DurationBase::Quarter]
                 .choose(&mut rng)
                 .unwrap();
+            let duration = &Duration::new(duration_base);
             if duration_sum + duration > beat {
                 break;
             }
             duration_sum += duration;
-            durations.push(duration);
+            durations.push(duration.clone());
         }
 
         let remainder = beat - duration_sum;
