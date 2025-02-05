@@ -325,9 +325,13 @@ pub mod duration_utils {
         let mut rng = thread_rng();
         let mut duration_sum = 0.0;
         while duration_sum < beat {
-            let duration_base = *[DurationBase::Half, DurationBase::Quarter]
-                .choose(&mut rng)
-                .unwrap();
+            let duration_base = *[
+                DurationBase::Quarter,
+                DurationBase::Eighth,
+                DurationBase::Sixteenth,
+            ]
+            .choose(&mut rng)
+            .unwrap();
             let duration = &Duration::new(duration_base);
             if duration_sum + duration > beat {
                 break;
