@@ -1,5 +1,5 @@
 use super::MusicError;
-use std::fmt::{write, Display, Formatter};
+use std::fmt::{Display, Formatter};
 
 ///
 /// Duration represents the length of a note.
@@ -349,5 +349,45 @@ pub mod duration_utils {
             durations.push(remainder.into());
         }
         durations
+    }
+}
+
+// Tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_duration() {
+        let q = Duration::new(DurationBase::Quarter);
+        assert_eq!(q.in_quarters(), 1.0);
+    }
+
+    #[test]
+    fn dotted_note() {
+        let d = Duration::new(DurationBase::Quarter).dotted(1);
+        assert_eq!(d.in_quarters(), 1.0 * 1.5);
+    }
+
+    #[test]
+    fn triplet() {
+        let triplet = Tuplet::new(3, 2, DurationBase::Quarter).unwrap();
+        let note = Duration::new(DurationBase::Quarter).with_tuplet(triplet);
+
+        // The triple note takes up 2/3 of a quarter note.
+        assert_eq!(note.in_quarters(), 2.0 / 3.0);
+    }
+
+    #[test]
+    fn complex_case() {
+        // Dotted eighth note + quintuplet note
+        let tuplet = Tuplet::new(5, 4, DurationBase::Eighth).unwrap();
+        let note = Duration::new(DurationBase::Eighth)
+            .dotted(1)
+            .with_tuplet(tuplet);
+
+        // Basic note value: 0.5 (quaver) + 0.25 (dotted) = 0.75
+        // Applied tuplet ratio: 4/5
+        assert_eq!(note.in_quarters(), 0.75 * (4.0 / 5.0));
     }
 }
