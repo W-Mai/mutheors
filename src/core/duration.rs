@@ -144,7 +144,7 @@ impl Duration {
         // Try to match the value to a base duration
         let (base, base_value) = duration_bases
             .iter()
-            .find(|(_, v)| value > *v * 4.0) // Allow a small floating-point tolerance
+            .find(|(_, v)| (value - *v * 4.0).abs() < f32::EPSILON) // Allow a small floating-point tolerance
             .map(|(b, v)| (*b, *v * 4.0))
             .unwrap_or((DurationBase::Quarter, 1.0)); // Default to Whole if no match
 
