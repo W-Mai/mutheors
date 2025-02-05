@@ -144,9 +144,9 @@ impl Duration {
         // Try to match the value to a base duration
         let (base, base_value) = duration_bases
             .iter()
-            .find(|(_, v)| (value - *v).abs() < 0.01) // Allow a small floating-point tolerance
-            .map(|(b, v)| (*b, *v))
-            .unwrap_or((DurationBase::Whole, 1.0)); // Default to Whole if no match
+            .find(|(_, v)| value > *v * 4.0) // Allow a small floating-point tolerance
+            .map(|(b, v)| (*b, *v * 4.0))
+            .unwrap_or((DurationBase::Quarter, 1.0)); // Default to Whole if no match
 
         // Calculate dots if the value is not exactly matching a base duration
         let mut dots = 0;
@@ -156,16 +156,8 @@ impl Duration {
             dots += 1;
         }
 
-        // Check if the remaining value can be represented as a tuplet
-        let tuplet = if remaining > 0.0 {
-            Some(Tuplet {
-                actual_notes: 3, // Example: Triplets
-                base_notes: 2,
-                base_duration: base,
-            })
-        } else {
-            None
-        };
+        // Now is always set to None.
+        let tuplet = None;
 
         Duration { base, dots, tuplet }
     }
@@ -367,6 +359,10 @@ mod tests {
     fn dotted_note() {
         let d = Duration::new(DurationBase::Quarter).dotted(1);
         assert_eq!(d.in_quarters(), 1.0 * 1.5);
+        assert_eq!(
+            d.in_quarters(),
+            Duration::from_quarters(d.in_quarters()).in_quarters()
+        )
     }
 
     #[test]
