@@ -15,6 +15,9 @@ pub enum MusicError {
     #[error("MIDI operation failed: {0}")]
     MidiError(String),
 
+    #[error("Invalid Duration {0}")]
+    InvalidDuration(f32),
+
     #[error("Ratio of invalid legato: {actual}:{base}")]
     InvalidTupletRatio { actual: u8, base: u8 },
 

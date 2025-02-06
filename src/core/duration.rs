@@ -18,6 +18,59 @@ pub enum DurationBase {
     SixtyFourth,  // 1 / 64
 }
 
+impl DurationBase {
+    pub fn in_quarters(&self) -> f32 {
+        match self {
+            DurationBase::Maxima => 32.0,
+            DurationBase::Longa => 16.0,
+            DurationBase::Breve => 8.0,
+            DurationBase::Whole => 4.0,
+            DurationBase::Half => 2.0,
+            DurationBase::Quarter => 1.0,
+            DurationBase::Eighth => 0.5,
+            DurationBase::Sixteenth => 0.25,
+            DurationBase::ThirtySecond => 0.125,
+            DurationBase::SixtyFourth => 0.0625,
+        }
+    }
+
+    pub fn from_quarters(value: f32) -> Result<Self, MusicError> {
+        match value {
+            32.0 => Ok(DurationBase::Maxima),
+            16.0 => Ok(DurationBase::Longa),
+            8.0 => Ok(DurationBase::Breve),
+            4.0 => Ok(DurationBase::Whole),
+            2.0 => Ok(DurationBase::Half),
+            1.0 => Ok(DurationBase::Quarter),
+            0.5 => Ok(DurationBase::Eighth),
+            0.25 => Ok(DurationBase::Sixteenth),
+            0.125 => Ok(DurationBase::ThirtySecond),
+            0.0625 => Ok(DurationBase::SixtyFourth),
+            _ => Err(MusicError::InvalidDuration(value)),
+        }
+    }
+
+    pub fn in_whole(&self) -> f32 {
+        self.in_quarters() / 4.0
+    }
+
+    pub fn from_whole(value: f32) -> Result<Self, MusicError> {
+        match value {
+            8.0 => Ok(DurationBase::Maxima),
+            4.0 => Ok(DurationBase::Longa),
+            2.0 => Ok(DurationBase::Breve),
+            1.0 => Ok(DurationBase::Whole),
+            0.5 => Ok(DurationBase::Half),
+            0.25 => Ok(DurationBase::Quarter),
+            0.125 => Ok(DurationBase::Eighth),
+            0.0625 => Ok(DurationBase::Sixteenth),
+            0.03125 => Ok(DurationBase::ThirtySecond),
+            0.015625 => Ok(DurationBase::SixtyFourth),
+            _ => Err(MusicError::InvalidDuration(value)),
+        }
+    }
+}
+
 /// Structure that represents a tuplet
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tuplet {
@@ -95,18 +148,7 @@ impl Duration {
     /// Calculate the actual duration value (unit: one quarter note equals one beat)
     pub fn in_quarters(&self) -> f32 {
         // Basic note value conversion (based on the quarter note)
-        let base_value = match self.base {
-            DurationBase::Maxima => 32.0,
-            DurationBase::Longa => 16.0,
-            DurationBase::Breve => 8.0,
-            DurationBase::Whole => 4.0,
-            DurationBase::Half => 2.0,
-            DurationBase::Quarter => 1.0,
-            DurationBase::Eighth => 0.5,
-            DurationBase::Sixteenth => 0.25,
-            DurationBase::ThirtySecond => 0.125,
-            DurationBase::SixtyFourth => 0.0625,
-        };
+        let base_value = self.base.in_quarters();
 
         // Calculate the extension of the dot accent.
         let dotted_value = (0..self.dots).fold(base_value, |acc, _| acc + acc / 2.0);
@@ -125,28 +167,32 @@ impl Duration {
         }
     }
 
+    pub fn in_whole(&self) -> f32 {
+        self.in_quarters() / 4.0
+    }
+
     /// Converts a given `f32` beat value to a `Duration` structure.
     pub fn from_quarters(value: f32) -> Self {
         // Define the base durations and their corresponding values
-        let duration_bases: Vec<(DurationBase, f32)> = vec![
-            (DurationBase::Maxima, 8.0),
-            (DurationBase::Longa, 4.0),
-            (DurationBase::Breve, 2.0),
-            (DurationBase::Whole, 1.0),
-            (DurationBase::Half, 0.5),
-            (DurationBase::Quarter, 0.25),
-            (DurationBase::Eighth, 0.125),
-            (DurationBase::Sixteenth, 0.0625),
-            (DurationBase::ThirtySecond, 0.03125),
-            (DurationBase::SixtyFourth, 0.015625),
+        let duration_bases = vec![
+            DurationBase::Maxima,
+            DurationBase::Longa,
+            DurationBase::Breve,
+            DurationBase::Whole,
+            DurationBase::Half,
+            DurationBase::Quarter,
+            DurationBase::Eighth,
+            DurationBase::Sixteenth,
+            DurationBase::ThirtySecond,
+            DurationBase::SixtyFourth,
         ];
 
         // Try to match the value to a base duration
-        let (base, base_value) = duration_bases
+        let base = duration_bases
             .iter()
-            .find(|(_, v)| (value - *v * 4.0).abs() < f32::EPSILON) // Allow a small floating-point tolerance
-            .map(|(b, v)| (*b, *v * 4.0))
-            .unwrap_or((DurationBase::Quarter, 1.0)); // Default to Whole if no match
+            .find(|base| (value - base.in_quarters()).abs() < f32::EPSILON) // Allow a small floating-point tolerance
+            .unwrap_or(&DurationBase::Quarter); // Default to Whole if no match
+        let base_value = base.in_quarters();
 
         // Calculate dots if the value is not exactly matching a base duration
         let mut dots = 0;
@@ -159,7 +205,15 @@ impl Duration {
         // Now is always set to None.
         let tuplet = None;
 
-        Duration { base, dots, tuplet }
+        Duration {
+            base: *base,
+            dots,
+            tuplet,
+        }
+    }
+
+    pub fn from_whole(value: f32) -> Self {
+        Self::from_quarters(value * 4.0)
     }
 
     /// Conversion to seconds (considering BPM)
