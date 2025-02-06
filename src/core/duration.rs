@@ -227,31 +227,31 @@ impl Duration {
 
 impl From<Duration> for f32 {
     fn from(duration: Duration) -> f32 {
-        duration.in_quarters()
+        duration.in_whole()
     }
 }
 
 impl From<Duration> for f64 {
     fn from(duration: Duration) -> f64 {
-        duration.in_quarters() as f64
+        duration.in_whole() as f64
     }
 }
 
 impl From<&Duration> for f32 {
     fn from(duration: &Duration) -> f32 {
-        duration.in_quarters()
+        duration.in_whole()
     }
 }
 
 impl From<&Duration> for f64 {
     fn from(duration: &Duration) -> f64 {
-        duration.in_quarters() as f64
+        duration.in_whole() as f64
     }
 }
 
 impl From<f32> for Duration {
     fn from(value: f32) -> Self {
-        Duration::from_quarters(value)
+        Duration::from_whole(value)
     }
 }
 
@@ -329,13 +329,13 @@ impl std::ops::AddAssign<&Duration> for f64 {
 
 impl std::ops::AddAssign<f32> for Duration {
     fn add_assign(&mut self, rhs: f32) {
-        *self = Duration::from(self.in_quarters() + rhs);
+        *self = Duration::from(self.in_whole() + rhs);
     }
 }
 
 impl std::ops::AddAssign<f64> for Duration {
     fn add_assign(&mut self, rhs: f64) {
-        *self = Duration::from(self.in_quarters() as f64 + rhs);
+        *self = Duration::from(self.in_whole() as f64 + rhs);
     }
 }
 
@@ -380,9 +380,9 @@ pub mod duration_utils {
         let mut duration_sum = 0.0;
         while duration_sum < beat {
             let duration_base = *[
+                DurationBase::Half,
+                DurationBase::Whole,
                 DurationBase::Quarter,
-                DurationBase::Eighth,
-                DurationBase::Sixteenth,
             ]
             .choose(&mut rng)
             .unwrap();
