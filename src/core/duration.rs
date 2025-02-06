@@ -305,12 +305,12 @@ impl Display for DurationBase {
 impl Display for Duration {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let duration_base = &self.base;
-        write!(
-            f,
+        let s = format!(
             "{}{}",
             duration_base,
             "𝅭".to_string().repeat(self.dots as usize)
-        )
+        );
+        write!(f, "{}", s)
     }
 }
 
