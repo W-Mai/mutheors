@@ -190,7 +190,10 @@ impl Duration {
         // Try to match the value to a base duration
         let base = duration_bases
             .iter()
-            .find(|base| (value - base.in_quarters()).abs() < f32::EPSILON) // Allow a small floating-point tolerance
+            .find(|base| {
+                let base_value = base.in_quarters();
+                (value - base.in_quarters()).abs() <= f32::EPSILON || value > base_value
+            }) // Allow a small floating-point tolerance
             .unwrap_or(&DurationBase::Quarter); // Default to Whole if no match
         let base_value = base.in_quarters();
 
@@ -420,7 +423,11 @@ mod tests {
         assert_eq!(
             d.in_quarters(),
             Duration::from_quarters(d.in_quarters()).in_quarters()
-        )
+        );
+
+        let d = Duration::new(DurationBase::Half);
+        assert_eq!(d.in_whole(), 0.5);
+        assert_eq!(Duration::from_whole(0.5).in_whole(), 0.5);
     }
 
     #[test]
