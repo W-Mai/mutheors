@@ -1,6 +1,7 @@
 pub mod chord;
 pub mod duration;
 pub mod errors;
+pub mod interval;
 pub mod note;
 pub mod tonality;
 pub mod tuning;
@@ -8,6 +9,7 @@ pub mod tuning;
 pub use chord::*;
 pub use duration::*;
 pub use errors::*;
+pub use interval::*;
 pub use note::*;
 pub use tonality::*;
 pub use tuning::*;
