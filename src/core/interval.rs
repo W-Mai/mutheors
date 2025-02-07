@@ -14,3 +14,16 @@ pub enum IntervalQuality {
     Augmented,  // Augmented interval
     Diminished, // Diminished interval
 }
+
+/// Degree of an interval
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct IntervalDegree(pub u8);
+
+/// Interval
+#[derive(Debug, Clone, PartialEq)]
+pub struct Interval {
+    quality: IntervalQuality,
+    degree: IntervalDegree,
+    semitones: i8,       // Actual number of semitones
+    is_descending: bool, // Is the interval descending (relative to the root)
+}
