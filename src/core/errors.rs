@@ -26,4 +26,7 @@ pub enum MusicError {
 
     #[error("The duration of the tied notes does not match the note values.")]
     TupletDurationMismatch,
+
+    #[error("Invalid interval degree: {degree}")]
+    InvalidIntervalDegree { degree: u8 },
 }

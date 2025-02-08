@@ -27,3 +27,12 @@ pub struct Interval {
     semitones: i8,       // Actual number of semitones
     is_descending: bool, // Is the interval descending (relative to the root)
 }
+
+impl IntervalDegree {
+    pub fn new(degree: u8) -> Result<Self, MusicError> {
+        if degree < 1 || degree > 13 {
+            return Err(MusicError::InvalidIntervalDegree { degree });
+        }
+        Ok(Self(degree))
+    }
+}
