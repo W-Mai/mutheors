@@ -41,6 +41,7 @@ impl Interval {
     pub fn from_semitones(semitones: i8) -> Result<Self, MusicError> {
         let abs_semi = semitones.abs() % 12;
         let octaves = semitones.abs() / 12;
+        let is_descending = semitones < 0;
 
         let (quality, degree) = match abs_semi {
             0 => (IntervalQuality::Perfect, 1),
@@ -49,7 +50,13 @@ impl Interval {
             3 => (IntervalQuality::Minor, 3),
             4 => (IntervalQuality::Major, 3),
             5 => (IntervalQuality::Perfect, 4),
-            6 => (IntervalQuality::Augmented, 4),
+            6 => {
+                if is_descending {
+                    (IntervalQuality::Diminished, 5)
+                } else {
+                    (IntervalQuality::Augmented, 4)
+                }
+            } // or Diminished 5th (depending on direction)
             7 => (IntervalQuality::Perfect, 5),
             8 => (IntervalQuality::Minor, 6),
             9 => (IntervalQuality::Major, 6),
@@ -62,7 +69,7 @@ impl Interval {
             quality,
             degree: IntervalDegree(degree + octaves as u8 * 7),
             semitones,
-            is_descending: semitones < 0,
+            is_descending,
         })
     }
 }
