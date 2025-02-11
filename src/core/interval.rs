@@ -67,9 +67,14 @@ impl Interval {
 
         Ok(Self {
             quality,
-            degree: IntervalDegree(degree + octaves as u8 * 7),
+            degree: IntervalDegree::new(degree + octaves as u8 * 7)?,
             semitones,
             is_descending,
         })
+    }
+
+    pub fn between(start: PitchClass, end: PitchClass) -> Self {
+        let semitones = end as i8 - start as i8;
+        Self::from_semitones(semitones).unwrap()
     }
 }
