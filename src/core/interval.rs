@@ -77,4 +77,17 @@ impl Interval {
         let semitones = end as i8 - start as i8;
         Self::from_semitones(semitones).unwrap()
     }
+
+    /// Interstitial inversion (e.g. Major 3rd -> minor 6th)
+    pub fn invert(&mut self) {
+        self.degree.0 = 9 - self.degree.0 % 7;
+        self.semitones = 12 - self.semitones.abs();
+        self.quality = match self.quality {
+            IntervalQuality::Perfect => IntervalQuality::Perfect,
+            IntervalQuality::Major => IntervalQuality::Minor,
+            IntervalQuality::Minor => IntervalQuality::Major,
+            IntervalQuality::Augmented => IntervalQuality::Diminished,
+            IntervalQuality::Diminished => IntervalQuality::Augmented,
+        };
+    }
 }
