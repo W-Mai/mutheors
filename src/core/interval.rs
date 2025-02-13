@@ -15,6 +15,14 @@ pub enum IntervalQuality {
     Diminished, // Diminished interval
 }
 
+/// Consonance of an interval
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Consonance {
+    Consonant,
+    Imperfect,
+    Dissonant,
+}
+
 /// Degree of an interval
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IntervalDegree(pub u8);
@@ -89,5 +97,19 @@ impl Interval {
             IntervalQuality::Augmented => IntervalQuality::Diminished,
             IntervalQuality::Diminished => IntervalQuality::Augmented,
         };
+    }
+
+    /// Consonance of the interval
+    pub fn consonance(&self) -> Consonance {
+        match (self.degree.0 % 7, self.quality) {
+            (0, _) => Consonance::Consonant, // Same quality
+            (3, IntervalQuality::Perfect) => Consonance::Consonant, // 4th
+            (4, IntervalQuality::Perfect) => Consonance::Consonant, // 5th
+            (_, IntervalQuality::Perfect) => Consonance::Consonant,
+            (1 | 2 | 5, q) if matches!(q, IntervalQuality::Major | IntervalQuality::Minor) => {
+                Consonance::Imperfect
+            }
+            _ => Consonance::Dissonant,
+        }
     }
 }
