@@ -112,4 +112,24 @@ impl Interval {
             _ => Consonance::Dissonant,
         }
     }
+
+    /// Get the interval name
+    /// e.g.
+    /// - M3 (major third)
+    /// - m6 (minor sixth)
+    /// - Aug4 (augmented fourth)
+    /// - Dim5 (diminished fifth)
+    pub fn name(&self) -> String {
+        let quality_str = match self.quality {
+            IntervalQuality::Perfect => "",
+            IntervalQuality::Major => "M",
+            IntervalQuality::Minor => "m",
+            IntervalQuality::Augmented => "Aug",
+            IntervalQuality::Diminished => "Dim",
+        };
+
+        let degree_str = format!("{}", self.degree.0);
+
+        format!("{}{}", quality_str, self.degree.0)
+    }
 }
