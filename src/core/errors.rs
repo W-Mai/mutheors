@@ -32,4 +32,7 @@ pub enum MusicError {
     
     #[error("Invalid interval quality: {name}")]
     IntervalParseError { name: String },
+    
+    #[error("Invalid interval quality")]
+    InvalidIntervalQuality,
 }
