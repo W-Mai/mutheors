@@ -121,7 +121,7 @@ impl Interval {
     /// - Dim5 (diminished fifth)
     pub fn name(&self) -> String {
         let quality_str = match self.quality {
-            IntervalQuality::Perfect => "",
+            IntervalQuality::Perfect => "P",
             IntervalQuality::Major => "M",
             IntervalQuality::Minor => "m",
             IntervalQuality::Augmented => "Aug",
@@ -131,5 +131,44 @@ impl Interval {
         let degree_str = format!("{}", self.degree.0);
 
         format!("{}{}", quality_str, self.degree.0)
+    }
+}
+
+impl TryFrom<&str> for Interval {
+    type Error = MusicError;
+
+    /// Parse an interval name
+    /// e.g.
+    /// - "M3"
+    /// - "m6"
+    /// - "Aug4"
+    /// - "Dim5"
+    ///
+    /// into an `Interval` object.
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        let mut quality = None;
+        let mut degree = None;
+
+        if s.starts_with("P") {
+            quality = Some(IntervalQuality::Perfect);
+            degree = s[1..].parse().ok();
+        } else if let Some(remainder) = s.strip_prefix("Aug") {
+            quality = Some(IntervalQuality::Augmented);
+            degree = remainder.parse().ok();
+        } else if let Some(remainder) = s.strip_prefix("Dim") {
+            quality = Some(IntervalQuality::Diminished);
+            degree = remainder.parse().ok();
+        } else if s.starts_with("M") {
+            quality = Some(IntervalQuality::Major);
+            degree = s[1..].parse().ok();
+        } else if s.starts_with("m") {
+            quality = Some(IntervalQuality::Minor);
+            degree = s[1..].parse().ok();
+        }
+
+        match (quality, degree) {
+            (Some(q), Some(d)) => Self::from_quality_degree(q, d),
+            _ => Err(MusicError::IntervalParseError { name: s.to_owned() }),
+        }
     }
 }
