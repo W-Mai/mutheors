@@ -139,9 +139,7 @@ impl Interval {
             IntervalQuality::Augmented => "Aug",
             IntervalQuality::Diminished => "Dim",
         };
-
-        let degree_str = format!("{}", self.degree.0);
-
+        
         format!("{}{}", quality_str, self.degree.0)
     }
 }
