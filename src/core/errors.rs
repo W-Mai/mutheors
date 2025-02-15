@@ -29,4 +29,7 @@ pub enum MusicError {
 
     #[error("Invalid interval degree: {degree}")]
     InvalidIntervalDegree { degree: u8 },
+    
+    #[error("Invalid interval quality: {name}")]
+    IntervalParseError { name: String },
 }
