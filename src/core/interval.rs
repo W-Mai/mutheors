@@ -218,3 +218,31 @@ impl TryFrom<&str> for Interval {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_perfect_fifth() {
+        let interval = Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap();
+        assert_eq!(interval.semitones, 7);
+        assert_eq!(interval.name(), "P5");
+    }
+
+    #[test]
+    fn test_major_third() {
+        let interval = Interval::from_semitones(4).unwrap();
+        assert_eq!(interval.quality, IntervalQuality::Major);
+        assert_eq!(interval.degree.0, 3);
+    }
+
+    #[test]
+    fn test_inversion() {
+        let mut interval = Interval::from_semitones(4).unwrap(); // Major 3rd
+        interval.invert();
+        assert_eq!(interval.semitones, 8); // Minor 6th
+        assert_eq!(interval.quality, IntervalQuality::Minor);
+        assert_eq!(interval.degree.0, 6);
+    }
+}
