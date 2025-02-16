@@ -1,5 +1,6 @@
 use crate::chord::Chord;
 use crate::tonality::Tonality;
+use crate::Interval;
 use std::fmt::Display;
 
 #[derive(Copy, Clone, Debug)]
@@ -124,5 +125,14 @@ impl Tuning {
         self.freq.unwrap_or_else(|| {
             440.0 * 2f32.powf((self.midi_number().unwrap() as f32 - 69.0) / 12.0)
         })
+    }
+}
+
+impl Tuning {
+    pub fn add_interval(&self, interval: &Interval) -> Self {
+        let new_semitones = interval.semitones() + self.class as i8;
+        let new_octave = self.octave + new_semitones / 12;
+        let class = PitchClass::from((new_semitones % 12) as u8);
+        Tuning::new(class, new_octave)
     }
 }

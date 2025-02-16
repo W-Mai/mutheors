@@ -88,3 +88,128 @@ pub struct Scale {
     intervals: Vec<Interval>, // Scale intervals
     notes: Vec<Tuning>,       // Cache the generated notes
 }
+
+impl Scale {
+    /// Create a new scale
+    pub fn new(root: Tuning, scale_type: ScaleType) -> Result<Self, MusicError> {
+        let intervals = Self::get_intervals(scale_type)?;
+        let notes = Self::generate_notes(&root, &intervals, 3)?;
+
+        Ok(Self {
+            root,
+            scale_type,
+            intervals,
+            notes,
+        })
+    }
+
+    /// Generating note sequence
+    fn generate_notes(
+        root: &Tuning,
+        intervals: &[Interval],
+        octaves: u8,
+    ) -> Result<Vec<Tuning>, MusicError> {
+        let mut current = root.clone();
+        let mut notes = vec![current.clone()];
+
+        // Generate basic scales
+        for interval in intervals {
+            current = current.add_interval(interval);
+            notes.push(current.clone());
+        }
+
+        // Extended octave
+        let base_len = notes.len();
+        for octave in 1..=octaves {
+            for i in 0..base_len {
+                let mut note = notes[i].clone();
+                note.octave += octave as i8;
+                notes.push(note);
+            }
+        }
+
+        Ok(notes)
+    }
+}
+
+/// # Interval pattern library
+/// ## Standard scale patterns
+/// - Major scale: [2, 2, 1, 2, 2, 2, 1]
+/// - Natural minor scale: [2, 1, 2, 2, 1, 2, 2]
+/// - Harmonic minor scale: [2, 1, 2, 2, 1, 3, 1]
+/// - Melodic minor scale: [2, 1, 2, 2, 2, 2, 1]
+///
+/// ## Mediaeval mode
+/// - Dorian mode: [2, 1, 2, 2, 2, 1, 2]
+/// - Phrygian mode: [1, 2, 2, 2, 1, 2, 2]
+/// - Lydian mode: [2, 2, 2, 1, 2, 2, 1]
+/// - Mixolydian mode: [2, 2, 1, 2, 2, 1, 2]
+/// - Locrian mode: [1, 2, 2, 1, 2, 2, 2]
+///
+/// ## Pentatonic scale
+/// - Major pentatonic scale: [2, 2, 3, 2, 3]
+/// - Minor pentatonic scale: [3, 2, 2, 3, 2]
+/// - Blues scale: [3, 2, 1, 1, 3, 2]
+///
+/// ## Special scales
+/// - Whole tone scale: [2, 2, 2, 2, 2, 2]
+/// - Octatonic scale: [2, 1, 2, 1, 2, 1, 2, 1]
+/// - Chromatic scale: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+/// - Bebop dominant scale: [2, 2, 1, 2, 2, 1, 1, 2]
+///
+/// ## National scales
+/// - Arabian Hijaz scale: [1, 3, 1, 2, 1, 3, 1]
+/// - Japanese Hirajoshi scale: [2, 1, 4, 1, 4]
+/// - Japanese InSen scale: [1, 4, 2, 3, 2]
+/// - Custom scale: [2, 1, 3, 1, 4]
+impl Scale {
+    /// Gets the standard interval pattern of the scale
+    fn get_intervals(scale_type: ScaleType) -> Result<Vec<Interval>, MusicError> {
+        match scale_type {
+            // Natural scales
+            ScaleType::Major => parse_intervals(&[2, 2, 1, 2, 2, 2, 1]),
+            ScaleType::NaturalMinor => parse_intervals(&[2, 1, 2, 2, 1, 2, 2]),
+            ScaleType::HarmonicMinor => parse_intervals(&[2, 1, 2, 2, 1, 3, 1]),
+            ScaleType::MelodicMinor => parse_intervals(&[2, 1, 2, 2, 2, 2, 1]),
+
+            // Mediaeval mode
+            ScaleType::Dorian => parse_intervals(&[2, 1, 2, 2, 2, 1, 2]),
+            ScaleType::Phrygian => parse_intervals(&[1, 2, 2, 2, 1, 2, 2]),
+            ScaleType::Lydian => parse_intervals(&[2, 2, 2, 1, 2, 2, 1]),
+            ScaleType::Mixolydian => parse_intervals(&[2, 2, 1, 2, 2, 1, 2]),
+            ScaleType::Locrian => parse_intervals(&[1, 2, 2, 1, 2, 2, 2]),
+
+            // Pentatonic scale
+            ScaleType::PentatonicMajor => parse_intervals(&[2, 2, 3, 2, 3]),
+            ScaleType::PentatonicMinor => parse_intervals(&[3, 2, 2, 3, 2]),
+            ScaleType::Blues => parse_intervals(&[3, 2, 1, 1, 3, 2]),
+
+            // Special scales
+            ScaleType::WholeTone => parse_intervals(&[2, 2, 2, 2, 2, 2]),
+            ScaleType::Octatonic => parse_intervals(&[2, 1, 2, 1, 2, 1, 2, 1]),
+            ScaleType::Chromatic => parse_intervals(&[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+            ScaleType::BebopDominant => parse_intervals(&[2, 2, 1, 2, 2, 1, 1, 2]),
+
+            // National scales
+            ScaleType::Hijaz => parse_intervals(&[1, 3, 1, 2, 1, 3, 1]),
+            ScaleType::Hirajoshi => parse_intervals(&[2, 1, 4, 1, 4]),
+            ScaleType::InSen => parse_intervals(&[1, 4, 2, 3, 2]),
+
+            ScaleType::Custom(pattern) => {
+                let semitones = pattern
+                    .iter()
+                    .map(|&s| Interval::from_semitones(s as i8))
+                    .collect::<Result<Vec<_>, _>>()?;
+                Ok(semitones)
+            }
+        }
+    }
+}
+
+/// Converts semitones to a list of intervals
+fn parse_intervals(semitones: &[i8]) -> Result<Vec<Interval>, MusicError> {
+    semitones
+        .iter()
+        .map(|&s| Interval::from_semitones(s))
+        .collect()
+}

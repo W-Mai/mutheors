@@ -46,6 +46,12 @@ impl IntervalDegree {
 }
 
 impl Interval {
+    pub fn semitones(&self) -> i8 {
+        self.semitones
+    }
+}
+
+impl Interval {
     pub fn from_quality_degree(quality: IntervalQuality, degree: u8) -> Result<Self, MusicError> {
         let degree = IntervalDegree::new(degree)?;
         let semitones = calculate_semitones(quality, degree)?;
