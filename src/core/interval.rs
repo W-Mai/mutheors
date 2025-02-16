@@ -139,7 +139,7 @@ impl Interval {
             IntervalQuality::Augmented => "Aug",
             IntervalQuality::Diminished => "Dim",
         };
-        
+
         format!("{}{}", quality_str, self.degree.0)
     }
 }

@@ -96,3 +96,33 @@ impl Display for PitchClass {
         write!(f, "{}", str)
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub struct Tuning {
+    pub class: PitchClass,
+    pub octave: i8,
+    pub freq: Option<f32>, // 自定义频率
+}
+
+impl Tuning {
+    pub fn new(class: PitchClass, octave: i8) -> Self {
+        Self {
+            class,
+            octave,
+            freq: None,
+        }
+    }
+
+    pub fn with_freq(self, freq: f32) -> Self {
+        let mut n = self;
+        n.freq = Some(freq);
+        self
+    }
+
+    /// Calculation of physical frequency (A4 = 440 Hz)
+    pub fn frequency(&self) -> f32 {
+        self.freq.unwrap_or_else(|| {
+            440.0 * 2f32.powf((self.midi_number().unwrap() as f32 - 69.0) / 12.0)
+        })
+    }
+}

@@ -1,3 +1,4 @@
+use crate::{MusicError, PitchClass, Tuning};
 use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
 
 pub struct MidiPlayer {
@@ -98,5 +99,18 @@ impl MidiPlayer {
 impl Drop for MidiPlayer {
     fn drop(&mut self) {
         self.close();
+    }
+}
+
+impl Tuning {
+    /// Get MIDI pitch number (A4=69)
+    pub fn midi_number(&self) -> Result<u8, MusicError> {
+        let base = self.class as u8;
+        if base == 0 {
+            return Ok(0);
+        }
+        let base = base - 1;
+        let num = (self.octave + 1) * 12 + base as i8;
+        num.try_into().map_err(|_| MusicError::InvalidPitch)
     }
 }
