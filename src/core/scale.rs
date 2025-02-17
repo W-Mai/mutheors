@@ -130,6 +130,31 @@ impl Scale {
 
         Ok(notes)
     }
+
+    /// Determining whether a pitch belongs to a scale
+    pub fn contains(&self, tuning: &Tuning) -> bool {
+        self.notes.iter().any(|n| n.class == tuning.class)
+    }
+
+    /// Getting the Scale Degree
+    /// - Get the Tuning by order
+    /// - Such as in Pentatonic scale, the scale only has five notes. In major `C` the tuning is like:
+    ///     - 1 -> C
+    ///     - 2 -> D
+    ///     - 3 -> E
+    ///     - 4 -> G
+    ///     - 5 -> A
+    pub fn degree(&self, degree: u8) -> Result<Tuning, MusicError> {
+        if degree < 1 {
+            return Err(MusicError::InvalidScaleDegree(degree));
+        }
+        let idx = (degree - 1) as usize % self.intervals.len();
+        // TODO: Dealing with a pentatonic scale where there are only five notes but the scales are not continuous
+        self.notes
+            .get(idx)
+            .cloned()
+            .ok_or(MusicError::InvalidScaleDegree(degree))
+    }
 }
 
 /// # Interval pattern library
