@@ -155,6 +155,15 @@ impl Scale {
             .cloned()
             .ok_or(MusicError::InvalidScaleDegree(degree))
     }
+
+    // TODO: 生成音阶和弦
+    // pub fn chord(&self, degree: u8, quality: ChordQuality) -> Result<Chord, MusicError> {}
+
+    // TODO: 分析调式特征音程
+    // pub fn characteristic_interval(&self) -> Option<Interval> {}
+
+    // TODO: 获取音阶调式主音
+    // pub fn modal_tonic(&self) -> Option<Tuning> {}
 }
 
 /// # Interval pattern library
