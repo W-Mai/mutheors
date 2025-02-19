@@ -5,7 +5,7 @@ use std::fmt::Display;
 
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
-#[derive(PartialEq)]
+#[derive(PartialEq, PartialOrd)]
 pub enum PitchClass {
     None = 0,
     C = 1,
@@ -98,7 +98,7 @@ impl Display for PitchClass {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct Tuning {
     pub class: PitchClass,
     pub octave: i8,
@@ -131,8 +131,8 @@ impl Tuning {
 impl Tuning {
     pub fn add_interval(&self, interval: &Interval) -> Self {
         let new_semitones = interval.semitones() + self.class as i8;
-        let new_octave = self.octave + new_semitones / 12;
-        let class = PitchClass::from((new_semitones % 12) as u8);
+        let new_octave = self.octave + (new_semitones + 11) / 12 - 1;
+        let class = PitchClass::from(((new_semitones + 11) % 12 + 1) as u8);
         Tuning::new(class, new_octave)
     }
 }

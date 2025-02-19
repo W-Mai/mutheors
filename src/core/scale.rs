@@ -4,7 +4,6 @@
 use crate::interval::Interval;
 use crate::tuning::{PitchClass, Tuning};
 use crate::MusicError;
-use std::convert::TryFrom;
 
 /// Scale type classification
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -246,4 +245,35 @@ fn parse_intervals(semitones: &[i8]) -> Result<Vec<Interval>, MusicError> {
         .iter()
         .map(|&s| Interval::from_semitones(s))
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_major_scale() {
+        let c = Tuning::new(PitchClass::G, 4);
+        let scale = Scale::new(c, ScaleType::Major).unwrap();
+        assert_eq!(
+            scale.notes[0..7],
+            vec![
+                Tuning::new(PitchClass::G, 4),
+                Tuning::new(PitchClass::A, 4),
+                Tuning::new(PitchClass::B, 4),
+                Tuning::new(PitchClass::C, 5),
+                Tuning::new(PitchClass::D, 5),
+                Tuning::new(PitchClass::E, 5),
+                Tuning::new(PitchClass::FSharpOrGFlat, 5),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_blues_scale() {
+        let a = Tuning::new(PitchClass::A, 4);
+        let scale = Scale::new(a, ScaleType::Blues).unwrap();
+        assert!(scale.contains(&Tuning::new(PitchClass::C, 5)));
+        assert!(scale.contains(&Tuning::new(PitchClass::DSharpOrEFlat, 5)));
+    }
 }

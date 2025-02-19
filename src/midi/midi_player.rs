@@ -1,4 +1,4 @@
-use crate::{MusicError, PitchClass, Tuning};
+use crate::{MusicError, Tuning};
 use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
 
 pub struct MidiPlayer {
