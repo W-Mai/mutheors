@@ -254,7 +254,7 @@ mod tests {
     #[test]
     fn test_major_scale() {
         let c = Tuning::new(PitchClass::G, 4);
-        let scale = Scale::new(c, ScaleType::Major).unwrap();
+        let scale = c.scale(ScaleType::Major);
         assert_eq!(
             scale.notes[0..7],
             vec![
@@ -272,7 +272,7 @@ mod tests {
     #[test]
     fn test_blues_scale() {
         let a = Tuning::new(PitchClass::A, 4);
-        let scale = Scale::new(a, ScaleType::Blues).unwrap();
+        let scale = a.scale(ScaleType::Blues);
         assert!(scale.contains(&Tuning::new(PitchClass::C, 5)));
         assert!(scale.contains(&Tuning::new(PitchClass::DSharpOrEFlat, 5)));
     }

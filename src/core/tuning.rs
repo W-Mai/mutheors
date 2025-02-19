@@ -1,6 +1,6 @@
 use crate::chord::Chord;
 use crate::tonality::Tonality;
-use crate::Interval;
+use crate::{Interval, Scale, ScaleType};
 use std::fmt::Display;
 
 #[derive(Copy, Clone, Debug)]
@@ -125,6 +125,10 @@ impl Tuning {
         self.freq.unwrap_or_else(|| {
             440.0 * 2f32.powf((self.midi_number().unwrap() as f32 - 69.0) / 12.0)
         })
+    }
+
+    pub fn scale(&self, scale_type: ScaleType) -> Scale {
+        Scale::new(*self, scale_type).unwrap()
     }
 }
 
