@@ -104,9 +104,25 @@ impl Chord {
 
         Ok(Self::new(root, intervals, ChordType::Triad, quality))
     }
-}
 
-// ---------- 子模块实现 ----------
+    /// Construct seventh chord
+    pub fn seventh(root: Tuning, quality: SeventhQuality) -> Result<Self, MusicError> {
+        let mut base = Self::triad(root, quality.base_quality())?;
+        base.extensions.push(match quality {
+            SeventhQuality::Major7 | SeventhQuality::MinorMajor7 => {
+                Interval::from_quality_degree(IntervalQuality::Major, 7)?
+            }
+            SeventhQuality::Dominant7 | SeventhQuality::HalfDiminished | SeventhQuality::Minor7 => {
+                Interval::from_quality_degree(IntervalQuality::Minor, 7)?
+            }
+            SeventhQuality::FullyDiminished => {
+                Interval::from_quality_degree(IntervalQuality::Diminished, 7)?
+            }
+        });
+        base.chord_type = ChordType::Seventh;
+        Ok(base)
+    }
+}
 
 /// Classification of chord masses (basic triads)
 #[derive(Debug, Clone, Copy)]
@@ -123,6 +139,7 @@ pub enum SeventhQuality {
     Major7,
     Dominant7,
     Minor7,
+    MinorMajor7,
     HalfDiminished,
     FullyDiminished,
 }
@@ -136,4 +153,17 @@ pub enum ChordFunction {
     SecondaryDominant,
     Neapolitan,
     //... Other Functional Categories
+}
+
+impl SeventhQuality {
+    pub fn base_quality(&self) -> ChordQuality {
+        match self {
+            SeventhQuality::Major7 => ChordQuality::Major,
+            SeventhQuality::Dominant7 => ChordQuality::Major,
+            SeventhQuality::Minor7 => ChordQuality::Minor,
+            SeventhQuality::MinorMajor7 => ChordQuality::Minor,
+            SeventhQuality::HalfDiminished => ChordQuality::Diminished,
+            SeventhQuality::FullyDiminished => ChordQuality::Diminished,
+        }
+    }
 }
