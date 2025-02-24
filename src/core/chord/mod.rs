@@ -107,8 +107,7 @@ impl Chord {
 
     /// Construct seventh chord
     pub fn seventh(root: Tuning, quality: SeventhQuality) -> Result<Self, MusicError> {
-        let mut base = Self::triad(root, quality.base_quality())?;
-        base.extensions.push(match quality {
+        let mut base = Self::triad(root, quality.base_quality())?.with_extension(match quality {
             SeventhQuality::Major7 | SeventhQuality::MinorMajor7 => {
                 Interval::from_quality_degree(IntervalQuality::Major, 7)?
             }
@@ -122,6 +121,62 @@ impl Chord {
         base.chord_type = ChordType::Seventh;
         Ok(base)
     }
+
+    /// Adding Extended interval
+    pub fn with_extension(mut self, interval: Interval) -> Self {
+        self.extensions.push(interval);
+        self
+    }
+
+    /// TODO: Chord inversion
+    pub fn invert(&mut self, inversion: Inversion) {
+        self.inversion = inversion;
+    }
+
+    /// TODO: Rearrangement of voices
+    pub fn revoice(&mut self, voicing: Voicing) {
+        self.voicing = voicing;
+    }
+
+    /// Getting Chord composition tones
+    pub fn components(&self) -> Vec<Tuning> {
+        let mut notes = vec![self.root];
+
+        // Adding basic intervals
+        let mut current = self.root;
+        for interval in &self.intervals {
+            current = current.add_interval(interval);
+            notes.push(current);
+        }
+
+        // Adding Extended Tones
+        for ext in &self.extensions {
+            current = current.add_interval(ext);
+            notes.push(current);
+        }
+
+        // TODO: Applying transposition and alignment
+        // self.apply_voicing(&mut notes);
+        notes
+    }
+
+    // TODO: Analyzing chord functions (TSD function system)
+    // pub fn function(&self, key: Tuning) -> ChordFunction {
+    //     // Implementing tonal analysis logic
+    //     // ...
+    // }
+
+    // TODO: Parsing from chord symbols (e.g. " Cmaj7")
+    // pub fn from_symbol(symbol: &str) -> Result<Self, MusicError> {
+    //     // Implementing a chord symbol parser
+    //     // ...
+    // }
+
+    // TODO: Generating arpeggios
+    // pub fn arpeggio(&self, style: ArpeggioStyle) -> Vec<Note> {
+    //     // Realization of different arpeggio patterns
+    //     // ...
+    // }
 }
 
 /// Classification of chord masses (basic triads)
