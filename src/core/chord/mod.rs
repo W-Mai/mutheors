@@ -255,3 +255,15 @@ impl Chord {
         }
     }
 }
+
+impl FromStr for Chord {
+    type Err = MusicError;
+
+    /// Eg：
+    /// - "Cmaj7"   => C Major 7th chord
+    /// - "G7/B"    => G Dominant 7th chord with B bass
+    /// - "Dm9"     => D minor 9th chord
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        todo!()
+    }
+}
