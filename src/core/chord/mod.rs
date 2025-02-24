@@ -155,8 +155,7 @@ impl Chord {
             notes.push(current);
         }
 
-        // TODO: Applying transposition and alignment
-        // self.apply_voicing(&mut notes);
+        self.apply_voicing(&mut notes);
         notes
     }
 
@@ -219,6 +218,40 @@ impl SeventhQuality {
             SeventhQuality::MinorMajor7 => ChordQuality::Minor,
             SeventhQuality::HalfDiminished => ChordQuality::Diminished,
             SeventhQuality::FullyDiminished => ChordQuality::Diminished,
+        }
+    }
+}
+
+impl Chord {
+    // Applying the rules of vocal arrangement
+    fn apply_voicing(&self, notes: &mut Vec<Tuning>) {
+        match self.voicing {
+            Voicing::ClosePosition => self.close_voicing(notes),
+            Voicing::OpenPosition => self.open_voicing(notes),
+            Voicing::Drop2 | Voicing::Drop3 | Voicing::Cluster => todo!(),
+            // ...
+        }
+    }
+
+    /// Close arrangement algorithm
+    fn close_voicing(&self, notes: &mut Vec<Tuning>) {
+        // Ensure that the notes are within an octave
+        let base_octave = notes[0].octave;
+        for note in notes.iter_mut().skip(1) {
+            while note.octave > base_octave + 1 {
+                note.octave -= 1;
+            }
+        }
+    }
+
+    /// Open arrangement algorithm
+    fn open_voicing(&self, notes: &mut Vec<Tuning>) {
+        let mut current_octave = notes[0].octave;
+        for (i, note) in notes.iter_mut().enumerate().skip(1) {
+            if i % 2 == 0 {
+                current_octave += 1;
+            }
+            note.octave = current_octave;
         }
     }
 }
