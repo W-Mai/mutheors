@@ -267,3 +267,49 @@ impl FromStr for Chord {
         todo!()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_major_triad() {
+        let c_major = Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
+        assert_eq!(
+            c_major.components(),
+            vec![
+                Tuning::new(PitchClass::C, 4),
+                Tuning::new(PitchClass::E, 4),
+                Tuning::new(PitchClass::G, 4)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_dominant_seventh() {
+        let g7 = Chord::seventh(Tuning::new(PitchClass::G, 4), SeventhQuality::Dominant7).unwrap();
+        assert_eq!(
+            g7.components(),
+            vec![
+                Tuning::new(PitchClass::G, 4),
+                Tuning::new(PitchClass::B, 4),
+                Tuning::new(PitchClass::D, 5),
+                Tuning::new(PitchClass::F, 5)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_inversion() {
+        let mut cmaj = Chord::triad(Tuning::new(PitchClass::E, 4), ChordQuality::Major).unwrap();
+        cmaj.invert(Inversion::First);
+        assert_eq!(
+            cmaj.components(),
+            vec![
+                Tuning::new(PitchClass::E, 4),
+                Tuning::new(PitchClass::G, 4),
+                Tuning::new(PitchClass::C, 5)
+            ] // 第一转位
+        );
+    }
+}
