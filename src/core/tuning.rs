@@ -1,6 +1,6 @@
 use crate::chord::Chord;
 use crate::tonality::Tonality;
-use crate::{Interval, Scale, ScaleType};
+use crate::{ChordQuality, Interval, Scale, ScaleType};
 use std::fmt::Display;
 
 #[derive(Copy, Clone, Debug)]
@@ -53,16 +53,13 @@ impl PitchClass {
     pub fn common_chord(&self, degree: u8) -> Chord {
         assert!(degree > 0 && degree < 7, "Degree must be in [1, 6]");
         let new_pc = self.next_basic_degree((degree - 1) as i8);
-        let tonality = match degree {
-            1 | 4 | 5 => Tonality::Major,
-            2 | 3 | 6 => Tonality::Minor,
+        let quality = match degree {
+            1 | 4 | 5 => ChordQuality::Major,
+            2 | 3 | 6 => ChordQuality::Minor,
             _ => panic!("Invalid degree"),
         };
 
-        Chord {
-            pitch_class: new_pc,
-            tonality,
-        }
+        Chord::triad(Tuning::new(new_pc, 3), quality).unwrap()
     }
 
     pub fn next_basic_degree(&self, nth: i8) -> PitchClass {
