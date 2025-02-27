@@ -100,23 +100,25 @@ impl Chord {
                 Interval::from_quality_degree(IntervalQuality::Major, 3)?,
                 Interval::from_quality_degree(IntervalQuality::Augmented, 5)?,
             ],
+            _ => return Err(MusicError::TheoryViolation("Invalid triad".to_owned())),
         };
 
         Ok(Self::new(root, intervals, ChordType::Triad, quality))
     }
 
     /// Construct seventh chord
-    pub fn seventh(root: Tuning, quality: SeventhQuality) -> Result<Self, MusicError> {
+    pub fn seventh(root: Tuning, quality: ChordQuality) -> Result<Self, MusicError> {
         let mut base = Self::triad(root, quality.base_quality())?.with_extension(match quality {
-            SeventhQuality::Major7 | SeventhQuality::MinorMajor7 => {
+            ChordQuality::Major7 | ChordQuality::MinorMajor7 => {
                 Interval::from_quality_degree(IntervalQuality::Major, 7)?
             }
-            SeventhQuality::Dominant7 | SeventhQuality::HalfDiminished | SeventhQuality::Minor7 => {
+            ChordQuality::Dominant7 | ChordQuality::HalfDiminished | ChordQuality::Minor7 => {
                 Interval::from_quality_degree(IntervalQuality::Minor, 7)?
             }
-            SeventhQuality::FullyDiminished => {
+            ChordQuality::FullyDiminished => {
                 Interval::from_quality_degree(IntervalQuality::Diminished, 7)?
             }
+            _ => return Err(MusicError::TheoryViolation("Invalid 7th chord".to_owned())),
         });
         base.chord_type = ChordType::Seventh;
         Ok(base)
@@ -185,11 +187,6 @@ pub enum ChordQuality {
     Minor,
     Diminished,
     Augmented,
-}
-
-/// Subdivision of seventh chord types
-#[derive(Debug, Clone, Copy)]
-pub enum SeventhQuality {
     Major7,
     Dominant7,
     Minor7,
@@ -209,15 +206,16 @@ pub enum ChordFunction {
     //... Other Functional Categories
 }
 
-impl SeventhQuality {
+impl ChordQuality {
     pub fn base_quality(&self) -> ChordQuality {
         match self {
-            SeventhQuality::Major7 => ChordQuality::Major,
-            SeventhQuality::Dominant7 => ChordQuality::Major,
-            SeventhQuality::Minor7 => ChordQuality::Minor,
-            SeventhQuality::MinorMajor7 => ChordQuality::Minor,
-            SeventhQuality::HalfDiminished => ChordQuality::Diminished,
-            SeventhQuality::FullyDiminished => ChordQuality::Diminished,
+            ChordQuality::Major7 => ChordQuality::Major,
+            ChordQuality::Dominant7 => ChordQuality::Major,
+            ChordQuality::Minor7 => ChordQuality::Minor,
+            ChordQuality::MinorMajor7 => ChordQuality::Minor,
+            ChordQuality::HalfDiminished => ChordQuality::Diminished,
+            ChordQuality::FullyDiminished => ChordQuality::Diminished,
+            _ => *self,
         }
     }
 }
@@ -287,7 +285,7 @@ mod tests {
 
     #[test]
     fn test_dominant_seventh() {
-        let g7 = Chord::seventh(Tuning::new(PitchClass::G, 4), SeventhQuality::Dominant7).unwrap();
+        let g7 = Chord::seventh(Tuning::new(PitchClass::G, 4), ChordQuality::Dominant7).unwrap();
         assert_eq!(
             g7.components(),
             vec![

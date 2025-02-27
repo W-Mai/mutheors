@@ -16,7 +16,7 @@ mod tests {
     fn test_breakdown() {
         let pitch_class = PitchClass::C;
         let chord = pitch_class.common_chord(1);
-        assert_eq!(chord.tonality, Tonality::Major);
+        assert_eq!(chord, Tonality::Major);
         let notes = chord.breakdown(4);
         assert_eq!(notes.len(), 3);
         assert_eq!(notes[0].pitch_class, PitchClass::C);
