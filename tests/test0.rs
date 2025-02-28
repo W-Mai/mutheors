@@ -16,50 +16,47 @@ mod tests {
     fn test_breakdown() {
         let pitch_class = PitchClass::C;
         let chord = pitch_class.common_chord(1);
-        assert_eq!(chord, Tonality::Major);
-        let notes = chord.breakdown(4);
+        assert_eq!(chord.quality(), ChordQuality::Major);
+        let notes = chord.components();
         assert_eq!(notes.len(), 3);
-        assert_eq!(notes[0].pitch_class, PitchClass::C);
+        assert_eq!(notes[0].class, PitchClass::C);
         assert_eq!(notes[0].octave, 4);
-        assert_eq!(notes[1].pitch_class, PitchClass::E);
+        assert_eq!(notes[1].class, PitchClass::E);
         assert_eq!(notes[1].octave, 4);
-        assert_eq!(notes[2].pitch_class, PitchClass::G);
+        assert_eq!(notes[2].class, PitchClass::G);
         assert_eq!(notes[2].octave, 4);
 
         let chord = pitch_class.common_chord(2);
-        assert_eq!(chord.tonality, Tonality::Minor);
-        let notes = chord.breakdown(4);
+        assert_eq!(chord.quality(), ChordQuality::Minor);
+        let notes = chord.components();
         assert_eq!(notes.len(), 3);
-        assert_eq!(notes[0].pitch_class, PitchClass::D);
+        assert_eq!(notes[0].class, PitchClass::D);
         assert_eq!(notes[0].octave, 4);
-        assert_eq!(notes[1].pitch_class, PitchClass::F);
+        assert_eq!(notes[1].class, PitchClass::F);
         assert_eq!(notes[1].octave, 4);
-        assert_eq!(notes[2].pitch_class, PitchClass::A);
+        assert_eq!(notes[2].class, PitchClass::A);
         assert_eq!(notes[2].octave, 4);
 
         let chord = pitch_class.common_chord(6);
-        assert_eq!(chord.tonality, Tonality::Minor);
+        assert_eq!(chord.quality(), ChordQuality::Minor);
     }
 
     #[test]
     fn test_breakdown_2() {
         let pitch_class = PitchClass::CSharpOrDFlat;
         let chord = pitch_class.common_chord(1);
-        let notes = chord.breakdown(4);
+        let notes = chord.components();
 
         assert_eq!(
             chord,
-            Chord {
-                pitch_class: PitchClass::CSharpOrDFlat,
-                tonality: Tonality::Major
-            }
+            Chord::triad(Tuning::new(PitchClass::CSharpOrDFlat, 4), ChordQuality::Major).unwrap()
         );
         assert_eq!(notes.len(), 3);
-        assert_eq!(notes[0].pitch_class, PitchClass::CSharpOrDFlat);
+        assert_eq!(notes[0].class, PitchClass::CSharpOrDFlat);
         assert_eq!(notes[0].octave, 4);
-        assert_eq!(notes[1].pitch_class, PitchClass::F);
+        assert_eq!(notes[1].class, PitchClass::F);
         assert_eq!(notes[1].octave, 4);
-        assert_eq!(notes[2].pitch_class, PitchClass::GSharpOrAFlat);
+        assert_eq!(notes[2].class, PitchClass::GSharpOrAFlat);
         assert_eq!(notes[2].octave, 4);
     }
 

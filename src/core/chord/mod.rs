@@ -27,6 +27,7 @@ pub enum ChordType {
 
 /// Chord voicing
 #[derive(Debug, Clone, Copy)]
+#[derive(PartialEq)]
 pub enum Voicing {
     // Dense arrangement (notes within an octave)
     ClosePosition,
@@ -42,6 +43,7 @@ pub enum Voicing {
 
 /// Chord inversion state
 #[derive(Debug, Clone, Copy)]
+#[derive(PartialEq)]
 pub enum Inversion {
     /// Root position
     RootPosition,
@@ -54,14 +56,21 @@ pub enum Inversion {
 }
 
 /// Complete Chord Description Structure
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Chord {
     root: Tuning,
+    quality: ChordQuality,
     intervals: Vec<Interval>,
     chord_type: ChordType,
     inversion: Inversion,
     voicing: Voicing,
     extensions: Vec<Interval>, // Extended sounds (9th, 11th, etc.)
+}
+
+impl Chord {
+    pub fn quality(&self) -> ChordQuality {
+        self.quality
+    }
 }
 
 impl Chord {
@@ -73,6 +82,7 @@ impl Chord {
     ) -> Chord {
         Self {
             root: tuning,
+            quality: chord_quality,
             intervals,
             chord_type,
             inversion: Inversion::RootPosition,
@@ -181,7 +191,7 @@ impl Chord {
 }
 
 /// Classification of chord masses (basic triads)
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ChordQuality {
     Major,
     Minor,
