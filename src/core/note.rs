@@ -4,7 +4,7 @@ use std::fmt::Display;
 #[derive(Copy, Clone, Debug)]
 pub struct Note {
     pub pitch_class: PitchClass,
-    pub octave: u8,
+    pub octave: i8,
     pub duration: f32,
     pub velocity: f32,
 }

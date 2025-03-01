@@ -155,15 +155,14 @@ impl Chord {
         let mut notes = vec![self.root];
 
         // Adding basic intervals
-        let mut current = self.root;
         for interval in &self.intervals {
-            current = current.add_interval(interval);
+            let current = self.root.add_interval(interval);
             notes.push(current);
         }
 
         // Adding Extended Tones
         for ext in &self.extensions {
-            current = current.add_interval(ext);
+            let current = self.root.add_interval(ext);
             notes.push(current);
         }
 
