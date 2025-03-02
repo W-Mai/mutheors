@@ -50,7 +50,7 @@ impl PitchClass {
         }
     }
 
-    pub fn common_chord(&self, degree: u8) -> Chord {
+    pub fn common_chord(&self, degree: u8, octave: i8) -> Chord {
         assert!(degree > 0 && degree < 7, "Degree must be in [1, 6]");
         let new_pc = self.next_basic_degree((degree - 1) as i8);
         let quality = match degree {
@@ -59,7 +59,7 @@ impl PitchClass {
             _ => panic!("Invalid degree"),
         };
 
-        Chord::triad(Tuning::new(new_pc, 3), quality).unwrap()
+        Chord::triad(Tuning::new(new_pc, octave), quality).unwrap()
     }
 
     pub fn next_basic_degree(&self, nth: i8) -> PitchClass {

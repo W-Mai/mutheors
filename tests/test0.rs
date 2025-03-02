@@ -15,7 +15,7 @@ mod tests {
     #[test]
     fn test_breakdown() {
         let pitch_class = PitchClass::C;
-        let chord = pitch_class.common_chord(1);
+        let chord = pitch_class.common_chord(1, 4);
         assert_eq!(chord.quality(), ChordQuality::Major);
         let notes = chord.components();
         assert_eq!(notes.len(), 3);
@@ -26,7 +26,7 @@ mod tests {
         assert_eq!(notes[2].class, PitchClass::G);
         assert_eq!(notes[2].octave, 4);
 
-        let chord = pitch_class.common_chord(2);
+        let chord = pitch_class.common_chord(2, 4);
         assert_eq!(chord.quality(), ChordQuality::Minor);
         let notes = chord.components();
         assert_eq!(notes.len(), 3);
@@ -37,19 +37,23 @@ mod tests {
         assert_eq!(notes[2].class, PitchClass::A);
         assert_eq!(notes[2].octave, 4);
 
-        let chord = pitch_class.common_chord(6);
+        let chord = pitch_class.common_chord(6, 2);
         assert_eq!(chord.quality(), ChordQuality::Minor);
     }
 
     #[test]
     fn test_breakdown_2() {
         let pitch_class = PitchClass::CSharpOrDFlat;
-        let chord = pitch_class.common_chord(1);
+        let chord = pitch_class.common_chord(1, 4);
         let notes = chord.components();
 
         assert_eq!(
             chord,
-            Chord::triad(Tuning::new(PitchClass::CSharpOrDFlat, 4), ChordQuality::Major).unwrap()
+            Chord::triad(
+                Tuning::new(PitchClass::CSharpOrDFlat, 4),
+                ChordQuality::Major
+            )
+            .unwrap()
         );
         assert_eq!(notes.len(), 3);
         assert_eq!(notes[0].class, PitchClass::CSharpOrDFlat);
