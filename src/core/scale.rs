@@ -2,7 +2,7 @@
 //! Provides core functions such as scale generation, modal analysis, scale and chord derivation, and more!
 
 use crate::interval::Interval;
-use crate::tuning::{PitchClass, Tuning};
+use crate::tuning::{Tuning};
 use crate::MusicError;
 
 /// Scale type classification

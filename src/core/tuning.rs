@@ -1,5 +1,4 @@
 use crate::chord::Chord;
-use crate::tonality::Tonality;
 use crate::{ChordQuality, Interval, Scale, ScaleType};
 use std::fmt::Display;
 

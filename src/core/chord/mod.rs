@@ -1,8 +1,8 @@
 //! Chord system module
 //! It includes core functions such as chord construction, analysis, inversion and voice arrangement
 
-use crate::interval::{Interval, IntervalDegree, IntervalQuality};
-use crate::tuning::{PitchClass, Tuning};
+use crate::interval::{Interval, IntervalQuality};
+use crate::tuning::{Tuning};
 use crate::MusicError;
 use std::str::FromStr;
 
@@ -270,7 +270,7 @@ impl FromStr for Chord {
     /// - "Cmaj7"   => C Major 7th chord
     /// - "G7/B"    => G Dominant 7th chord with B bass
     /// - "Dm9"     => D minor 9th chord
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(_s: &str) -> Result<Self, Self::Err> {
         todo!()
     }
 }
