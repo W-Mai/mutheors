@@ -307,7 +307,7 @@ mod tests {
 
     #[test]
     fn test_inversion() {
-        let mut cmaj = Chord::triad(Tuning::new(PitchClass::E, 4), ChordQuality::Major).unwrap();
+        let mut cmaj = Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
         cmaj.invert(Inversion::First);
         assert_eq!(
             cmaj.components(),
