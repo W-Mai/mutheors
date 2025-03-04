@@ -136,3 +136,41 @@ impl Tuning {
         Tuning::new(class, new_octave)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::IntervalQuality;
+
+    #[test]
+    fn test_tuning() {
+        let tuning = Tuning::new(PitchClass::C, 4);
+        assert_eq!(tuning.class, PitchClass::C);
+        assert_eq!(tuning.octave, 4);
+        assert_eq!(tuning.frequency(), 440.0 * 2f32.powf((60.0 - 69.0) / 12.0));
+    }
+
+    #[test]
+    fn test_modulation() {
+        let pc = PitchClass::C;
+        assert_eq!(pc.modulation(4), PitchClass::E);
+        assert_eq!(pc.modulation(-3), PitchClass::A);
+        assert_eq!(pc.modulation(12), PitchClass::C);
+        assert_eq!(pc.modulation(-12), PitchClass::C);
+        assert_eq!(pc.modulation(0), PitchClass::C);
+        assert_eq!(PitchClass::None.modulation(1), PitchClass::None);
+    }
+    #[test]
+    fn test_interval() {
+        let tuning = Tuning::new(PitchClass::C, 4);
+        let interval = Interval::from_semitones(4).unwrap();
+        let new_tuning = tuning.add_interval(&interval);
+        assert_eq!(new_tuning.class, PitchClass::E);
+        assert_eq!(new_tuning.octave, 4);
+
+        let new_tuning = tuning
+            .add_interval(&Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap());
+        assert_eq!(new_tuning.class, PitchClass::G);
+        assert_eq!(new_tuning.octave, 4);
+    }
+}
