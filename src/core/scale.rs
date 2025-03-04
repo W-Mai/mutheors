@@ -249,6 +249,7 @@ fn parse_intervals(semitones: &[i8]) -> Result<Vec<Interval>, MusicError> {
 
 #[cfg(test)]
 mod tests {
+    use crate::PitchClass;
     use super::*;
 
     #[test]

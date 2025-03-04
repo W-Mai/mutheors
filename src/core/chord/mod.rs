@@ -2,7 +2,7 @@
 //! It includes core functions such as chord construction, analysis, inversion and voice arrangement
 
 use crate::interval::{Interval, IntervalQuality};
-use crate::tuning::{Tuning};
+use crate::tuning::Tuning;
 use crate::MusicError;
 use std::str::FromStr;
 
@@ -26,8 +26,7 @@ pub enum ChordType {
 }
 
 /// Chord voicing
-#[derive(Debug, Clone, Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Voicing {
     // Dense arrangement (notes within an octave)
     ClosePosition,
@@ -42,8 +41,7 @@ pub enum Voicing {
 }
 
 /// Chord inversion state
-#[derive(Debug, Clone, Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Inversion {
     /// Root position
     RootPosition,
@@ -278,6 +276,7 @@ impl FromStr for Chord {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::PitchClass;
 
     #[test]
     fn test_major_triad() {
