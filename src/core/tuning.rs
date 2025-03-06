@@ -167,6 +167,8 @@ mod tests {
     #[test]
     fn test_interval() {
         let tuning = Tuning::new(PitchClass::C, 4);
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(0).unwrap());
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::C, 4));
         let new_tuning = tuning.add_interval(&Interval::from_semitones(2).unwrap());
         assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::D, 4));
         let new_tuning = tuning.add_interval(&Interval::from_semitones(4).unwrap());
