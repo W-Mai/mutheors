@@ -167,15 +167,18 @@ mod tests {
     #[test]
     fn test_interval() {
         let tuning = Tuning::new(PitchClass::C, 4);
-        let interval = Interval::from_semitones(4).unwrap();
-        let new_tuning = tuning.add_interval(&interval);
-        assert_eq!(new_tuning.class, PitchClass::E);
-        assert_eq!(new_tuning.octave, 4);
-
-        let new_tuning = tuning
-            .add_interval(&Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap());
-        assert_eq!(new_tuning.class, PitchClass::G);
-        assert_eq!(new_tuning.octave, 4);
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(2).unwrap());
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::D, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(4).unwrap());
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::E, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(5).unwrap());
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::F, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(7).unwrap());
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::G, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(9).unwrap());
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::A, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(11).unwrap());
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::B, 4));
     }
 
     #[test]
