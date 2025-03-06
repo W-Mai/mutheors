@@ -87,11 +87,18 @@ impl MidiPlayer {
     }
 
     pub fn close(&mut self) {
+        self.reset_notes();
         match self.midi_out_conn.take() {
             None => {}
             Some(conn) => {
                 self.midi_out = Some(conn.close());
             }
+        }
+    }
+
+    fn reset_notes(&mut self) {
+        for i in 0..15 {
+            self.stop_notes(i, (0..=127).collect::<Vec<_>>().as_slice());
         }
     }
 }
