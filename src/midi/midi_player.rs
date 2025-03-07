@@ -1,11 +1,20 @@
 use crate::{MusicError, Tuning};
 use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct MidiPlayer {
     name: String,
     midi_out: Option<MidiOutput>,
     port: Option<MidiOutputPort>,
-    midi_out_conn: Option<MidiOutputConnection>,
+    midi_out_conn: Rc<RefCell<Option<MidiOutputConnection>>>,
+
+    midi_player_channels: Option<[MidiPlayerChannel; 16]>,
+}
+
+pub struct MidiPlayerChannel {
+    midi_out_conn: Rc<RefCell<Option<MidiOutputConnection>>>,
+    channel: u8,
 }
 
 impl MidiPlayer {
@@ -14,7 +23,8 @@ impl MidiPlayer {
             name: name.to_owned(),
             midi_out: None,
             port: None,
-            midi_out_conn: None,
+            midi_out_conn: Rc::new(RefCell::new(None)),
+            midi_player_channels: None,
         };
 
         let midi_out = MidiOutput::new(&midi_player.name).ok();
@@ -47,43 +57,39 @@ impl MidiPlayer {
         Ok(())
     }
 
-    pub fn connect(&mut self, port_name: &str) -> Result<(), String> {
+    pub fn connect(&mut self, port_name: &str) -> Result<&mut [MidiPlayerChannel; 16], String> {
         match &self.port {
             None => Err("No port selected".to_owned()),
             Some(port) => {
-                self.midi_out_conn = self
-                    .midi_out
-                    .take()
-                    .ok_or("Midi output is not initialized")?
-                    .connect(port, port_name)
-                    .ok();
-                Ok(())
+                self.midi_out_conn = Rc::new(RefCell::new(
+                    self.midi_out
+                        .take()
+                        .ok_or("Midi output is not initialized")?
+                        .connect(port, port_name)
+                        .ok(),
+                ));
+
+                self.midi_player_channels = Some([
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 0),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 1),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 2),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 3),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 4),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 5),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 6),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 7),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 8),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 9),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 10),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 11),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 12),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 13),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 14),
+                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 15),
+                ]);
+                Ok(self.midi_player_channels.as_mut().unwrap())
             }
         }
-    }
-
-    pub fn play_notes(&mut self, ch: u8, notes: &[u8]) {
-        if let Some(conn) = &mut self.midi_out_conn {
-            for (index, note) in notes.iter().enumerate() {
-                let _ = conn.send(&[0x90 | (ch & 0xF), *note, 0x64]);
-            }
-        }
-    }
-
-    pub fn stop_notes(&mut self, ch: u8, notes: &[u8]) {
-        if let Some(conn) = &mut self.midi_out_conn {
-            for (index, note) in notes.iter().enumerate() {
-                let _ = conn.send(&[0x80 | (ch & 0xF), *note, 0x64]);
-            }
-        }
-    }
-
-    pub fn play_note(&mut self, ch: u8, note: u8) {
-        self.play_notes(ch, &[note]);
-    }
-
-    pub fn stop_note(&mut self, ch: u8, note: u8) {
-        self.stop_notes(ch, &[note]);
     }
 
     pub fn close(&mut self) {
@@ -97,8 +103,8 @@ impl MidiPlayer {
     }
 
     fn reset_notes(&mut self) {
-        for i in 0..15 {
-            self.stop_notes(i, (0..=127).collect::<Vec<_>>().as_slice());
+        for channel in self.midi_player_channels.iter_mut().flatten() {
+            channel.stop_all();
         }
     }
 }
@@ -106,6 +112,43 @@ impl MidiPlayer {
 impl Drop for MidiPlayer {
     fn drop(&mut self) {
         self.close();
+    }
+}
+
+impl<'a> MidiPlayerChannel {
+    fn new(midi_out_conn: Rc<RefCell<Option<MidiOutputConnection>>>, channel: u8) -> Self {
+        MidiPlayerChannel {
+            midi_out_conn,
+            channel,
+        }
+    }
+
+    pub fn play_notes(&mut self, notes: &[u8]) {
+        if let Some(conn) = &mut self.midi_out_conn.borrow_mut().as_mut() {
+            for (index, note) in notes.iter().enumerate() {
+                let _ = conn.send(&[
+                    0x90 | (self.channel & 0xF) | (index as u8 & 0x0F),
+                    *note,
+                    0x64,
+                ]);
+            }
+        }
+    }
+
+    pub fn stop_notes(&mut self, notes: &[u8]) {
+        if let Some(conn) = &mut self.midi_out_conn.borrow_mut().as_mut() {
+            for (index, note) in notes.iter().enumerate() {
+                let _ = conn.send(&[
+                    0x80 | (self.channel & 0xF) | (index as u8 & 0x0F),
+                    *note,
+                    0x64,
+                ]);
+            }
+        }
+    }
+
+    pub fn stop_all(&mut self) {
+        self.stop_notes((0..=127).collect::<Vec<_>>().as_slice());
     }
 }
 
