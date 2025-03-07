@@ -1,5 +1,5 @@
 use crate::chord::Chord;
-use crate::{ChordQuality, Interval, IntervalQuality, Scale, ScaleType};
+use crate::{ChordQuality, Interval, Scale, ScaleType};
 use std::fmt::Display;
 
 #[derive(Copy, Clone, Debug)]
@@ -144,7 +144,6 @@ impl Tuning {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{IntervalQuality, Note};
 
     #[test]
     fn test_tuning() {
