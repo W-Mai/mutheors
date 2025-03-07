@@ -9,7 +9,7 @@ pub struct MidiPlayer {
     port: Option<MidiOutputPort>,
     midi_out_conn: Rc<RefCell<Option<MidiOutputConnection>>>,
 
-    midi_player_channels: Option<[MidiPlayerChannel; 16]>,
+    midi_player_channels: Option<[RefCell<MidiPlayerChannel>; 16]>,
 }
 
 pub struct MidiPlayerChannel {
@@ -57,7 +57,10 @@ impl MidiPlayer {
         Ok(())
     }
 
-    pub fn connect(&mut self, port_name: &str) -> Result<&mut [MidiPlayerChannel; 16], String> {
+    pub fn connect(
+        &mut self,
+        port_name: &str,
+    ) -> Result<&mut [RefCell<MidiPlayerChannel>; 16], String> {
         match &self.port {
             None => Err("No port selected".to_owned()),
             Some(port) => {
@@ -70,22 +73,22 @@ impl MidiPlayer {
                 ));
 
                 self.midi_player_channels = Some([
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 0),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 1),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 2),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 3),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 4),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 5),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 6),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 7),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 8),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 9),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 10),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 11),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 12),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 13),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 14),
-                    MidiPlayerChannel::new(self.midi_out_conn.clone(), 15),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 0)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 1)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 2)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 3)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 4)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 5)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 6)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 7)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 8)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 9)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 10)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 11)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 12)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 13)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 14)),
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 15)),
                 ]);
                 Ok(self.midi_player_channels.as_mut().unwrap())
             }
@@ -104,7 +107,7 @@ impl MidiPlayer {
 
     fn reset_notes(&mut self) {
         for channel in self.midi_player_channels.iter_mut().flatten() {
-            channel.stop_all();
+            channel.borrow_mut().stop_all();
         }
     }
 }
