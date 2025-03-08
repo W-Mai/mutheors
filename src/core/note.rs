@@ -19,6 +19,15 @@ impl Display for Note {
 }
 
 impl Note {
+    pub fn new(pitch_class: PitchClass, octave: i8) -> Self {
+        Note {
+            pitch_class,
+            octave,
+            duration: 0.0,
+            velocity: 0.0,
+        }
+    }
+    
     pub fn with_duration(self, duration: f32) -> Note {
         Note {
             pitch_class: self.pitch_class,
@@ -35,5 +44,21 @@ impl Note {
             duration: self.duration,
             velocity,
         }
+    }
+    
+    pub fn pitch_class(&self) -> PitchClass {
+        self.pitch_class
+    }
+    
+    pub fn octave(&self) -> i8 {
+        self.octave
+    }
+    
+    pub fn duration(&self) -> f32 {
+        self.duration
+    }
+    
+    pub fn velocity(&self) -> f32 {
+        self.velocity
     }
 }
