@@ -49,4 +49,12 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
     pub fn get_tracks(&self) -> &[Track; TRACK_COUNT] {
         &self.tracks
     }
+
+    pub fn tempo(&self) -> f32 {
+        self.tempo
+    }
+
+    pub fn time_signature(&self) -> (u8, u8) {
+        self.time_signature
+    }
 }
