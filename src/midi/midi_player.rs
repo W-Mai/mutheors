@@ -2,7 +2,6 @@ use crate::{Measure, MusicError, Score, Tuning};
 use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::thread::sleep;
 
 pub struct MidiPlayer {
     name: String,
@@ -170,16 +169,17 @@ impl Tuning {
 }
 
 impl MidiPlayer {
+    /// Play a score
+    ///
+    /// TODO: optimize the performance
     pub fn play_score<const TRACK_COUNT: usize>(
         &mut self,
         score: Score<TRACK_COUNT>,
     ) -> Result<(), String> {
+        use std::time;
+
         let tracks = score.get_tracks();
-        let measure_count = tracks
-            .first()
-            .ok_or("No tracks in score".to_owned())?
-            .get_measures()
-            .len();
+        tracks.first().ok_or("No tracks in score".to_owned())?;
 
         self.list_ports()
             .first()
@@ -188,25 +188,95 @@ impl MidiPlayer {
         let channels = self.connect("Simple Compose Port 0")?;
         let max_track_count = TRACK_COUNT.min(channels.len());
 
-        (0..measure_count).for_each(|i| {
-            tracks[..max_track_count].iter().for_each(|track| {
-                let measure = &track.get_measures()[i];
+        let tempo = score.tempo();
+        let beats_per_measure = score.time_signature().0;
+        let beat_duration = time::Duration::from_secs_f64(60.0 / tempo as f64);
+        let measure_duration = beat_duration * beats_per_measure as u32;
+
+        struct TimedEvent {
+            trigger_time: time::Duration,
+            track_idx: usize,
+            notes: Vec<u8>,
+            is_start: bool,
+        }
+
+        let mut events = Vec::new();
+        for (track_idx, track) in tracks[..max_track_count].iter().enumerate() {
+            for (measure_idx, measure) in track.get_measures().iter().enumerate() {
                 match measure {
                     Measure::Rest => {}
                     Measure::Chord(chord) => {
-                        let chord_notes = chord
+                        let chord_notes: Vec<u8> = chord
                             .components()
                             .iter()
-                            .map(|tuning| tuning.midi_number().unwrap())
-                            .collect::<Vec<u8>>();
-                        channels[0].borrow_mut().play_notes(&chord_notes);
-                        sleep(std::time::Duration::from_millis((1.0 * 80.0 * 32.0) as u64));
-                        channels[0].borrow_mut().stop_notes(&chord_notes);
+                            .map(|t| t.midi_number().unwrap())
+                            .collect();
+
+                        let start_time = measure_duration * measure_idx as u32;
+                        let end_time = start_time + measure_duration;
+
+                        events.push(TimedEvent {
+                            trigger_time: start_time,
+                            track_idx,
+                            notes: chord_notes.clone(),
+                            is_start: true,
+                        });
+                        events.push(TimedEvent {
+                            trigger_time: end_time,
+                            track_idx,
+                            notes: chord_notes,
+                            is_start: false,
+                        });
                     }
-                    Measure::Note(notes) => {}
+                    Measure::Note(notes) => {
+                        let mut current_start = 0.0;
+                        for note in notes {
+                            let duration = note.duration();
+                            let start = current_start;
+                            current_start += duration;
+                            let note_start = measure_duration * measure_idx as u32
+                                + beat_duration.mul_f64(start as f64);
+                            let note_end =
+                                note_start + beat_duration.mul_f64(note.duration() as f64);
+
+                            let midi_num = Tuning::new(note.pitch_class, note.octave)
+                                .midi_number()
+                                .unwrap();
+
+                            events.push(TimedEvent {
+                                trigger_time: note_start,
+                                track_idx,
+                                notes: vec![midi_num],
+                                is_start: true,
+                            });
+                            events.push(TimedEvent {
+                                trigger_time: note_end,
+                                track_idx,
+                                notes: vec![midi_num],
+                                is_start: false,
+                            });
+                        }
+                    }
                 }
-            })
-        });
+            }
+        }
+
+        events.sort_by(|a, b| a.trigger_time.cmp(&b.trigger_time));
+        let time_start = time::SystemTime::now();
+        for event in events {
+            let trigger_moment = time_start + event.trigger_time;
+            let now = time::SystemTime::now();
+
+            if let Ok(wait_duration) = trigger_moment.duration_since(now) {
+                std::thread::sleep(wait_duration);
+            }
+            let channel = &channels[event.track_idx];
+            if event.is_start {
+                channel.borrow_mut().play_notes(&event.notes);
+            } else {
+                channel.borrow_mut().stop_notes(&event.notes);
+            }
+        }
 
         Ok(())
     }
