@@ -271,6 +271,10 @@ impl MidiPlayer {
                 std::thread::sleep(wait_duration);
             }
             let channel = &channels[event.track_idx];
+            println!(
+                "Playing notes {:?} on channel {}",
+                event.notes, event.track_idx
+            );
             if event.is_start {
                 channel.borrow_mut().play_notes(&event.notes);
             } else {
