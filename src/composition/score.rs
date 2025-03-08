@@ -36,4 +36,13 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
                 track.push(*measure);
             })
     }
+
+    pub fn new_measures<F>(&mut self, f: F)
+    where
+        F: Fn(&mut [Measure; TRACK_COUNT]),
+    {
+        let mut new_measure = [Measure::new(); TRACK_COUNT];
+        f(&mut new_measure);
+        self.push_measures(new_measure);
+    }
 }

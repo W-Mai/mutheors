@@ -2,7 +2,7 @@ use crate::composition::measure::Measure;
 
 #[derive(Clone)]
 pub struct Track {
-    measures: Vec<Measure>,
+    pub(crate) measures: Vec<Measure>,
 }
 
 impl Track {
