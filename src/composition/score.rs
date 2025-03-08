@@ -1,7 +1,6 @@
 use crate::composition::measure::Measure;
 use crate::composition::track::Track;
 use std::array;
-use std::ptr::NonNull;
 
 pub struct Score<const TRACK_COUNT: usize> {
     pub tracks: [Track; TRACK_COUNT],
