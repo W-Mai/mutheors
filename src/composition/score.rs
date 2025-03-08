@@ -39,7 +39,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
 
     pub fn new_measures<F>(&mut self, f: F)
     where
-        F: Fn(&mut [Measure; TRACK_COUNT]),
+        F: FnOnce(&mut [Measure; TRACK_COUNT]),
     {
         let mut new_measure: [Measure; TRACK_COUNT] = array::from_fn(|_| Measure::new());
         f(&mut new_measure);
