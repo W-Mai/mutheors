@@ -9,6 +9,7 @@ pub use track::*;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{Chord, ChordQuality, PitchClass, Tuning};
 
     #[test]
     fn test_score_creation() {
@@ -30,10 +31,17 @@ mod tests {
         assert_eq!(score.time_signature, (3, 4));
 
         score.new_measures(|ms| {
-            ms[0].test();
-            ms[1].test();
-            ms[2].test();
-            ms[3].test();
+            ms[0].chord(Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap());
+            ms[1].chord(Chord::triad(Tuning::new(PitchClass::G, 4), ChordQuality::Major).unwrap());
+            ms[2].chord(Chord::triad(Tuning::new(PitchClass::A, 4), ChordQuality::Major).unwrap());
+            ms[3].chord(Chord::triad(Tuning::new(PitchClass::F, 4), ChordQuality::Major).unwrap());
         });
+
+        score.new_measures(|ms| {
+            ms[0].chord(Chord::triad(Tuning::new(PitchClass::D, 4), ChordQuality::Major).unwrap());
+            ms[1].rest();
+            ms[2].rest();
+            ms[3].chord(Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap());
+        })
     }
 }

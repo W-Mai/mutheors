@@ -31,9 +31,9 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
     pub fn push_measures(&mut self, measures: [Measure; TRACK_COUNT]) {
         self.tracks
             .iter_mut()
-            .zip(measures.iter())
+            .zip(measures.into_iter())
             .for_each(|(track, measure)| {
-                track.push(*measure);
+                track.push(measure);
             })
     }
 
@@ -41,7 +41,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
     where
         F: Fn(&mut [Measure; TRACK_COUNT]),
     {
-        let mut new_measure = [Measure::new(); TRACK_COUNT];
+        let mut new_measure: [Measure; TRACK_COUNT] = array::from_fn(|_| Measure::new());
         f(&mut new_measure);
         self.push_measures(new_measure);
     }
