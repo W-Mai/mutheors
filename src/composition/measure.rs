@@ -4,7 +4,7 @@ use crate::{Chord, Note};
 pub enum Measure {
     Rest,
     Chord(Chord),
-    Note(Note),
+    Note(Vec<Note>),
 }
 
 impl Measure {
@@ -20,7 +20,7 @@ impl Measure {
         *self = Self::Chord(chord);
     }
 
-    pub fn note(&mut self, note: Note) {
-        *self = Self::Note(note);
+    pub fn note(&mut self, notes: Vec<Note>) {
+        *self = Self::Note(notes);
     }
 }

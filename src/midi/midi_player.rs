@@ -1,7 +1,8 @@
-use crate::{MusicError, Tuning};
+use crate::{Measure, MusicError, Score, Tuning};
 use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::thread::sleep;
 
 pub struct MidiPlayer {
     name: String,
@@ -165,5 +166,48 @@ impl Tuning {
         let base = base - 1;
         let num = (self.octave + 1) * 12 + base as i8;
         num.try_into().map_err(|_| MusicError::InvalidPitch)
+    }
+}
+
+impl MidiPlayer {
+    pub fn play_score<const TRACK_COUNT: usize>(
+        &mut self,
+        score: Score<TRACK_COUNT>,
+    ) -> Result<(), String> {
+        let tracks = score.get_tracks();
+        let measure_count = tracks
+            .first()
+            .ok_or("No tracks in score".to_owned())?
+            .get_measures()
+            .len();
+
+        self.list_ports()
+            .first()
+            .ok_or("No MIDI output ports available".to_owned())?;
+        self.select_port(0)?;
+        let channels = self.connect("Simple Compose Port 0")?;
+        let max_track_count = TRACK_COUNT.min(channels.len());
+
+        (0..measure_count).for_each(|i| {
+            tracks[..max_track_count].iter().for_each(|track| {
+                let measure = &track.get_measures()[i];
+                match measure {
+                    Measure::Rest => {}
+                    Measure::Chord(chord) => {
+                        let chord_notes = chord
+                            .components()
+                            .iter()
+                            .map(|tuning| tuning.midi_number().unwrap())
+                            .collect::<Vec<u8>>();
+                        channels[0].borrow_mut().play_notes(&chord_notes);
+                        sleep(std::time::Duration::from_millis((1.0 * 80.0 * 32.0) as u64));
+                        channels[0].borrow_mut().stop_notes(&chord_notes);
+                    }
+                    Measure::Note(notes) => {}
+                }
+            })
+        });
+
+        Ok(())
     }
 }

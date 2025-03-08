@@ -45,4 +45,8 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
         f(&mut new_measure);
         self.push_measures(new_measure);
     }
+
+    pub fn get_tracks(&self) -> &[Track; TRACK_COUNT] {
+        &self.tracks
+    }
 }
