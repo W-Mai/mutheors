@@ -73,24 +73,9 @@ impl MidiPlayer {
                         .ok(),
                 ));
 
-                self.midi_player_channels = Some([
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 0)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 1)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 2)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 3)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 4)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 5)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 6)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 7)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 8)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 9)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 10)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 11)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 12)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 13)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 14)),
-                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), 15)),
-                ]);
+                self.midi_player_channels = Some(array::from_fn(|i| {
+                    RefCell::new(MidiPlayerChannel::new(self.midi_out_conn.clone(), i as u8))
+                }));
                 Ok(self.midi_player_channels.as_mut().unwrap())
             }
         }
