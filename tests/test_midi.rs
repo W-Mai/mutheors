@@ -8,7 +8,7 @@ macro_rules! degrees {
 mod tests {
     use mutheors::*;
     use rand::prelude::*;
-    use rand::thread_rng;
+    use rand::rng;
 
     #[test]
     fn test_score_with_midi_player() {
@@ -87,7 +87,7 @@ mod tests {
         let chords = deg.map(|degree| pitch_class.common_chord(degree, 4));
 
         let mut score = Score::<2>::new().with_tempo(140.0);
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         (0..deg.len()).for_each(|i| {
             score.new_measures(|m| {

@@ -375,11 +375,12 @@ pub mod duration_utils {
     use super::Duration;
     use crate::DurationBase;
     use rand::prelude::*;
+    use rand::rng;
 
     pub fn generate_one_measure(beat: u8) -> Vec<Duration> {
         let beat = beat as f64 / 4.0;
         let mut durations = vec![];
-        let mut rng = thread_rng();
+        let mut rng = rng();
         let mut duration_sum = 0.0;
         while duration_sum < beat {
             let duration_base = *[
