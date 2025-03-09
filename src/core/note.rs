@@ -1,58 +1,39 @@
 use crate::tuning::PitchClass;
-use crate::Duration;
+use crate::{Duration, Tuning};
 use std::fmt::Display;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Note {
-    pub pitch_class: PitchClass,
-    pub octave: i8,
-    pub duration: Duration,
-    pub velocity: f32,
+    tuning: Tuning,
+    duration: Duration,
+    velocity: f32,
 }
 
 impl Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let chord_str = self.pitch_class.to_string();
-        let octave_str = self.octave.to_string();
-
-        write!(f, "{}{}", chord_str, octave_str)
+        write!(f, "{}[{}]", self.tuning, self.duration)
     }
 }
 
 impl Note {
-    pub fn new(pitch_class: PitchClass, octave: i8) -> Self {
+    pub fn new(tuning: Tuning) -> Self {
         Note {
-            pitch_class,
-            octave,
+            tuning,
             duration: Duration::from_quarters(1.0),
             velocity: 0.0,
         }
     }
 
     pub fn with_duration(self, duration: Duration) -> Note {
-        Note {
-            pitch_class: self.pitch_class,
-            octave: self.octave,
-            duration,
-            velocity: self.velocity,
-        }
+        Note { duration, ..self }
     }
 
     pub fn with_velocity(self, velocity: f32) -> Note {
-        Note {
-            pitch_class: self.pitch_class,
-            octave: self.octave,
-            duration: self.duration,
-            velocity,
-        }
+        Note { velocity, ..self }
     }
 
-    pub fn pitch_class(&self) -> PitchClass {
-        self.pitch_class
-    }
-
-    pub fn octave(&self) -> i8 {
-        self.octave
+    pub fn tuning(&self) -> Tuning {
+        self.tuning
     }
 
     pub fn duration(&self) -> Duration {

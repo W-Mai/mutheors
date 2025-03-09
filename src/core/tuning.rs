@@ -141,6 +141,12 @@ impl Tuning {
     }
 }
 
+impl Display for Tuning {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}{}", self.class, self.octave)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -217,9 +217,7 @@ impl MidiPlayer {
                             let note_end =
                                 note_start + beat_duration.mul_f64(duration.in_quarters() as f64);
 
-                            let midi_num = Tuning::new(note.pitch_class, note.octave)
-                                .midi_number()
-                                .unwrap();
+                            let midi_num = note.tuning().midi_number().unwrap();
 
                             events.push(TimedEvent {
                                 trigger_time: note_start,
