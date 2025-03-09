@@ -1,5 +1,6 @@
 use crate::{Measure, MusicError, Score, Tuning};
 use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
+use std::array;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -127,23 +128,23 @@ impl<'a> MidiPlayerChannel {
     }
 
     pub fn play_notes(&mut self, notes: &[u8]) {
-        if let Some(conn) = &mut self.midi_out_conn.borrow_mut().as_mut() {
-            for note in notes {
+        self.midi_out_conn.borrow_mut().as_mut().map(|conn| {
+            notes.iter().for_each(|note| {
                 let _ = conn.send(&[0x90 | (self.channel & 0xF), *note, 0x64]);
-            }
-        }
+            })
+        });
     }
 
     pub fn stop_notes(&mut self, notes: &[u8]) {
-        if let Some(conn) = &mut self.midi_out_conn.borrow_mut().as_mut() {
-            for note in notes {
+        self.midi_out_conn.borrow_mut().as_mut().map(|conn| {
+            notes.iter().for_each(|note| {
                 let _ = conn.send(&[0x80 | (self.channel & 0xF), *note, 0x64]);
-            }
-        }
+            })
+        });
     }
 
     pub fn stop_all(&mut self) {
-        self.stop_notes((0..=127).collect::<Vec<_>>().as_slice());
+        self.stop_notes(&array::from_fn::<_, 128, _>(|i| i as u8));
     }
 }
 
