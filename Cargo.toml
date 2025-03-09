@@ -13,3 +13,7 @@ rand = "0.8.5"
 thiserror = "2.0.11"
 
 midir = { version = "0.10.0", optional = true }
+
+[[test]]
+name = "test_midi"
+required-features = ["midi_io"]
