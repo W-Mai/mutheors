@@ -1,7 +1,14 @@
+macro_rules! degrees {
+    ($($degree:expr)*) => {
+        [$($degree),*]
+    };
+}
+
 #[cfg(all(test))]
 mod tests {
-    use super::*;
     use mutheors::*;
+    use rand::prelude::*;
+    use rand::thread_rng;
 
     #[test]
     fn test_score_with_midi_player() {
@@ -49,7 +56,6 @@ mod tests {
         midi_player.play_score(score).unwrap();
     }
 
-
     #[test]
     fn test_score_with_midi_player_2() {
         let mut score = Score::<2>::new()
@@ -71,6 +77,40 @@ mod tests {
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
         midi_player.play_score(score).unwrap();
+        midi_player.close();
+    }
+
+    #[test]
+    fn test_random_measure() {
+        let pitch_class = PitchClass::G;
+        let deg = degrees!(1 5 6 2 4 1 4 5 1 5 6 2 4 1 4 5 1 5 6 2 4 1 4 5 1 5 6 2 4 1 4 5 1 1);
+        let chords = deg.map(|degree| pitch_class.common_chord(degree, 4));
+
+        let mut score = Score::<2>::new().with_tempo(140.0);
+        let mut rng = thread_rng();
+
+        (0..deg.len()).for_each(|i| {
+            score.new_measures(|m| {
+                m[0].chord(chords[i].clone());
+
+                let chord_notes = chords[i].components();
+                let durations = duration_utils::generate_one_measure(4);
+                let note_iter = durations
+                    .iter()
+                    .map(|duration| {
+                        let tuning = chord_notes.choose(&mut rng).unwrap().clone();
+                        Note::new(tuning.add_interval(&Interval::from_semitones(12).unwrap()))
+                            .with_duration(duration.clone())
+                    })
+                    .collect();
+
+                m[1].note(note_iter);
+            })
+        });
+
+        let mut midi_player = MidiPlayer::new("Simple Compose");
+        midi_player.play_score(score).unwrap();
+
         midi_player.close();
     }
 }
