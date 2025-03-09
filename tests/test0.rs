@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use simple_compose::*;
+    use mutheors::*;
 
     #[test]
     fn test_modulation() {

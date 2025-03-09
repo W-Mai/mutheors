@@ -163,7 +163,7 @@ impl MidiPlayer {
             .first()
             .ok_or("No MIDI output ports available".to_owned())?;
         self.select_port(0)?;
-        let channels = self.connect("Simple Compose Port 0")?;
+        let channels = self.connect("Mutheors Port 0")?;
         let max_track_count = TRACK_COUNT.min(channels.len());
 
         let tempo = score.tempo();

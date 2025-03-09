@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use simple_compose::*;
+    use mutheors::*;
 
     fn sum_duration(ds: &Vec<Duration>) -> f64 {
         ds.iter().fold(0.0f64, |acc, x| acc + x)

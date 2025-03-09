@@ -86,7 +86,7 @@ impl Tuplet {
     /// - base: Basic note value type (such as Quarter, indicating a note value based on the quarter note)
     /// # Examples
     /// ```
-    /// use simple_compose::{DurationBase, Tuplet};
+    /// use mutheors::{DurationBase, Tuplet};
     /// let triplet = Tuplet::new(3, 2, DurationBase::Quarter).unwrap();
     /// ```
     ///
