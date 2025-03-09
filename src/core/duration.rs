@@ -72,7 +72,7 @@ impl DurationBase {
 }
 
 /// Structure that represents a tuplet
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Tuplet {
     pub actual_notes: u8,            // The number of actual notes played
     pub base_notes: u8,              // Base number of notes
@@ -117,7 +117,7 @@ impl Tuplet {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Duration {
     pub base: DurationBase,
     pub dots: u8, // [0, 3]

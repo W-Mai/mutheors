@@ -211,11 +211,11 @@ impl MidiPlayer {
                         for note in notes {
                             let duration = note.duration();
                             let start = current_start;
-                            current_start += duration;
+                            current_start += duration.in_quarters();
                             let note_start = measure_duration * measure_idx as u32
                                 + beat_duration.mul_f64(start as f64);
                             let note_end =
-                                note_start + beat_duration.mul_f64(note.duration() as f64);
+                                note_start + beat_duration.mul_f64(duration.in_quarters() as f64);
 
                             let midi_num = Tuning::new(note.pitch_class, note.octave)
                                 .midi_number()

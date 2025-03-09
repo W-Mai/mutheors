@@ -1,13 +1,12 @@
 use crate::tuning::PitchClass;
+use crate::Duration;
 use std::fmt::Display;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Note {
     pub pitch_class: PitchClass,
     pub octave: i8,
-
-    /// Duration in `DurationBase::Quarter`
-    pub duration: f32,
+    pub duration: Duration,
     pub velocity: f32,
 }
 
@@ -25,12 +24,12 @@ impl Note {
         Note {
             pitch_class,
             octave,
-            duration: 0.0,
+            duration: Duration::from_quarters(1.0),
             velocity: 0.0,
         }
     }
 
-    pub fn with_duration(self, duration: f32) -> Note {
+    pub fn with_duration(self, duration: Duration) -> Note {
         Note {
             pitch_class: self.pitch_class,
             octave: self.octave,
@@ -56,7 +55,7 @@ impl Note {
         self.octave
     }
 
-    pub fn duration(&self) -> f32 {
+    pub fn duration(&self) -> Duration {
         self.duration
     }
 
