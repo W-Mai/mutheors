@@ -5,6 +5,8 @@ use std::fmt::Display;
 pub struct Note {
     pub pitch_class: PitchClass,
     pub octave: i8,
+
+    /// Duration in `DurationBase::Quarter`
     pub duration: f32,
     pub velocity: f32,
 }
@@ -27,7 +29,7 @@ impl Note {
             velocity: 0.0,
         }
     }
-    
+
     pub fn with_duration(self, duration: f32) -> Note {
         Note {
             pitch_class: self.pitch_class,
@@ -45,19 +47,19 @@ impl Note {
             velocity,
         }
     }
-    
+
     pub fn pitch_class(&self) -> PitchClass {
         self.pitch_class
     }
-    
+
     pub fn octave(&self) -> i8 {
         self.octave
     }
-    
+
     pub fn duration(&self) -> f32 {
         self.duration
     }
-    
+
     pub fn velocity(&self) -> f32 {
         self.velocity
     }
