@@ -4,7 +4,12 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Benign X <1341398182@qq.com>"]
 
+[features]
+default = []
+midi_io = ["midir"]
+
 [dependencies]
 rand = "0.8.5"
-midir = "0.10.0"
 thiserror = "2.0.11"
+
+midir = { version = "0.10.0", optional = true }

@@ -1,4 +1,3 @@
-use crate::tuning::PitchClass;
 use crate::{Duration, Tuning};
 use std::fmt::Display;
 

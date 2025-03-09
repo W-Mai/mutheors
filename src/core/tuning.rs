@@ -123,7 +123,8 @@ impl Tuning {
     /// Calculation of physical frequency (A4 = 440 Hz)
     pub fn frequency(&self) -> f32 {
         self.freq.unwrap_or_else(|| {
-            440.0 * 2f32.powf((self.midi_number().unwrap() as f32 - 69.0) / 12.0)
+            440.0
+                * 2f32.powf((((self.octave + 1) * 12 + self.class as i8 - 1) as f32 - 69.0) / 12.0)
         })
     }
 
