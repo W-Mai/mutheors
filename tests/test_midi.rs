@@ -48,4 +48,29 @@ mod tests {
         let mut midi_player = MidiPlayer::new("Simple Compose");
         midi_player.play_score(score).unwrap();
     }
+
+
+    #[test]
+    fn test_score_with_midi_player_2() {
+        let mut score = Score::<2>::new()
+            .with_tempo(180.0)
+            .with_time_signature((4, 4));
+        score.new_measures(|m| {
+            m[0].rest();
+            m[1].note(vec![
+                Note::new(Tuning::new(PitchClass::C, 4))
+                    .with_duration(Duration::new(DurationBase::Quarter)),
+                Note::new(Tuning::new(PitchClass::E, 4))
+                    .with_duration(Duration::new(DurationBase::Quarter)),
+                Note::new(Tuning::new(PitchClass::G, 4))
+                    .with_duration(Duration::new(DurationBase::Quarter)),
+                Note::new(Tuning::new(PitchClass::C, 5))
+                    .with_duration(Duration::new(DurationBase::Quarter)),
+            ]);
+        });
+
+        let mut midi_player = MidiPlayer::new("Simple Compose");
+        midi_player.play_score(score).unwrap();
+        midi_player.close();
+    }
 }
