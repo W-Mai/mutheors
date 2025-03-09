@@ -377,7 +377,7 @@ pub mod duration_utils {
     use rand::prelude::*;
 
     pub fn generate_one_measure(beat: u8) -> Vec<Duration> {
-        let beat = beat as f64;
+        let beat = beat as f64 / 4.0;
         let mut durations = vec![];
         let mut rng = thread_rng();
         let mut duration_sum = 0.0;
