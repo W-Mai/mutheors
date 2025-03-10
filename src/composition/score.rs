@@ -1,6 +1,7 @@
 use crate::composition::measure::Measure;
 use crate::composition::track::Track;
 use std::array;
+use std::fmt::Display;
 
 pub struct Score<const TRACK_COUNT: usize> {
     pub tracks: [Track; TRACK_COUNT],
@@ -56,5 +57,23 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
 
     pub fn time_signature(&self) -> (u8, u8) {
         self.time_signature
+    }
+}
+
+impl<const TRACK_COUNT: usize> Display for Score<TRACK_COUNT> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "Tempo: {}\n {}\n---\n {}",
+            self.tempo, self.time_signature.0, self.time_signature.1
+        )?;
+
+        for (_i, track) in self.tracks.iter().enumerate() {
+            for measure in track.get_measures() {
+                write!(f, "{} ", measure)?;
+            }
+            write!(f, "\n")?;
+        }
+        Ok(())
     }
 }
