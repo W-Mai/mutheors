@@ -4,6 +4,7 @@
 use crate::interval::{Interval, IntervalQuality};
 use crate::tuning::Tuning;
 use crate::MusicError;
+use std::fmt::Display;
 use std::str::FromStr;
 
 /// Chord quality classification (basic triad)
@@ -68,6 +69,10 @@ pub struct Chord {
 impl Chord {
     pub fn quality(&self) -> ChordQuality {
         self.quality
+    }
+
+    pub fn root(&self) -> Tuning {
+        self.root
     }
 }
 
@@ -270,6 +275,24 @@ impl FromStr for Chord {
     /// - "Dm9"     => D minor 9th chord
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         todo!()
+    }
+}
+
+impl Display for ChordQuality {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            ChordQuality::Major => "M",
+            ChordQuality::Minor => "m",
+            ChordQuality::Diminished => "dim",
+            ChordQuality::Augmented => "aug",
+            ChordQuality::Major7 => "M7",
+            ChordQuality::Dominant7 => "7",
+            ChordQuality::Minor7 => "m7",
+            ChordQuality::MinorMajor7 => "mM7",
+            ChordQuality::HalfDiminished => "Ø",
+            ChordQuality::FullyDiminished => "°7",
+        };
+        write!(f, "{}", str)
     }
 }
 
