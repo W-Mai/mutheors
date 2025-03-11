@@ -115,6 +115,9 @@ impl<'a> MidiPlayerChannel {
     pub fn play_notes(&mut self, notes: &[u8]) {
         self.midi_out_conn.borrow_mut().as_mut().map(|conn| {
             notes.iter().for_each(|note| {
+                if *note == 0 {
+                    return;
+                }
                 let _ = conn.send(&[0x90 | (self.channel & 0xF), *note, 0x64]);
             })
         });
@@ -123,6 +126,9 @@ impl<'a> MidiPlayerChannel {
     pub fn stop_notes(&mut self, notes: &[u8]) {
         self.midi_out_conn.borrow_mut().as_mut().map(|conn| {
             notes.iter().for_each(|note| {
+                if *note == 0 {
+                    return;
+                }
                 let _ = conn.send(&[0x80 | (self.channel & 0xF), *note, 0x64]);
             })
         });
