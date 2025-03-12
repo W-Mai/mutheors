@@ -1,6 +1,5 @@
 use crate::{Chord, Note};
 use std::fmt::Display;
-use std::ptr::write;
 
 #[derive(Clone)]
 pub enum Measure {
