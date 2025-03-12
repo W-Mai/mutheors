@@ -278,6 +278,13 @@ impl FromStr for Chord {
     }
 }
 
+impl Display for Chord {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = format!("{}{}", self.root, self.quality);
+        write!(f, "{}", str)
+    }
+}
+
 impl Display for ChordQuality {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {

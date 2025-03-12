@@ -236,7 +236,7 @@ impl MidiPlayer {
                                 trigger_time: note_start,
                                 track_idx,
                                 chord: None,
-                                original_notes: Some(notes.clone()),
+                                original_notes: Some(vec![note.clone()]),
                                 notes: vec![midi_num],
                                 is_start: true,
                             });
@@ -244,7 +244,7 @@ impl MidiPlayer {
                                 trigger_time: note_end,
                                 track_idx,
                                 chord: None,
-                                original_notes: Some(notes.clone()),
+                                original_notes: Some(vec![note.clone()]),
                                 notes: vec![midi_num],
                                 is_start: false,
                             });
@@ -267,9 +267,9 @@ impl MidiPlayer {
 
             if event.is_start {
                 if let Some(chord) = event.chord {
-                    print!("{:?}", chord);
+                    println!("{}", chord);
                 } else if let Some(original_notes) = event.original_notes {
-                    print!(
+                    println!(
                         "{}",
                         original_notes
                             .iter()
@@ -281,7 +281,6 @@ impl MidiPlayer {
                 channel.borrow_mut().play_notes(&event.notes);
             } else {
                 channel.borrow_mut().stop_notes(&event.notes);
-                println!();
             }
         }
 
