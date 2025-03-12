@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter};
 ///
 /// Duration represents the length of a note.
 ///
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq)]
 pub enum DurationBase {
     Maxima,       // 8
     Longa,        // 4
@@ -25,7 +25,7 @@ pub struct Duration {
     pub tuplet: Option<Tuplet>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DurationGenerator {
     type_of_beat: DurationBase,
 }
