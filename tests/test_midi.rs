@@ -14,7 +14,7 @@ mod tests {
     fn test_score_with_midi_player() {
         let mut score = Score::<2>::new()
             .with_tempo(140.0)
-            .with_time_signature((4, 4));
+            .with_time_signature(4, DurationBase::Quarter);
 
         let dg = DurationGenerator::new(DurationBase::Quarter);
 
@@ -52,7 +52,7 @@ mod tests {
     fn test_score_with_midi_player_2() {
         let mut score = Score::<2>::new()
             .with_tempo(180.0)
-            .with_time_signature((4, 4));
+            .with_time_signature(4, DurationBase::Quarter);
 
         let dg = DurationGenerator::new(DurationBase::Quarter);
 

@@ -173,7 +173,7 @@ impl MidiPlayer {
         let max_track_count = TRACK_COUNT.min(channels.len());
 
         let tempo = score.tempo();
-        let beats_per_measure = score.time_signature().0;
+        let beats_per_measure = score.time_signature().beats_per_measure();
         let beat_duration = time::Duration::from_secs_f64(60.0 / tempo as f64);
         let measure_duration = beat_duration * beats_per_measure as u32;
 

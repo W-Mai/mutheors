@@ -1,12 +1,19 @@
 use crate::composition::measure::Measure;
 use crate::composition::track::Track;
+use crate::DurationBase;
 use std::array;
 use std::fmt::Display;
 
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+pub struct TimeSignature {
+    beats_per_measure: u8,
+    beat_type: DurationBase,
+}
+
 pub struct Score<const TRACK_COUNT: usize> {
-    pub tracks: [Track; TRACK_COUNT],
-    pub tempo: f32,
-    pub time_signature: (u8, u8),
+    tracks: [Track; TRACK_COUNT],
+    tempo: f32,
+    time_signature: TimeSignature,
 }
 
 impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
@@ -14,7 +21,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
         Score {
             tracks: array::from_fn(|_| Track::new()),
             tempo: 120.0,
-            time_signature: (4, 4),
+            time_signature: TimeSignature::new(4, DurationBase::Quarter),
         }
     }
 
@@ -22,9 +29,9 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
         Score { tempo, ..self }
     }
 
-    pub fn with_time_signature(self, time_signature: (u8, u8)) -> Self {
+    pub fn with_time_signature(self, beats_per_measure: u8, beat_type: DurationBase) -> Self {
         Score {
-            time_signature,
+            time_signature: TimeSignature::new(beats_per_measure, beat_type),
             ..self
         }
     }
@@ -55,8 +62,8 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
         self.tempo
     }
 
-    pub fn time_signature(&self) -> (u8, u8) {
-        self.time_signature
+    pub fn time_signature(&self) -> &TimeSignature {
+        &self.time_signature
     }
 }
 
@@ -65,7 +72,7 @@ impl<const TRACK_COUNT: usize> Display for Score<TRACK_COUNT> {
         writeln!(
             f,
             "Tempo: {}\n {}\n---\n {}",
-            self.tempo, self.time_signature.0, self.time_signature.1
+            self.tempo, self.time_signature.beats_per_measure, self.time_signature.beat_type as u8
         )?;
 
         for (_i, track) in self.tracks.iter().enumerate() {
@@ -75,5 +82,22 @@ impl<const TRACK_COUNT: usize> Display for Score<TRACK_COUNT> {
             write!(f, "\n")?;
         }
         Ok(())
+    }
+}
+
+impl TimeSignature {
+    pub fn new(beats_per_measure: u8, beat_type: DurationBase) -> Self {
+        TimeSignature {
+            beats_per_measure,
+            beat_type,
+        }
+    }
+
+    pub fn beats_per_measure(&self) -> u8 {
+        self.beats_per_measure
+    }
+
+    pub fn beat_type(&self) -> DurationBase {
+        self.beat_type
     }
 }

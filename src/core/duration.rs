@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter};
 ///
 /// Duration represents the length of a note.
 ///
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum DurationBase {
     Maxima,       // 8
     Longa,        // 4
