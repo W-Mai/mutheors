@@ -51,6 +51,32 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
     {
         let mut new_measure: [Measure; TRACK_COUNT] = array::from_fn(|_| Measure::new());
         f(&mut new_measure);
+
+        let measure_check = new_measure.iter().enumerate().filter_map(|(i, measure)| {
+            return match measure {
+                Measure::Note(notes) => {
+                    let total = notes.iter().fold(0.0f32, |acc, note| {
+                        let duration = note.duration().in_quarters();
+                        let new_duration: f32 = duration + acc;
+                        new_duration
+                    });
+
+                    if total > self.time_signature.beats_per_measure as f32 {
+                        Some((i, total))
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            };
+        });
+
+        measure_check.for_each(|track| {
+            eprintln!(
+                "Track {}: measure [{}] that exceeds the time signature please check the measures ",
+                track.0, track.1
+            );
+        });
         self.push_measures(new_measure);
     }
 
