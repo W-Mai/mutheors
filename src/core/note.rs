@@ -43,3 +43,9 @@ impl Note {
         self.velocity
     }
 }
+
+impl From<Tuning> for Note {
+    fn from(tuning: Tuning) -> Self {
+        Note::new(tuning)
+    }
+}

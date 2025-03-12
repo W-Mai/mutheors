@@ -21,11 +21,11 @@ mod tests {
         score.new_measures(|m| {
             m[0].rest();
             m[1].note(vec![
-                dg.beat(1.0).with_note(Note::new(tuning!(C 4))),
-                dg.beat(0.5).with_note(Note::new(tuning!(E 4))),
-                dg.beat(0.5).with_note(Note::new(tuning!(G 4))),
-                dg.beat(0.5).with_note(Note::new(tuning!(B 4))),
-                dg.beat(0.5).with_note(Note::new(tuning!(D 5))),
+                dg.beat(1.0).with_note(tuning!(C 4).into()),
+                dg.beat(0.5).with_note(tuning!(E 4).into()),
+                dg.beat(0.5).with_note(tuning!(G 4).into()),
+                dg.beat(0.5).with_note(tuning!(B 4).into()),
+                dg.beat(0.5).with_note(tuning!(D 5).into()),
             ]);
         });
         score.new_measures(|m| {
@@ -34,12 +34,12 @@ mod tests {
         });
         score.new_measures(|m| {
             m[0].note(vec![
-                dg.beat(1.0).with_note(Note::new(tuning!(C 4))),
-                dg.beat(1.0).with_note(Note::new(tuning!(E 4))),
-                dg.beat(0.5).with_note(Note::new(tuning!(B 4))),
-                dg.beat(0.5).with_note(Note::new(tuning!(G 4))),
-                dg.beat(0.5).with_note(Note::new(tuning!(E 4))),
-                dg.beat(0.5).with_note(Note::new(tuning!(C 5))),
+                dg.beat(1.0).with_note(tuning!(C 4).into()),
+                dg.beat(1.0).with_note(tuning!(E 4).into()),
+                dg.beat(0.5).with_note(tuning!(B 4).into()),
+                dg.beat(0.5).with_note(tuning!(G 4).into()),
+                dg.beat(0.5).with_note(tuning!(E 4).into()),
+                dg.beat(0.5).with_note(tuning!(C 5).into()),
             ]);
             m[1].rest();
         });
@@ -59,10 +59,10 @@ mod tests {
         score.new_measures(|m| {
             m[0].rest();
             m[1].note(vec![
-                dg.beat(1.0).with_note(Note::new(tuning!(C 4))),
-                dg.beat(1.0).with_note(Note::new(tuning!(E 4))),
-                dg.beat(1.0).with_note(Note::new(tuning!(G 4))),
-                dg.beat(1.0).with_note(Note::new(tuning!(C 5))),
+                dg.beat(1.0).with_note(tuning!(C 4).into()),
+                dg.beat(1.0).with_note(tuning!(E 4).into()),
+                dg.beat(1.0).with_note(tuning!(G 4).into()),
+                dg.beat(1.0).with_note(tuning!(C 5).into()),
             ]);
         });
 

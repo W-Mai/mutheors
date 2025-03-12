@@ -12,7 +12,6 @@ pub use chord::*;
 pub use duration::*;
 pub use errors::*;
 pub use interval::*;
-pub use macros::*;
 pub use note::*;
 pub use scale::*;
 pub use tonality::*;
