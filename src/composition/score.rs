@@ -3,6 +3,7 @@ use crate::composition::track::Track;
 use crate::{DurationBase, DurationGenerator};
 use std::array;
 use std::fmt::Display;
+use std::rc::Rc;
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct TimeSignature {
@@ -15,7 +16,7 @@ pub struct Score<const TRACK_COUNT: usize> {
     tempo: f32,
     time_signature: TimeSignature,
 
-    duration_generator: DurationGenerator,
+    duration_generator: Rc<DurationGenerator>,
     current_measure: usize,
 }
 
@@ -25,7 +26,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
             tracks: array::from_fn(|_| Track::new()),
             tempo: 120.0,
             time_signature: TimeSignature::new(4, DurationBase::Quarter),
-            duration_generator: DurationGenerator::new(DurationBase::Quarter),
+            duration_generator: Rc::new(DurationGenerator::new(DurationBase::Quarter)),
             current_measure: 0,
         }
     }
@@ -37,7 +38,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
     pub fn with_time_signature(self, beats_per_measure: u8, beat_type: DurationBase) -> Self {
         Score {
             time_signature: TimeSignature::new(beats_per_measure, beat_type),
-            duration_generator: DurationGenerator::new(beat_type),
+            duration_generator: Rc::new(DurationGenerator::new(beat_type)),
             ..self
         }
     }
@@ -63,7 +64,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
             return match measure {
                 Measure::Note(notes) => {
                     let total = notes.iter().fold(0.0f32, |acc, note| {
-                        let beats = note.duration().in_beats(self.duration_generator());
+                        let beats = note.duration().in_beats(&self.duration_generator());
                         beats + acc
                     });
 
@@ -99,8 +100,8 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
         &self.time_signature
     }
 
-    pub fn duration_generator(&self) -> &DurationGenerator {
-        &self.duration_generator
+    pub fn duration_generator(&self) -> Rc<DurationGenerator> {
+        self.duration_generator.clone()
     }
 }
 

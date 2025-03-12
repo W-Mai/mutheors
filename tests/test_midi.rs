@@ -16,7 +16,7 @@ mod tests {
             .with_tempo(140.0)
             .with_time_signature(4, DurationBase::Quarter);
 
-        let dg = score.duration_generator().clone();
+        let dg = score.duration_generator();
 
         score.new_measures(|m| {
             m[0].rest();
