@@ -1,5 +1,6 @@
 use super::MusicError;
 use std::fmt::{Display, Formatter};
+use crate::Note;
 
 ///
 /// Duration represents the length of a note.
@@ -366,6 +367,10 @@ impl DurationGenerator {
 impl Duration {
     pub fn in_beats(&self, duration_generator: &DurationGenerator) -> f32 {
         duration_generator.in_beats(&self)
+    }
+    
+    pub fn with_note(&self, note: Note) -> Note {
+        note.with_duration(self.clone())
     }
 }
 

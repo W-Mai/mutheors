@@ -21,7 +21,8 @@ mod tests {
         score.new_measures(|m| {
             m[0].rest();
             m[1].note(vec![
-                Note::new(Tuning::new(PitchClass::C, 4)).with_duration(dg.beat(1.0)),
+                dg.beat(1.0)
+                    .with_note(Note::new(Tuning::new(PitchClass::C, 4))),
                 Note::new(Tuning::new(PitchClass::E, 4)).with_duration(dg.beat(0.5)),
                 Note::new(Tuning::new(PitchClass::G, 4)).with_duration(dg.beat(0.5)),
                 Note::new(Tuning::new(PitchClass::B, 4)).with_duration(dg.beat(0.5)),
