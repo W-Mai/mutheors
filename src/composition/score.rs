@@ -56,9 +56,9 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
             return match measure {
                 Measure::Note(notes) => {
                     let total = notes.iter().fold(0.0f32, |acc, note| {
-                        let duration = note.duration().in_quarters();
-                        let new_duration: f32 = duration + acc;
-                        new_duration
+                        let beats = note.duration().in_quarters()
+                            / self.time_signature.beat_type.in_quarters();
+                        beats + acc
                     });
 
                     if total > self.time_signature.beats_per_measure as f32 {
@@ -73,8 +73,8 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
 
         measure_check.for_each(|track| {
             eprintln!(
-                "Track {}: measure [{}] that exceeds the time signature please check the measures ",
-                track.0, track.1
+                "Track {}: measure [{}] in [{} beats] that exceeds the time signature [{}] please check the measures ",
+                track.0, self.tracks.first().unwrap().measures.len(), track.1, self.time_signature.beats_per_measure
             );
         });
         self.push_measures(new_measure);
