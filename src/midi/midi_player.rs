@@ -1,4 +1,4 @@
-use crate::{Measure, MusicError, Score, Tuning};
+use crate::{Chord, Measure, MusicError, Note, Score, Tuning};
 use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
 use std::array;
 use std::cell::RefCell;
@@ -180,6 +180,9 @@ impl MidiPlayer {
         struct TimedEvent {
             trigger_time: time::Duration,
             track_idx: usize,
+            chord: Option<Chord>,
+            original_notes: Option<Vec<Note>>,
+            /// MIDI note numbers
             notes: Vec<u8>,
             is_start: bool,
         }
@@ -202,12 +205,16 @@ impl MidiPlayer {
                         events.push(TimedEvent {
                             trigger_time: start_time,
                             track_idx,
+                            chord: Some(chord.clone()),
+                            original_notes: None,
                             notes: chord_notes.clone(),
                             is_start: true,
                         });
                         events.push(TimedEvent {
                             trigger_time: end_time,
                             track_idx,
+                            chord: Some(chord.clone()),
+                            original_notes: None,
                             notes: chord_notes,
                             is_start: false,
                         });
@@ -228,12 +235,16 @@ impl MidiPlayer {
                             events.push(TimedEvent {
                                 trigger_time: note_start,
                                 track_idx,
+                                chord: None,
+                                original_notes: Some(notes.clone()),
                                 notes: vec![midi_num],
                                 is_start: true,
                             });
                             events.push(TimedEvent {
                                 trigger_time: note_end,
                                 track_idx,
+                                chord: None,
+                                original_notes: Some(notes.clone()),
                                 notes: vec![midi_num],
                                 is_start: false,
                             });
@@ -253,14 +264,24 @@ impl MidiPlayer {
                 std::thread::sleep(wait_duration);
             }
             let channel = &channels[event.track_idx];
-            println!(
-                "Playing notes {:?} on channel {}",
-                event.notes, event.track_idx
-            );
+
             if event.is_start {
+                if let Some(chord) = event.chord {
+                    print!("{:?}", chord);
+                } else if let Some(original_notes) = event.original_notes {
+                    print!(
+                        "{}",
+                        original_notes
+                            .iter()
+                            .map(|note| { note.to_string() })
+                            .collect::<Vec<_>>()
+                            .join(" ")
+                    );
+                }
                 channel.borrow_mut().play_notes(&event.notes);
             } else {
                 channel.borrow_mut().stop_notes(&event.notes);
+                println!();
             }
         }
 
