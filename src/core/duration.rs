@@ -1,6 +1,6 @@
 use super::MusicError;
-use std::fmt::{Display, Formatter};
 use crate::Note;
+use std::fmt::{Display, Formatter};
 
 ///
 /// Duration represents the length of a note.
@@ -368,7 +368,7 @@ impl Duration {
     pub fn in_beats(&self, duration_generator: &DurationGenerator) -> f32 {
         duration_generator.in_beats(&self)
     }
-    
+
     pub fn with_note(&self, note: Note) -> Note {
         note.with_duration(self.clone())
     }
@@ -404,37 +404,36 @@ impl Display for Duration {
 }
 
 pub mod duration_utils {
-    use super::Duration;
-    use crate::DurationBase;
+    use crate::{Chord, DurationGenerator, Measure, Note};
     use rand::prelude::*;
     use rand::rng;
 
-    pub fn generate_one_measure(beat: u8) -> Vec<Duration> {
-        let beat = beat as f64 / 4.0;
-        let mut durations = vec![];
+    pub fn generate_one_measure(dg: &DurationGenerator, chord: Chord, beat: u8) -> Measure {
+        let beat = beat as f32;
+        let chord_components = chord.components();
+        let mut notes: Vec<Note> = vec![];
         let mut rng = rng();
-        let mut duration_sum = 0.0;
-        while duration_sum < beat {
-            let duration_base = *[
-                DurationBase::Half,
-                DurationBase::Whole,
-                DurationBase::Quarter,
-            ]
-            .choose(&mut rng)
-            .unwrap();
-            let duration = &Duration::new(duration_base);
-            if duration_sum + duration > beat {
+        let mut beats_sum = 0.0;
+        while beats_sum < beat {
+            let beats_choice = *[3.0, 2.0, 1.0].choose(&mut rng).unwrap();
+            let duration = dg.beat(beats_choice);
+            if beats_sum + beats_choice > beat {
                 break;
             }
-            duration_sum += duration;
-            durations.push(duration.clone());
+            beats_sum += beats_choice;
+            notes.push(
+                duration.with_note(chord_components.choose(&mut rng).unwrap().clone().into()),
+            );
         }
 
-        let remainder = beat - duration_sum;
+        let remainder = beat - beats_sum;
         if remainder > 0.0 {
-            durations.push(remainder.into());
+            notes.push(
+                dg.beat(remainder)
+                    .with_note(chord_components.choose(&mut rng).unwrap().clone().into()),
+            );
         }
-        durations
+        Measure::Note(notes)
     }
 }
 

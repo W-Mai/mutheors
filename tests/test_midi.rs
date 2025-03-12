@@ -78,24 +78,12 @@ mod tests {
         let chords = deg.map(|degree| pitch_class.common_chord(degree, 4));
 
         let mut score = Score::<2>::new().with_tempo(140);
-        let mut rng = rng();
+        let dg = score.duration_generator();
 
         (0..deg.len()).for_each(|i| {
             score.new_measures(|m| {
                 m[0].chord(chords[i].clone());
-
-                let chord_notes = chords[i].components();
-                let durations = duration_utils::generate_one_measure(4);
-                let note_iter = durations
-                    .iter()
-                    .map(|duration| {
-                        let tuning = chord_notes.choose(&mut rng).unwrap().clone();
-                        Note::new(tuning.add_interval(&Interval::from_semitones(12).unwrap()))
-                            .with_duration(duration.clone())
-                    })
-                    .collect();
-
-                m[1].note(note_iter);
+                m[1] = duration_utils::generate_one_measure(&dg, chords[i].clone(), 4);
             })
         });
 
