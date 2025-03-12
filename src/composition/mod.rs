@@ -1,10 +1,12 @@
 mod measure;
 mod score;
 mod track;
+mod tempo;
 
 pub use measure::*;
 pub use score::*;
 pub use track::*;
+pub use tempo::*;
 
 #[cfg(test)]
 mod tests {

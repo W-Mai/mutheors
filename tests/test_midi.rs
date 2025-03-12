@@ -77,7 +77,7 @@ mod tests {
         let deg = degrees!(1 5 6 2 4 1 4 5 1 5 6 2 4 1 4 5 1 5 6 2 4 1 4 5 1 5 6 2 4 1 4 5 1 1);
         let chords = deg.map(|degree| pitch_class.common_chord(degree, 4));
 
-        let mut score = Score::<2>::new().with_tempo(140.0);
+        let mut score = Score::<2>::new().with_tempo(140);
         let mut rng = rng();
 
         (0..deg.len()).for_each(|i| {
