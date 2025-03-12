@@ -2,98 +2,6 @@ use crate::chord::Chord;
 use crate::{ChordQuality, Interval, Scale, ScaleType};
 use std::fmt::Display;
 
-#[macro_export]
-macro_rules! tuning {
-    (# $note:ident $octave:expr) => {
-        Tuning {
-            class: pitch_class!(# $note),
-            octave: $octave,
-            freq: None,
-        }
-    };
-    (b $note:ident $octave:expr) => {
-        Tuning {
-            class: pitch_class!(b $note),
-            octave: $octave,
-            freq: None,
-        }
-    };
-    ($note:ident $octave:expr) => {
-        Tuning {
-            class: pitch_class!($note),
-            octave: $octave,
-            freq: None,
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! pitch_class {
-    (# C) => {
-        PitchClass::CSharpOrDFlat
-    };
-    (b C) => {
-        PitchClass::B
-    };
-    (# D) => {
-        PitchClass::DSharpOrEFlat
-    };
-    (b D) => {
-        PitchClass::CSharpOrDFlat
-    };
-    (# E) => {
-        PitchClass::F
-    };
-    (b E) => {
-        PitchClass::DSharpOrEFlat
-    };
-    (# F) => {
-        PitchClass::FSharpOrGFlat
-    };
-    (b F) => {
-        PitchClass::E
-    };
-    (# G) => {
-        PitchClass::GSharpOrAFlat
-    };
-    (b G) => {
-        PitchClass::FSharpOrGFlat
-    };
-    (# A) => {
-        PitchClass::ASharpOrBFlat
-    };
-    (b A) => {
-        PitchClass::GSharpOrAFlat
-    };
-    (# B) => {
-        PitchClass::C
-    };
-    (b B) => {
-        PitchClass::ASharpOrBFlat
-    };
-    (C) => {
-        PitchClass::C
-    };
-    (D) => {
-        PitchClass::D
-    };
-    (E) => {
-        PitchClass::E
-    };
-    (F) => {
-        PitchClass::F
-    };
-    (G) => {
-        PitchClass::G
-    };
-    (A) => {
-        PitchClass::A
-    };
-    (B) => {
-        PitchClass::B
-    };
-}
-
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
 #[derive(PartialEq, PartialOrd)]
@@ -243,6 +151,7 @@ impl Display for Tuning {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::*;
 
     #[test]
     fn test_tuning() {
