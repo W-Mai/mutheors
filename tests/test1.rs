@@ -2,19 +2,28 @@
 mod tests {
     use mutheors::*;
 
-    fn sum_duration(ds: &Vec<Duration>) -> f64 {
-        ds.iter().fold(0.0f64, |acc, x| acc + x)
+    fn sum_duration(dg: &DurationGenerator, ds: &Vec<Note>) -> f32 {
+        ds.iter().fold(0.0f32, |acc, x| acc + x.duration().in_beats(dg))
     }
 
     fn do_a_measure_test(beat: u8) {
-        let ds = duration_utils::generate_one_measure(beat);
-        println!(
-            "{}",
-            (&ds)
-                .iter()
-                .fold("".to_owned(), |acc, x| format!("{} {}", acc, x))
-        );
-        assert_eq!(sum_duration(&ds), beat as f64);
+        let dg = DurationGenerator::new(DurationBase::Quarter);
+        let chord = Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
+        let measure = duration_utils::generate_one_measure(&dg, chord, beat);
+        match measure {
+            Measure::Note(notes) => {
+                println!(
+                    "{}",
+                    (&notes)
+                        .iter()
+                        .fold("".to_owned(), |acc, x| format!("{} {}", acc, x))
+                );
+                assert_eq!(sum_duration(&dg, &notes), beat as f32);
+            }
+            _ => {
+                assert!(false, "Expected a Note measure");
+            }
+        }
     }
 
     #[test]
