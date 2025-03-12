@@ -25,6 +25,7 @@ pub struct Duration {
     pub tuplet: Option<Tuplet>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct DurationGenerator {
     type_of_beat: DurationBase,
 }

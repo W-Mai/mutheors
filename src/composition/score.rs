@@ -63,8 +63,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
             return match measure {
                 Measure::Note(notes) => {
                     let total = notes.iter().fold(0.0f32, |acc, note| {
-                        let beats = note.duration().in_quarters()
-                            / self.time_signature.beat_type.in_quarters();
+                        let beats = note.duration().in_beats(self.duration_generator());
                         beats + acc
                     });
 
