@@ -356,6 +356,16 @@ impl DurationGenerator {
 
         Duration::from_quarters(duration)
     }
+
+    pub fn in_beats(&self, duration: &Duration) -> f32 {
+        duration.in_quarters() / self.type_of_beat.in_quarters()
+    }
+}
+
+impl Duration {
+    pub fn in_beats(&self, duration_generator: &DurationGenerator) -> f32 {
+        duration_generator.in_beats(&self)
+    }
 }
 
 impl Display for DurationBase {
