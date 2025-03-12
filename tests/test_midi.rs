@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn test_two_tigers() {
         let mut score = Score::<2>::new()
-            .with_tempo(180.0)
+            .with_tempo(Tempo::Vivace)
             .with_time_signature(4, DurationBase::Quarter);
 
         let dg = score.duration_generator();
