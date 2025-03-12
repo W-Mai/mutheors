@@ -92,14 +92,11 @@ macro_rules! pitch_class {
 
 #[macro_export]
 macro_rules! beats {
-    ($dg:expr; $($bts:expr),+ ; with $($tunings:expr),+) => {{
-        let bts = [$($bts),+];
-        let tunings = [$($tunings),+];
-        
-        assert_eq!(bts.len(), tunings.len());
+    ($dg:expr; $($bt:expr => $tuning:expr),+ $(,)?) => {{
+        let mappings = [$(($bt, $tuning)),+];
 
-        bts.iter().enumerate().map(|(i, &bt)| {
-            $dg.beat(bt).with_note(tunings[i].into())
+        mappings.iter().map(|(beat, tune)| {
+            $dg.beat(*beat).with_note((*tune).into())
         }).collect::<Vec<_>>()
     }};
 }

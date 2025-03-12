@@ -20,27 +20,27 @@ mod tests {
 
         score.new_measures(|m| {
             m[0].rest();
-            m[1].note(vec![
-                dg.beat(1.0).with_note(tuning!(C 4).into()),
-                dg.beat(0.5).with_note(tuning!(E 4).into()),
-                dg.beat(0.5).with_note(tuning!(G 4).into()),
-                dg.beat(0.5).with_note(tuning!(B 4).into()),
-                dg.beat(0.5).with_note(tuning!(D 5).into()),
-            ]);
+            m[1].note(beats!(dg;
+                1.0 => tuning!(C 4),
+                0.5 => tuning!(E 4),
+                0.5 => tuning!(G 4),
+                0.5 => tuning!(B 4),
+                0.5 => tuning!(D 5)
+            ));
         });
         score.new_measures(|m| {
             m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Major).unwrap());
             m[1].chord(Chord::triad(tuning!(B 3), ChordQuality::Major).unwrap());
         });
         score.new_measures(|m| {
-            m[0].note(vec![
-                dg.beat(1.0).with_note(tuning!(C 4).into()),
-                dg.beat(1.0).with_note(tuning!(E 4).into()),
-                dg.beat(0.5).with_note(tuning!(B 4).into()),
-                dg.beat(0.5).with_note(tuning!(G 4).into()),
-                dg.beat(0.5).with_note(tuning!(E 4).into()),
-                dg.beat(0.5).with_note(tuning!(C 5).into()),
-            ]);
+            m[0].note(beats!(dg;
+                1.0 => tuning!(C 4),
+                1.0 => tuning!(E 4),
+                0.5 => tuning!(B 4),
+                0.5 => tuning!(G 4),
+                0.5 => tuning!(E 4),
+                0.5 => tuning!(C 5)
+            ));
             m[1].rest();
         });
 
@@ -59,12 +59,10 @@ mod tests {
         score.new_measures(|m| {
             m[0].rest();
             m[1].note(beats!(dg;
-                1.0, 1.0, 1.0, 1.0;
-                with
-                tuning!(C 4),
-                tuning!(E 4),
-                tuning!(G 4),
-                tuning!(C 5)
+                1.0 => tuning!(C 4),
+                1.0 => tuning!(E 4),
+                1.0 => tuning!(G 4),
+                1.0 => tuning!(C 5)
             ));
         });
 
