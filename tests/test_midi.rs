@@ -58,12 +58,14 @@ mod tests {
 
         score.new_measures(|m| {
             m[0].rest();
-            m[1].note(vec![
-                dg.beat(1.0).with_note(tuning!(C 4).into()),
-                dg.beat(1.0).with_note(tuning!(E 4).into()),
-                dg.beat(1.0).with_note(tuning!(G 4).into()),
-                dg.beat(1.0).with_note(tuning!(C 5).into()),
-            ]);
+            m[1].note(beats!(dg;
+                1.0, 1.0, 1.0, 1.0;
+                with
+                tuning!(C 4),
+                tuning!(E 4),
+                tuning!(G 4),
+                tuning!(C 5)
+            ));
         });
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
