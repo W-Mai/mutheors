@@ -14,6 +14,8 @@ pub struct Score<const TRACK_COUNT: usize> {
     tracks: [Track; TRACK_COUNT],
     tempo: f32,
     time_signature: TimeSignature,
+
+    current_measure: usize,
 }
 
 impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
@@ -22,6 +24,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
             tracks: array::from_fn(|_| Track::new()),
             tempo: 120.0,
             time_signature: TimeSignature::new(4, DurationBase::Quarter),
+            current_measure: 0,
         }
     }
 
@@ -42,7 +45,8 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
             .zip(measures.into_iter())
             .for_each(|(track, measure)| {
                 track.push(measure);
-            })
+            });
+        self.current_measure += 1;
     }
 
     pub fn new_measures<F>(&mut self, f: F)
@@ -74,10 +78,11 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
         measure_check.for_each(|track| {
             eprintln!(
                 "Track {}: measure [{}] in [{} beats] that exceeds the time signature [{}] please check the measures ",
-                track.0, self.tracks.first().unwrap().measures.len(), track.1, self.time_signature.beats_per_measure
+                track.0, self.current_measure, track.1, self.time_signature.beats_per_measure
             );
         });
         self.push_measures(new_measure);
+        self.current_measure += 1;
     }
 
     pub fn get_tracks(&self) -> &[Track; TRACK_COUNT] {
