@@ -21,26 +21,25 @@ mod tests {
         score.new_measures(|m| {
             m[0].rest();
             m[1].note(vec![
-                dg.beat(1.0)
-                    .with_note(Note::new(Tuning::new(PitchClass::C, 4))),
-                Note::new(Tuning::new(PitchClass::E, 4)).with_duration(dg.beat(0.5)),
-                Note::new(Tuning::new(PitchClass::G, 4)).with_duration(dg.beat(0.5)),
-                Note::new(Tuning::new(PitchClass::B, 4)).with_duration(dg.beat(0.5)),
-                Note::new(Tuning::new(PitchClass::D, 5)).with_duration(dg.beat(0.5)),
+                dg.beat(1.0).with_note(Note::new(tuning!(C 4))),
+                dg.beat(0.5).with_note(Note::new(tuning!(E 4))),
+                dg.beat(0.5).with_note(Note::new(tuning!(G 4))),
+                dg.beat(0.5).with_note(Note::new(tuning!(B 4))),
+                dg.beat(0.5).with_note(Note::new(tuning!(D 5))),
             ]);
         });
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(Tuning::new(PitchClass::G, 4), ChordQuality::Major).unwrap());
-            m[1].chord(Chord::triad(Tuning::new(PitchClass::B, 3), ChordQuality::Major).unwrap());
+            m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Major).unwrap());
+            m[1].chord(Chord::triad(tuning!(B 3), ChordQuality::Major).unwrap());
         });
         score.new_measures(|m| {
             m[0].note(vec![
-                Note::new(Tuning::new(PitchClass::C, 4)).with_duration(dg.beat(1.0)),
-                Note::new(Tuning::new(PitchClass::E, 4)).with_duration(dg.beat(1.0)),
-                Note::new(Tuning::new(PitchClass::B, 4)).with_duration(dg.beat(0.5)),
-                Note::new(Tuning::new(PitchClass::G, 4)).with_duration(dg.beat(0.5)),
-                Note::new(Tuning::new(PitchClass::E, 4)).with_duration(dg.beat(0.5)),
-                Note::new(Tuning::new(PitchClass::C, 5)).with_duration(dg.beat(0.5)),
+                dg.beat(1.0).with_note(Note::new(tuning!(C 4))),
+                dg.beat(1.0).with_note(Note::new(tuning!(E 4))),
+                dg.beat(0.5).with_note(Note::new(tuning!(B 4))),
+                dg.beat(0.5).with_note(Note::new(tuning!(G 4))),
+                dg.beat(0.5).with_note(Note::new(tuning!(E 4))),
+                dg.beat(0.5).with_note(Note::new(tuning!(C 5))),
             ]);
             m[1].rest();
         });
@@ -60,10 +59,10 @@ mod tests {
         score.new_measures(|m| {
             m[0].rest();
             m[1].note(vec![
-                Note::new(Tuning::new(PitchClass::C, 4)).with_duration(dg.beat(1.0)),
-                Note::new(Tuning::new(PitchClass::E, 4)).with_duration(dg.beat(1.0)),
-                Note::new(Tuning::new(PitchClass::G, 4)).with_duration(dg.beat(1.0)),
-                Note::new(Tuning::new(PitchClass::C, 5)).with_duration(dg.beat(1.0)),
+                dg.beat(1.0).with_note(Note::new(tuning!(C 4))),
+                dg.beat(1.0).with_note(Note::new(tuning!(E 4))),
+                dg.beat(1.0).with_note(Note::new(tuning!(G 4))),
+                dg.beat(1.0).with_note(Note::new(tuning!(C 5))),
             ]);
         });
 

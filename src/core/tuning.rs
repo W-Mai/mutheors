@@ -27,6 +27,7 @@ macro_rules! tuning {
     };
 }
 
+#[macro_export]
 macro_rules! pitch_class {
     (# C) => {
         PitchClass::CSharpOrDFlat
