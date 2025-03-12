@@ -1,6 +1,6 @@
 use crate::composition::measure::Measure;
 use crate::composition::track::Track;
-use crate::DurationBase;
+use crate::{DurationBase, DurationGenerator};
 use std::array;
 use std::fmt::Display;
 
@@ -15,6 +15,7 @@ pub struct Score<const TRACK_COUNT: usize> {
     tempo: f32,
     time_signature: TimeSignature,
 
+    duration_generator: DurationGenerator,
     current_measure: usize,
 }
 
@@ -24,6 +25,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
             tracks: array::from_fn(|_| Track::new()),
             tempo: 120.0,
             time_signature: TimeSignature::new(4, DurationBase::Quarter),
+            duration_generator: DurationGenerator::new(DurationBase::Quarter),
             current_measure: 0,
         }
     }
@@ -35,6 +37,7 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
     pub fn with_time_signature(self, beats_per_measure: u8, beat_type: DurationBase) -> Self {
         Score {
             time_signature: TimeSignature::new(beats_per_measure, beat_type),
+            duration_generator: DurationGenerator::new(beat_type),
             ..self
         }
     }
@@ -95,6 +98,10 @@ impl<const TRACK_COUNT: usize> Score<TRACK_COUNT> {
 
     pub fn time_signature(&self) -> &TimeSignature {
         &self.time_signature
+    }
+
+    pub fn duration_generator(&self) -> &DurationGenerator {
+        &self.duration_generator
     }
 }
 
