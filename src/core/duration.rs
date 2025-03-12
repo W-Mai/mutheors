@@ -18,6 +18,17 @@ pub enum DurationBase {
     SixtyFourth,  // 1 / 64
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct Duration {
+    pub base: DurationBase,
+    pub dots: u8, // [0, 3]
+    pub tuplet: Option<Tuplet>,
+}
+
+pub struct DurationGenerator {
+    type_of_beat: DurationBase,
+}
+
 impl DurationBase {
     pub fn in_quarters(&self) -> f32 {
         match self {
@@ -115,13 +126,6 @@ impl Tuplet {
         // For example, a 3:2 tritone returns 2.0/3.0.
         self.base_notes as f32 / self.actual_notes as f32
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Duration {
-    pub base: DurationBase,
-    pub dots: u8, // [0, 3]
-    pub tuplet: Option<Tuplet>,
 }
 
 impl Duration {
@@ -339,6 +343,18 @@ impl std::ops::AddAssign<f32> for Duration {
 impl std::ops::AddAssign<f64> for Duration {
     fn add_assign(&mut self, rhs: f64) {
         *self = Duration::from(self.in_whole() as f64 + rhs);
+    }
+}
+
+impl DurationGenerator {
+    pub fn new(type_of_beat: DurationBase) -> Self {
+        Self { type_of_beat }
+    }
+
+    pub fn beat(&self, beat_count: f32) -> Duration {
+        let duration = self.type_of_beat.in_quarters() * beat_count;
+
+        Duration::from_quarters(duration)
     }
 }
 

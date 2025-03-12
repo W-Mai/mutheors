@@ -15,19 +15,17 @@ mod tests {
         let mut score = Score::<2>::new()
             .with_tempo(140.0)
             .with_time_signature((4, 4));
+
+        let dg = DurationGenerator::new(DurationBase::Quarter);
+
         score.new_measures(|m| {
             m[0].rest();
             m[1].note(vec![
-                Note::new(Tuning::new(PitchClass::C, 4))
-                    .with_duration(Duration::new(DurationBase::Quarter)),
-                Note::new(Tuning::new(PitchClass::E, 4))
-                    .with_duration(Duration::new(DurationBase::Eighth)),
-                Note::new(Tuning::new(PitchClass::G, 4))
-                    .with_duration(Duration::new(DurationBase::Eighth)),
-                Note::new(Tuning::new(PitchClass::B, 4))
-                    .with_duration(Duration::new(DurationBase::Eighth)),
-                Note::new(Tuning::new(PitchClass::D, 5))
-                    .with_duration(Duration::new(DurationBase::Eighth)),
+                Note::new(Tuning::new(PitchClass::C, 4)).with_duration(dg.beat(1.0)),
+                Note::new(Tuning::new(PitchClass::E, 4)).with_duration(dg.beat(0.5)),
+                Note::new(Tuning::new(PitchClass::G, 4)).with_duration(dg.beat(0.5)),
+                Note::new(Tuning::new(PitchClass::B, 4)).with_duration(dg.beat(0.5)),
+                Note::new(Tuning::new(PitchClass::D, 5)).with_duration(dg.beat(0.5)),
             ]);
         });
         score.new_measures(|m| {
@@ -36,18 +34,12 @@ mod tests {
         });
         score.new_measures(|m| {
             m[0].note(vec![
-                Note::new(Tuning::new(PitchClass::C, 4))
-                    .with_duration(Duration::new(DurationBase::Quarter)),
-                Note::new(Tuning::new(PitchClass::E, 4))
-                    .with_duration(Duration::new(DurationBase::Quarter)),
-                Note::new(Tuning::new(PitchClass::B, 4))
-                    .with_duration(Duration::new(DurationBase::Eighth)),
-                Note::new(Tuning::new(PitchClass::G, 4))
-                    .with_duration(Duration::new(DurationBase::Eighth)),
-                Note::new(Tuning::new(PitchClass::E, 4))
-                    .with_duration(Duration::new(DurationBase::Eighth)),
-                Note::new(Tuning::new(PitchClass::C, 5))
-                    .with_duration(Duration::new(DurationBase::Eighth)),
+                Note::new(Tuning::new(PitchClass::C, 4)).with_duration(dg.beat(1.0)),
+                Note::new(Tuning::new(PitchClass::E, 4)).with_duration(dg.beat(1.0)),
+                Note::new(Tuning::new(PitchClass::B, 4)).with_duration(dg.beat(0.5)),
+                Note::new(Tuning::new(PitchClass::G, 4)).with_duration(dg.beat(0.5)),
+                Note::new(Tuning::new(PitchClass::E, 4)).with_duration(dg.beat(0.5)),
+                Note::new(Tuning::new(PitchClass::C, 5)).with_duration(dg.beat(0.5)),
             ]);
             m[1].rest();
         });
@@ -61,17 +53,16 @@ mod tests {
         let mut score = Score::<2>::new()
             .with_tempo(180.0)
             .with_time_signature((4, 4));
+
+        let dg = DurationGenerator::new(DurationBase::Quarter);
+
         score.new_measures(|m| {
             m[0].rest();
             m[1].note(vec![
-                Note::new(Tuning::new(PitchClass::C, 4))
-                    .with_duration(Duration::new(DurationBase::Quarter)),
-                Note::new(Tuning::new(PitchClass::E, 4))
-                    .with_duration(Duration::new(DurationBase::Quarter)),
-                Note::new(Tuning::new(PitchClass::G, 4))
-                    .with_duration(Duration::new(DurationBase::Quarter)),
-                Note::new(Tuning::new(PitchClass::C, 5))
-                    .with_duration(Duration::new(DurationBase::Quarter)),
+                Note::new(Tuning::new(PitchClass::C, 4)).with_duration(dg.beat(1.0)),
+                Note::new(Tuning::new(PitchClass::E, 4)).with_duration(dg.beat(1.0)),
+                Note::new(Tuning::new(PitchClass::G, 4)).with_duration(dg.beat(1.0)),
+                Note::new(Tuning::new(PitchClass::C, 5)).with_duration(dg.beat(1.0)),
             ]);
         });
 
