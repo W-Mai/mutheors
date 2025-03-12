@@ -2,6 +2,97 @@ use crate::chord::Chord;
 use crate::{ChordQuality, Interval, Scale, ScaleType};
 use std::fmt::Display;
 
+#[macro_export]
+macro_rules! tuning {
+    (# $note:ident $octave:expr) => {
+        Tuning {
+            class: pitch_class!(# $note),
+            octave: $octave,
+            freq: None,
+        }
+    };
+    (b $note:ident $octave:expr) => {
+        Tuning {
+            class: pitch_class!(b $note),
+            octave: $octave,
+            freq: None,
+        }
+    };
+    ($note:ident $octave:expr) => {
+        Tuning {
+            class: pitch_class!($note),
+            octave: $octave,
+            freq: None,
+        }
+    };
+}
+
+macro_rules! pitch_class {
+    (# C) => {
+        PitchClass::CSharpOrDFlat
+    };
+    (b C) => {
+        PitchClass::B
+    };
+    (# D) => {
+        PitchClass::DSharpOrEFlat
+    };
+    (b D) => {
+        PitchClass::CSharpOrDFlat
+    };
+    (# E) => {
+        PitchClass::F
+    };
+    (b E) => {
+        PitchClass::DSharpOrEFlat
+    };
+    (# F) => {
+        PitchClass::FSharpOrGFlat
+    };
+    (b F) => {
+        PitchClass::E
+    };
+    (# G) => {
+        PitchClass::GSharpOrAFlat
+    };
+    (b G) => {
+        PitchClass::FSharpOrGFlat
+    };
+    (# A) => {
+        PitchClass::ASharpOrBFlat
+    };
+    (b A) => {
+        PitchClass::GSharpOrAFlat
+    };
+    (# B) => {
+        PitchClass::C
+    };
+    (b B) => {
+        PitchClass::ASharpOrBFlat
+    };
+    (C) => {
+        PitchClass::C
+    };
+    (D) => {
+        PitchClass::D
+    };
+    (E) => {
+        PitchClass::E
+    };
+    (F) => {
+        PitchClass::F
+    };
+    (G) => {
+        PitchClass::G
+    };
+    (A) => {
+        PitchClass::A
+    };
+    (B) => {
+        PitchClass::B
+    };
+}
+
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
 #[derive(PartialEq, PartialOrd)]
@@ -154,7 +245,7 @@ mod tests {
 
     #[test]
     fn test_tuning() {
-        let tuning = Tuning::new(PitchClass::C, 4);
+        let tuning = tuning!(C 4);
         assert_eq!(tuning.class, PitchClass::C);
         assert_eq!(tuning.octave, 4);
         assert_eq!(tuning.frequency(), 440.0 * 2f32.powf((60.0 - 69.0) / 12.0));
@@ -172,7 +263,7 @@ mod tests {
     }
     #[test]
     fn test_interval() {
-        let tuning = Tuning::new(PitchClass::C, 4);
+        let tuning = tuning!(C 4);
         let new_tuning = tuning.add_interval(&Interval::from_semitones(0).unwrap());
         assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::C, 4));
         let new_tuning = tuning.add_interval(&Interval::from_semitones(2).unwrap());
