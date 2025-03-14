@@ -2,7 +2,7 @@
 //! Provides core functions such as scale generation, modal analysis, scale and chord derivation, and more!
 
 use crate::interval::Interval;
-use crate::tuning::{Tuning};
+use crate::tuning::Tuning;
 use crate::MusicError;
 
 /// Scale type classification
@@ -21,6 +21,9 @@ pub enum ScaleType {
     /// melodic minor (upward)
     /// - 旋律小调（上行）
     MelodicMinor,
+    /// Ionian mode (natural major)
+    /// - 伊奥尼亚调式（自然大调）
+    Ionian,
     /// Dorian mode
     /// - 多利亚调式
     Dorian,
@@ -33,6 +36,9 @@ pub enum ScaleType {
     /// Mixed Lydian mode
     /// - 混合利底亚调式
     Mixolydian,
+    /// Aeolian mode (natural minor)
+    /// - 艾奥利亚调式（自然小调）
+    Aeolian,
     /// Locrian mode
     /// - 洛克里亚调式
     Locrian,
@@ -173,10 +179,12 @@ impl Scale {
 /// - Melodic minor scale: [2, 1, 2, 2, 2, 2, 1]
 ///
 /// ## Mediaeval mode
+/// - Ionian mode: [2, 2, 1, 2, 2, 2, 1]
 /// - Dorian mode: [2, 1, 2, 2, 2, 1, 2]
 /// - Phrygian mode: [1, 2, 2, 2, 1, 2, 2]
 /// - Lydian mode: [2, 2, 2, 1, 2, 2, 1]
 /// - Mixolydian mode: [2, 2, 1, 2, 2, 1, 2]
+/// - Aeolian mode: [2, 1, 2, 2, 1, 2, 2]
 /// - Locrian mode: [1, 2, 2, 1, 2, 2, 2]
 ///
 /// ## Pentatonic scale
@@ -198,19 +206,28 @@ impl Scale {
 impl Scale {
     /// Gets the standard interval pattern of the scale
     fn get_intervals(scale_type: ScaleType) -> Result<Vec<Interval>, MusicError> {
+        const NATURE_MAJOR: [i8; 7] = [2, 2, 1, 2, 2, 2, 1];
+        fn shift_major(shift: i8) -> Vec<i8> {
+            let mut major = NATURE_MAJOR.to_vec();
+            major.rotate_left(shift as usize);
+            major
+        }
+
         match scale_type {
             // Natural scales
-            ScaleType::Major => parse_intervals(&[2, 2, 1, 2, 2, 2, 1]),
-            ScaleType::NaturalMinor => parse_intervals(&[2, 1, 2, 2, 1, 2, 2]),
+            ScaleType::Major => parse_intervals(&NATURE_MAJOR),
+            ScaleType::NaturalMinor => parse_intervals(&shift_major(6)),
             ScaleType::HarmonicMinor => parse_intervals(&[2, 1, 2, 2, 1, 3, 1]),
             ScaleType::MelodicMinor => parse_intervals(&[2, 1, 2, 2, 2, 2, 1]),
 
             // Mediaeval mode
-            ScaleType::Dorian => parse_intervals(&[2, 1, 2, 2, 2, 1, 2]),
-            ScaleType::Phrygian => parse_intervals(&[1, 2, 2, 2, 1, 2, 2]),
-            ScaleType::Lydian => parse_intervals(&[2, 2, 2, 1, 2, 2, 1]),
-            ScaleType::Mixolydian => parse_intervals(&[2, 2, 1, 2, 2, 1, 2]),
-            ScaleType::Locrian => parse_intervals(&[1, 2, 2, 1, 2, 2, 2]),
+            ScaleType::Ionian => parse_intervals(&shift_major(0)),
+            ScaleType::Dorian => parse_intervals(&shift_major(1)),
+            ScaleType::Phrygian => parse_intervals(&shift_major(2)),
+            ScaleType::Lydian => parse_intervals(&shift_major(3)),
+            ScaleType::Mixolydian => parse_intervals(&shift_major(4)),
+            ScaleType::Aeolian => parse_intervals(&shift_major(5)),
+            ScaleType::Locrian => parse_intervals(&shift_major(6)),
 
             // Pentatonic scale
             ScaleType::PentatonicMajor => parse_intervals(&[2, 2, 3, 2, 3]),
@@ -249,8 +266,8 @@ fn parse_intervals(semitones: &[i8]) -> Result<Vec<Interval>, MusicError> {
 
 #[cfg(test)]
 mod tests {
-    use crate::PitchClass;
     use super::*;
+    use crate::PitchClass;
 
     #[test]
     fn test_major_scale() {
