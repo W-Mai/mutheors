@@ -215,7 +215,7 @@ impl Scale {
 
         match scale_type {
             // Natural scales
-            ScaleType::Major => parse_intervals(&NATURE_MAJOR),
+            ScaleType::Major => parse_intervals(&shift_major(0)),
             ScaleType::NaturalMinor => parse_intervals(&shift_major(6)),
             ScaleType::HarmonicMinor => parse_intervals(&[2, 1, 2, 2, 1, 3, 1]),
             ScaleType::MelodicMinor => parse_intervals(&[2, 1, 2, 2, 2, 2, 1]),
