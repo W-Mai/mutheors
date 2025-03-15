@@ -1,6 +1,7 @@
 use crate::chord::Chord;
 use crate::{ChordQuality, Interval, Scale, ScaleType};
 use std::fmt::Display;
+use std::ops::{Div, Mul};
 
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
@@ -139,6 +140,22 @@ impl Tuning {
         let new_octave = self.octave + (new_semitones + 11) / 12 - 1;
         let class = PitchClass::from(((new_semitones + 11) % 12 + 1) as u8);
         Tuning::new(class, new_octave)
+    }
+}
+
+impl Mul<u8> for Tuning {
+    type Output = Tuning;
+
+    fn mul(self, rhs: u8) -> Self::Output {
+        self.add_interval(&Interval::from_semitones(12 * (rhs - 1) as i8).unwrap())
+    }
+}
+
+impl Div<u8> for Tuning {
+    type Output = Tuning;
+
+    fn div(self, rhs: u8) -> Self::Output {
+        self.add_interval(&Interval::from_semitones(-12 * (rhs - 1) as i8).unwrap())
     }
 }
 

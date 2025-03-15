@@ -190,7 +190,7 @@ mod tests {
             .with_tempo(Tempo::Vivace)
             .with_time_signature(4, DurationBase::Quarter);
 
-        let scale = Scale::new(tuning!(C 4), ScaleType::Hijaz).unwrap();
+        let scale = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
         let dg = score.duration_generator();
 
         (0..2).for_each(|_| {
@@ -235,7 +235,7 @@ mod tests {
                 m[0].chord(Chord::triad(tuning!(E 4), ChordQuality::Minor).unwrap());
                 m[1].note(beats!(dg;
                     1.0 => scale.degree(3).unwrap(),
-                    1.0 => scale.degree(5).unwrap(),
+                    1.0 => scale.degree(5).unwrap() / 2,
                     2.0 => scale.degree(1).unwrap(),
                 ));
             });

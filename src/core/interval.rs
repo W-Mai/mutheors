@@ -38,7 +38,7 @@ pub struct Interval {
 
 impl IntervalDegree {
     pub fn new(degree: u8) -> Result<Self, MusicError> {
-        if degree < 1 || degree > 13 {
+        if degree < 1 || degree > 127 {
             return Err(MusicError::InvalidIntervalDegree { degree });
         }
         Ok(Self(degree))
@@ -226,6 +226,7 @@ impl TryFrom<&str> for Interval {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::*;
 
     #[test]
     fn test_perfect_fifth() {
@@ -248,5 +249,16 @@ mod tests {
         assert_eq!(interval.semitones, 8); // Minor 6th
         assert_eq!(interval.quality, IntervalQuality::Minor);
         assert_eq!(interval.degree.0, 6);
+    }
+
+    #[test]
+    fn test_descending_interval() {
+        let interval = Interval::from_semitones(-24).unwrap();
+        assert_eq!(interval.quality, IntervalQuality::Perfect);
+
+        let tuning = tuning!(C 3);
+        let new_tuning = tuning.add_interval(&interval);
+        assert_eq!(new_tuning.class, PitchClass::C);
+        assert_eq!(new_tuning.octave, 1);
     }
 }
