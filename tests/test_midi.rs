@@ -8,7 +8,6 @@ macro_rules! degrees {
 mod tests {
     use mutheors::*;
     use rand::prelude::*;
-    use rand::rng;
 
     #[test]
     fn test_score_with_midi_player() {
@@ -179,6 +178,67 @@ mod tests {
                 1.0 => tuning!(G 3),
                 2.0 => tuning!(C 4),
             ));
+        });
+
+        let mut midi_player = MidiPlayer::new("Simple Compose");
+        midi_player.play_score(score).unwrap();
+    }
+
+    #[test]
+    fn test_two_tigers_with_diff_scale_type() {
+        let mut score = Score::<2>::new()
+            .with_tempo(Tempo::Vivace)
+            .with_time_signature(4, DurationBase::Quarter);
+
+        let scale = Scale::new(tuning!(C 4), ScaleType::Hijaz).unwrap();
+        let dg = score.duration_generator();
+
+        (0..2).for_each(|_| {
+            score.new_measures(|m| {
+                m[0].chord(Chord::triad(tuning!(C 4), ChordQuality::Major).unwrap());
+                m[1].note(beats!(dg;
+                    1.0 => scale.degree(1).unwrap(),
+                    1.0 => scale.degree(2).unwrap(),
+                    1.0 => scale.degree(3).unwrap(),
+                    1.0 => scale.degree(1).unwrap(),
+                ));
+            });
+        });
+
+        (0..2).for_each(|_| {
+            score.new_measures(|m| {
+                m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Major).unwrap());
+                m[1].note(beats!(dg;
+                    1.0 => scale.degree(3).unwrap(),
+                    1.0 => scale.degree(4).unwrap(),
+                    2.0 => scale.degree(5).unwrap(),
+                ));
+            });
+        });
+
+        (0..2).for_each(|_| {
+            score.new_measures(|m| {
+                m[0].chord(Chord::triad(tuning!(A 4), ChordQuality::Minor).unwrap());
+                m[1].note(beats!(dg;
+                    0.5 => scale.degree(5).unwrap(),
+                    0.5 => scale.degree(6).unwrap(),
+                    0.5 => scale.degree(5).unwrap(),
+                    0.5 => scale.degree(4).unwrap(),
+                    1.0 => scale.degree(3).unwrap(),
+                    1.0 => scale.degree(1).unwrap(),
+                ));
+            });
+        });
+
+        (0..2).for_each(|_| {
+            score.new_measures(|m| {
+                m[0].chord(Chord::triad(tuning!(E 4), ChordQuality::Minor).unwrap());
+                m[1].note(beats!(dg;
+                    1.0 => scale.degree(3).unwrap(),
+                    1.0 => scale.degree(5).unwrap(),
+                    2.0 => scale.degree(1).unwrap(),
+                ));
+            });
         });
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
