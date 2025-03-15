@@ -209,95 +209,48 @@ mod tests {
 
     #[test]
     fn test_common_chord() {
+        fn collect_class(chord: &Chord) -> Vec<PitchClass> {
+            chord.components().iter().map(|&c| c.class).collect()
+        }
+
         let pitch_class = PitchClass::C;
-        let notes: Vec<_> = pitch_class
-            .common_chord(1, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(1, 4));
         assert_eq!(notes, vec![PitchClass::C, PitchClass::E, PitchClass::G]);
-        let notes: Vec<_> = pitch_class
-            .common_chord(2, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
+
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(2, 4));
         assert_eq!(notes, vec![PitchClass::D, PitchClass::F, PitchClass::A]);
-        let notes: Vec<_> = pitch_class
-            .common_chord(3, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
+
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(3, 4));
         assert_eq!(notes, vec![PitchClass::E, PitchClass::G, PitchClass::B]);
-        let notes: Vec<_> = pitch_class
-            .common_chord(4, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
+
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(4, 4));
         assert_eq!(notes, vec![PitchClass::F, PitchClass::A, PitchClass::C]);
-        let notes: Vec<_> = pitch_class
-            .common_chord(5, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
+
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(5, 4));
         assert_eq!(notes, vec![PitchClass::G, PitchClass::B, PitchClass::D]);
-        let notes: Vec<_> = pitch_class
-            .common_chord(6, 2)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
+
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(6, 2));
         assert_eq!(notes, vec![PitchClass::A, PitchClass::C, PitchClass::E]);
 
         let pitch_class = PitchClass::D;
-        let notes: Vec<_> = pitch_class
-            .common_chord(1, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(1, 4));
         assert_eq!(
             notes,
             vec![PitchClass::D, PitchClass::FSharpOrGFlat, PitchClass::A]
         );
-        let notes: Vec<_> = pitch_class
-            .common_chord(2, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(2, 4));
         assert_eq!(notes, vec![PitchClass::E, PitchClass::G, PitchClass::B]);
-        let notes: Vec<_> = pitch_class
-            .common_chord(3, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
-        assert_eq!(notes, vec![PitchClass::F, PitchClass::A, PitchClass::C]);
-        let notes: Vec<_> = pitch_class
-            .common_chord(4, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
+
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(3, 4));
+        assert_eq!(notes, vec![PitchClass::FSharpOrGFlat, PitchClass::A, PitchClass::CSharpOrDFlat]);
+
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(4, 4));
         assert_eq!(notes, vec![PitchClass::G, PitchClass::B, PitchClass::D]);
-        let notes: Vec<_> = pitch_class
-            .common_chord(5, 4)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
-        assert_eq!(notes, vec![PitchClass::A, PitchClass::C, PitchClass::E]);
-        let notes: Vec<_> = pitch_class
-            .common_chord(6, 2)
-            .components()
-            .iter()
-            .map(|&c| c.class)
-            .collect();
-        assert_eq!(notes, vec![PitchClass::B, PitchClass::D, PitchClass::F]);
+
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(5, 4));
+        assert_eq!(notes, vec![PitchClass::A, PitchClass::CSharpOrDFlat, PitchClass::E]);
+
+        let notes: Vec<_> = collect_class(&pitch_class.common_chord(6, 2));
+        assert_eq!(notes, vec![PitchClass::B, PitchClass::D, PitchClass::FSharpOrGFlat]);
     }
 }
