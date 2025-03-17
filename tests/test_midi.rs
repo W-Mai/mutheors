@@ -190,12 +190,12 @@ mod tests {
             .with_tempo(Tempo::Vivace)
             .with_time_signature(4, DurationBase::Quarter);
 
-        let scale = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
+        let scale = Scale::new(tuning!(C 4), ScaleType::InSen).unwrap();
         let dg = score.duration_generator();
 
         (0..2).for_each(|_| {
             score.new_measures(|m| {
-                m[0].chord(Chord::triad(tuning!(C 4), ChordQuality::Major).unwrap());
+                m[0].chord(Chord::seventh(tuning!(C 4), ChordQuality::Dominant7).unwrap());
                 m[1].note(beats!(dg;
                     1.0 => scale.degree(1).unwrap(),
                     1.0 => scale.degree(2).unwrap(),
@@ -207,7 +207,7 @@ mod tests {
 
         (0..2).for_each(|_| {
             score.new_measures(|m| {
-                m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Major).unwrap());
+                m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Diminished).unwrap());
                 m[1].note(beats!(dg;
                     1.0 => scale.degree(3).unwrap(),
                     1.0 => scale.degree(4).unwrap(),
@@ -218,7 +218,7 @@ mod tests {
 
         (0..2).for_each(|_| {
             score.new_measures(|m| {
-                m[0].chord(Chord::triad(tuning!(A 4), ChordQuality::Minor).unwrap());
+                m[0].chord(Chord::seventh(tuning!(A 4), ChordQuality::FullyDiminished).unwrap());
                 m[1].note(beats!(dg;
                     0.5 => scale.degree(5).unwrap(),
                     0.5 => scale.degree(6).unwrap(),
@@ -232,7 +232,7 @@ mod tests {
 
         (0..2).for_each(|_| {
             score.new_measures(|m| {
-                m[0].chord(Chord::triad(tuning!(E 4), ChordQuality::Minor).unwrap());
+                m[0].chord(Chord::triad(tuning!(E 4), ChordQuality::Major).unwrap());
                 m[1].note(beats!(dg;
                     1.0 => scale.degree(3).unwrap(),
                     1.0 => scale.degree(5).unwrap() / 2,
