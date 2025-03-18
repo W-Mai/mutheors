@@ -244,4 +244,33 @@ mod tests {
         let mut midi_player = MidiPlayer::new("Simple Compose");
         midi_player.play_score(score).unwrap();
     }
+
+    #[test]
+    fn test_degrees() {
+        let mut score = Score::<1>::new()
+            .with_tempo(Tempo::Vivace)
+            .with_time_signature(10, DurationBase::Quarter);
+
+        let scale = Scale::new(tuning!(C 4), ScaleType::PentatonicMajor).unwrap();
+        let dg = score.duration_generator();
+
+        score.new_measures(|m| {
+            m[0].note(beats!(dg;
+                1.0 => scale.degree(1).unwrap(),
+                1.0 => scale.degree(2).unwrap(),
+                1.0 => scale.degree(3).unwrap(),
+                1.0 => scale.degree(4).unwrap(),
+                1.0 => scale.degree(5).unwrap(),
+                1.0 => scale.degree(6).unwrap(),
+                1.0 => scale.degree(7).unwrap(),
+                1.0 => scale.degree(8).unwrap(),
+                1.0 => scale.degree(9).unwrap(),
+                1.0 => scale.degree(10).unwrap(),
+            ));
+        });
+
+        let mut midi_player = MidiPlayer::new("Simple Compose");
+        midi_player.play_score(score).unwrap();
+        midi_player.close();
+    }
 }
