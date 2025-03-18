@@ -143,7 +143,7 @@ impl Scale {
         let mut current = self.root.clone();
         let mut tunings = vec![current.clone()];
 
-        for octave in 0..=octaves {
+        for _ in 0..=octaves {
             for interval in self.intervals.iter() {
                 current = current.add_interval(interval);
                 tunings.push(current.clone());
@@ -172,7 +172,6 @@ impl Scale {
             return Err(MusicError::InvalidScaleDegree(degree));
         }
         let octave = (degree - 1) / self.intervals.len() as u8;
-        let idx = (degree - 1) as usize % self.intervals.len();
         // TODO: Dealing with a pentatonic scale where there are only five notes but the scales are not continuous
         let tunings = self.generate_tunings(octave + 1)?;
         tunings
@@ -199,6 +198,14 @@ impl Scale {
             let mut major = NATURE_MAJOR.to_vec();
             major.rotate_left(shift as usize);
             major
+        }
+
+        /// Converts semitones to a list of intervals
+        fn parse_intervals(semitones: &[i8]) -> Result<Vec<Interval>, MusicError> {
+            semitones
+                .iter()
+                .map(|&s| Interval::from_semitones(s))
+                .collect()
         }
 
         match scale_type {
@@ -242,14 +249,6 @@ impl Scale {
             }
         }
     }
-}
-
-/// Converts semitones to a list of intervals
-fn parse_intervals(semitones: &[i8]) -> Result<Vec<Interval>, MusicError> {
-    semitones
-        .iter()
-        .map(|&s| Interval::from_semitones(s))
-        .collect()
 }
 
 #[cfg(test)]
