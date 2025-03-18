@@ -159,13 +159,13 @@ impl Chord {
 
         // Adding basic intervals
         for interval in &self.intervals {
-            let current = self.root.add_interval(interval);
+            let current = self.root.add_interval(interval).unwrap();
             notes.push(current);
         }
 
         // Adding Extended Tones
         for ext in &self.extensions {
-            let current = self.root.add_interval(ext);
+            let current = self.root.add_interval(ext).unwrap();
             notes.push(current);
         }
 

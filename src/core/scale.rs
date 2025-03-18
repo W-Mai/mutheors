@@ -140,7 +140,7 @@ impl Scale {
 
         for _ in 0..=octaves {
             for interval in intervals.iter() {
-                current = current.add_interval(interval);
+                current = current.add_interval(interval)?;
                 tunings.push(current.clone());
             }
         }
@@ -295,9 +295,12 @@ impl Mul<u8> for Scale {
 
     fn mul(self, rhs: u8) -> Self::Output {
         Self {
-            root: self.root.add_interval(
-                &Interval::from_semitones(((rhs - 1) * self.semitone_count()) as i8).unwrap(),
-            ),
+            root: self
+                .root
+                .add_interval(
+                    &Interval::from_semitones(((rhs - 1) * self.semitone_count()) as i8).unwrap(),
+                )
+                .unwrap(),
             ..self
         }
     }
@@ -308,9 +311,13 @@ impl Div<u8> for Scale {
 
     fn div(self, rhs: u8) -> Self::Output {
         Self {
-            root: self.root.add_interval(
-                &Interval::from_semitones(-(((rhs - 1) * self.semitone_count()) as i8)).unwrap(),
-            ),
+            root: self
+                .root
+                .add_interval(
+                    &Interval::from_semitones(-(((rhs - 1) * self.semitone_count()) as i8))
+                        .unwrap(),
+                )
+                .unwrap(),
             ..self
         }
     }

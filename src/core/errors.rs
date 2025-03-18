@@ -38,4 +38,9 @@ pub enum MusicError {
 
     #[error("Invalid scale degree {0}")]
     InvalidScaleDegree(u8),
+
+    #[error(
+        "Invalid Octave {octave}, IT MUST BE IN [0, 10]. Because Humans can only hear 10 octaves."
+    )]
+    InvalidOctave { octave: i8 },
 }

@@ -252,13 +252,15 @@ mod tests {
     }
 
     #[test]
-    fn test_descending_interval() {
-        let interval = Interval::from_semitones(-24).unwrap();
+    fn test_descending_interval() -> Result<(), MusicError> {
+        let interval = Interval::from_semitones(-24)?;
         assert_eq!(interval.quality, IntervalQuality::Perfect);
 
         let tuning = tuning!(C 3);
-        let new_tuning = tuning.add_interval(&interval);
+        let new_tuning = tuning.add_interval(&interval)?;
         assert_eq!(new_tuning.class, PitchClass::C);
         assert_eq!(new_tuning.octave, 1);
+
+        Ok(())
     }
 }
