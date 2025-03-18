@@ -37,7 +37,7 @@
 use crate::interval::Interval;
 use crate::tuning::Tuning;
 use crate::MusicError;
-use std::ops::{Add};
+use std::ops::Add;
 
 /// Scale type classification
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -124,28 +124,22 @@ pub enum ScaleType {
 pub struct Scale {
     root: Tuning,
     scale_type: ScaleType,
-    intervals: Vec<Interval>, // Scale intervals
 }
 
 impl Scale {
     /// Create a new scale
     pub fn new(root: Tuning, scale_type: ScaleType) -> Result<Self, MusicError> {
-        let intervals = Self::get_intervals(scale_type)?;
-
-        Ok(Self {
-            root,
-            scale_type,
-            intervals,
-        })
+        Ok(Self { root, scale_type })
     }
 
     /// Generating note sequence
     pub fn generate_tunings(&self, octaves: u8) -> Result<Vec<Tuning>, MusicError> {
         let mut current = self.root.clone();
         let mut tunings = vec![current.clone()];
+        let intervals = Self::get_intervals(self.scale_type)?;
 
         for _ in 0..=octaves {
-            for interval in self.intervals.iter() {
+            for interval in intervals.iter() {
                 current = current.add_interval(interval);
                 tunings.push(current.clone());
             }
@@ -172,7 +166,8 @@ impl Scale {
         if degree < 1 {
             return Err(MusicError::InvalidScaleDegree(degree));
         }
-        let octave = (degree - 1) / self.intervals.len() as u8;
+        let intervals = Self::get_intervals(self.scale_type)?;
+        let octave = (degree - 1) / intervals.len() as u8;
         // TODO: Dealing with a pentatonic scale where there are only five notes but the scales are not continuous
         let tunings = self.generate_tunings(octave + 1)?;
         tunings
