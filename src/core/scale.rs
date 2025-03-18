@@ -120,7 +120,7 @@ pub enum ScaleType {
 }
 
 /// Scale System
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Scale {
     root: Tuning,
     scale_type: ScaleType,
@@ -247,7 +247,7 @@ impl Scale {
     }
 }
 
-impl Add<u8> for &Scale {
+impl Add<u8> for Scale {
     type Output = Tuning;
 
     fn add(self, rhs: u8) -> Self::Output {
