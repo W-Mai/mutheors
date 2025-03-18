@@ -124,54 +124,48 @@ pub struct Scale {
     root: Tuning,
     scale_type: ScaleType,
     intervals: Vec<Interval>, // Scale intervals
-    notes: Vec<Tuning>,       // Cache the generated notes
 }
 
 impl Scale {
     /// Create a new scale
     pub fn new(root: Tuning, scale_type: ScaleType) -> Result<Self, MusicError> {
         let intervals = Self::get_intervals(scale_type)?;
-        let notes = Self::generate_notes(&root, &intervals, 3)?;
 
         Ok(Self {
             root,
             scale_type,
             intervals,
-            notes,
         })
     }
 
     /// Generating note sequence
-    fn generate_notes(
-        root: &Tuning,
-        intervals: &[Interval],
-        octaves: u8,
-    ) -> Result<Vec<Tuning>, MusicError> {
-        let mut current = root.clone();
-        let mut notes = vec![current.clone()];
+    pub fn generate_tunings(&self, octaves: u8) -> Result<Vec<Tuning>, MusicError> {
+        let mut current = self.root.clone();
+        let mut tunings = vec![current.clone()];
 
         // Generate basic scales
-        for interval in intervals {
+        for interval in self.intervals.iter() {
             current = current.add_interval(interval);
-            notes.push(current.clone());
+            tunings.push(current.clone());
         }
 
         // Extended octave
-        let base_len = notes.len();
+        let base_len = tunings.len();
         for octave in 1..=octaves {
             for i in 0..base_len {
-                let mut note = notes[i].clone();
-                note.octave += octave as i8;
-                notes.push(note);
+                let mut tuning = tunings[i].clone();
+                tuning.octave += octave as i8;
+                tunings.push(tuning);
             }
         }
 
-        Ok(notes)
+        Ok(tunings)
     }
 
     /// Determining whether a pitch belongs to a scale
     pub fn contains(&self, tuning: &Tuning) -> bool {
-        self.notes.iter().any(|n| n.class == tuning.class)
+        let tunings = self.generate_tunings(1).unwrap();
+        tunings.iter().any(|n| n.class == tuning.class)
     }
 
     /// Getting the Scale Degree
@@ -186,10 +180,12 @@ impl Scale {
         if degree < 1 {
             return Err(MusicError::InvalidScaleDegree(degree));
         }
+        let octave = (degree - 1) / self.intervals.len() as u8;
         let idx = (degree - 1) as usize % self.intervals.len();
         // TODO: Dealing with a pentatonic scale where there are only five notes but the scales are not continuous
-        self.notes
-            .get(idx)
+        let tunings = self.generate_tunings(octave + 1)?;
+        tunings
+            .get(degree as usize)
             .cloned()
             .ok_or(MusicError::InvalidScaleDegree(degree))
     }
