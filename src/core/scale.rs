@@ -286,6 +286,12 @@ impl Div<u8> for Scale {
     }
 }
 
+impl From<Scale> for Tuning {
+    fn from(scale: Scale) -> Self {
+        scale.root
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

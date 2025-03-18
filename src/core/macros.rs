@@ -96,7 +96,8 @@ macro_rules! beats {
         let mappings = [$(($bt, $tuning)),+];
 
         mappings.iter().map(|(beat, tune)| {
-            $dg.beat(*beat).with_note((*tune).into())
-        }).collect::<Vec<_>>()
+            let tune: Tuning = (*tune).into();
+            $dg.beat(*beat).with_note(tune.into())
+        }).collect::<Vec<Note>>()
     }};
 }
