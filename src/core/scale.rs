@@ -37,6 +37,7 @@
 use crate::interval::Interval;
 use crate::tuning::Tuning;
 use crate::MusicError;
+use std::ops::{Add};
 
 /// Scale type classification
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -248,6 +249,14 @@ impl Scale {
                 Ok(semitones)
             }
         }
+    }
+}
+
+impl Add<u8> for &Scale {
+    type Output = Tuning;
+
+    fn add(self, rhs: u8) -> Self::Output {
+        self.degree(rhs).unwrap()
     }
 }
 

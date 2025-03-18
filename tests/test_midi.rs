@@ -7,7 +7,6 @@ macro_rules! degrees {
 #[cfg(all(test))]
 mod tests {
     use mutheors::*;
-    use rand::prelude::*;
 
     #[test]
     fn test_score_with_midi_player() {
@@ -251,21 +250,21 @@ mod tests {
             .with_tempo(Tempo::Vivace)
             .with_time_signature(10, DurationBase::Quarter);
 
-        let scale = Scale::new(tuning!(C 4), ScaleType::PentatonicMajor).unwrap();
+        let s = Scale::new(tuning!(C 4), ScaleType::PentatonicMajor).unwrap();
         let dg = score.duration_generator();
 
         score.new_measures(|m| {
             m[0].note(beats!(dg;
-                1.0 => scale.degree(1).unwrap(),
-                1.0 => scale.degree(2).unwrap(),
-                1.0 => scale.degree(3).unwrap(),
-                1.0 => scale.degree(4).unwrap(),
-                1.0 => scale.degree(5).unwrap(),
-                1.0 => scale.degree(6).unwrap(),
-                1.0 => scale.degree(7).unwrap(),
-                1.0 => scale.degree(8).unwrap(),
-                1.0 => scale.degree(9).unwrap(),
-                1.0 => scale.degree(10).unwrap(),
+                1.0 => &s + 1,
+                1.0 => &s + 2,
+                1.0 => &s + 3,
+                1.0 => &s + 4,
+                1.0 => &s + 5,
+                1.0 => &s + 6,
+                1.0 => &s + 7,
+                1.0 => &s + 8,
+                1.0 => &s + 9,
+                1.0 => &s + 10,
             ));
         });
 
