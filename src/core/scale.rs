@@ -1,5 +1,38 @@
 //! Scale System Module
 //! Provides core functions such as scale generation, modal analysis, scale and chord derivation, and more!
+//!
+//! # Interval pattern library
+//! ## Standard scale patterns
+//! - Major scale: [2, 2, 1, 2, 2, 2, 1]
+//! - Natural minor scale: [2, 1, 2, 2, 1, 2, 2]
+//! - Harmonic minor scale: [2, 1, 2, 2, 1, 3, 1]
+//! - Melodic minor scale: [2, 1, 2, 2, 2, 2, 1]
+//!
+//! ## Mediaeval mode
+//! - Ionian mode: [2, 2, 1, 2, 2, 2, 1]
+//! - Dorian mode: [2, 1, 2, 2, 2, 1, 2]      Ionian mode shifted by 1
+//! - Phrygian mode: [1, 2, 2, 2, 1, 2, 2]    Ionian mode shifted by 2
+//! - Lydian mode: [2, 2, 2, 1, 2, 2, 1]      Ionian mode shifted by 3
+//! - Mixolydian mode: [2, 2, 1, 2, 2, 1, 2]  Ionian mode shifted by 4
+//! - Aeolian mode: [2, 1, 2, 2, 1, 2, 2]     Ionian mode shifted by 5
+//! - Locrian mode: [1, 2, 2, 1, 2, 2, 2]     Ionian mode shifted by 6
+//!
+//! ## Pentatonic scale
+//! - Major pentatonic scale: [2, 2, 3, 2, 3]
+//! - Minor pentatonic scale: [3, 2, 2, 3, 2]
+//! - Blues scale: [3, 2, 1, 1, 3, 2]
+//!
+//! ## Special scales
+//! - Whole tone scale: [2, 2, 2, 2, 2, 2]
+//! - Octatonic scale: [2, 1, 2, 1, 2, 1, 2, 1]
+//! - Chromatic scale: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+//! - Bebop dominant scale: [2, 2, 1, 2, 2, 1, 1, 2]
+//!
+//! ## National scales
+//! - Arabian Hijaz scale: [1, 3, 1, 2, 1, 3, 1]
+//! - Japanese Hirajoshi scale: [2, 1, 4, 1, 4]
+//! - Japanese InSen scale: [1, 4, 2, 3, 2]
+//! - Custom scale: [2, 1, 3, 1, 4]
 
 use crate::interval::Interval;
 use crate::tuning::Tuning;
@@ -171,38 +204,6 @@ impl Scale {
     // pub fn modal_tonic(&self) -> Option<Tuning> {}
 }
 
-/// # Interval pattern library
-/// ## Standard scale patterns
-/// - Major scale: [2, 2, 1, 2, 2, 2, 1]
-/// - Natural minor scale: [2, 1, 2, 2, 1, 2, 2]
-/// - Harmonic minor scale: [2, 1, 2, 2, 1, 3, 1]
-/// - Melodic minor scale: [2, 1, 2, 2, 2, 2, 1]
-///
-/// ## Mediaeval mode
-/// - Ionian mode: [2, 2, 1, 2, 2, 2, 1]
-/// - Dorian mode: [2, 1, 2, 2, 2, 1, 2]
-/// - Phrygian mode: [1, 2, 2, 2, 1, 2, 2]
-/// - Lydian mode: [2, 2, 2, 1, 2, 2, 1]
-/// - Mixolydian mode: [2, 2, 1, 2, 2, 1, 2]
-/// - Aeolian mode: [2, 1, 2, 2, 1, 2, 2]
-/// - Locrian mode: [1, 2, 2, 1, 2, 2, 2]
-///
-/// ## Pentatonic scale
-/// - Major pentatonic scale: [2, 2, 3, 2, 3]
-/// - Minor pentatonic scale: [3, 2, 2, 3, 2]
-/// - Blues scale: [3, 2, 1, 1, 3, 2]
-///
-/// ## Special scales
-/// - Whole tone scale: [2, 2, 2, 2, 2, 2]
-/// - Octatonic scale: [2, 1, 2, 1, 2, 1, 2, 1]
-/// - Chromatic scale: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-/// - Bebop dominant scale: [2, 2, 1, 2, 2, 1, 1, 2]
-///
-/// ## National scales
-/// - Arabian Hijaz scale: [1, 3, 1, 2, 1, 3, 1]
-/// - Japanese Hirajoshi scale: [2, 1, 4, 1, 4]
-/// - Japanese InSen scale: [1, 4, 2, 3, 2]
-/// - Custom scale: [2, 1, 3, 1, 4]
 impl Scale {
     /// Gets the standard interval pattern of the scale
     fn get_intervals(scale_type: ScaleType) -> Result<Vec<Interval>, MusicError> {
