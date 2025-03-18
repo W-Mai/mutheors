@@ -1,3 +1,5 @@
+#![feature(unboxed_closures, fn_traits)]
+
 //! # MuTheoRS
 //! > This crate provides a set of tools for working with music theory concepts,
 //!

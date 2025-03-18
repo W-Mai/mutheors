@@ -257,6 +257,14 @@ impl Scale {
     }
 }
 
+impl FnOnce<(u8, )> for Scale {
+    type Output = Tuning;
+
+    extern "rust-call" fn call_once(self, args: (u8,)) -> Self::Output {
+        self.degree(args.0).unwrap()
+    }
+}
+
 impl Add<u8> for Scale {
     type Output = Scale;
 
@@ -276,9 +284,7 @@ impl Sub<u8> for Scale {
         let octave = rhs / interval_count + 2;
         let scale = self / octave;
         Scale {
-            root: scale
-                .degree(interval_count - rhs % interval_count)
-                .unwrap(),
+            root: scale.degree(interval_count - rhs % interval_count).unwrap(),
             ..scale
         }
     }
