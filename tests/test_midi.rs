@@ -1,3 +1,5 @@
+#![feature(iter_array_chunks)]
+
 macro_rules! degrees {
     ($($degree:expr)*) => {
         [$($degree),*]
@@ -270,6 +272,31 @@ mod tests {
                 1.0 => s + 6,
             ));
         });
+
+        let mut midi_player = MidiPlayer::new("Simple Compose");
+        midi_player.play_score(score).unwrap();
+        midi_player.close();
+    }
+
+    #[test]
+    fn test_degree_scale_iter() {
+        let mut score = Score::<1>::new()
+            .with_tempo(Tempo::Presto)
+            .with_time_signature(4, DurationBase::Sixteenth);
+
+        let s = Scale::new(tuning!(C 0), ScaleType::Hirajoshi).unwrap();
+        let dg = score.duration_generator();
+
+        for chunk in s.into_iter().array_chunks::<4>() {
+            score.new_measures(|m| {
+                m[0].note(beats!(dg;
+                    1.0 => chunk[0],
+                    1.0 => chunk[1],
+                    1.0 => chunk[2],
+                    1.0 => chunk[3],
+                ));
+            });
+        }
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
         midi_player.play_score(score).unwrap();

@@ -138,7 +138,7 @@ impl Tuning {
     pub fn add_interval(&self, interval: &Interval) -> Result<Self, MusicError> {
         let new_semitones = interval.semitones() + self.class as i8;
         let new_octave = self.octave + (new_semitones + 11) / 12 - 1;
-        if !(0..=10).contains(&new_octave) {
+        if !(0..=11).contains(&new_octave) {
             Err(MusicError::InvalidOctave { octave: new_octave })
         } else {
             let class = PitchClass::from(((new_semitones + 11) % 12 + 1) as u8);
