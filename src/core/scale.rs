@@ -257,7 +257,7 @@ impl Scale {
     }
 }
 
-impl FnOnce<(u8, )> for Scale {
+impl FnOnce<(u8,)> for Scale {
     type Output = Tuning;
 
     extern "rust-call" fn call_once(self, args: (u8,)) -> Self::Output {
@@ -322,10 +322,37 @@ impl From<Scale> for Tuning {
     }
 }
 
+pub struct IntoIter {
+    scale: Scale,
+    current_degree: u8,
+}
+
+impl IntoIterator for Scale {
+    type Item = Tuning;
+    type IntoIter = IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter {
+            scale: self,
+            current_degree: 1,
+        }
+    }
+}
+
+impl Iterator for IntoIter {
+    type Item = Tuning;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let tuning = self.scale.degree(self.current_degree).ok();
+        self.current_degree += 1;
+        tuning
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::PitchClass;
+    use crate::*;
 
     #[test]
     fn test_major_scale() {
@@ -353,5 +380,14 @@ mod tests {
         let scale = a.scale(ScaleType::Blues);
         assert!(scale.contains(&Tuning::new(PitchClass::C, 5)));
         assert!(scale.contains(&Tuning::new(PitchClass::DSharpOrEFlat, 5)));
+    }
+
+    #[test]
+    fn test_scale_iter() {
+        let s = Scale::new(tuning!(C 4), ScaleType::PentatonicMajor).unwrap();
+
+        for t in s {
+            println!("{:?}", t);
+        }
     }
 }
