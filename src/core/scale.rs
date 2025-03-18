@@ -143,19 +143,10 @@ impl Scale {
         let mut current = self.root.clone();
         let mut tunings = vec![current.clone()];
 
-        // Generate basic scales
-        for interval in self.intervals.iter() {
-            current = current.add_interval(interval);
-            tunings.push(current.clone());
-        }
-
-        // Extended octave
-        let base_len = tunings.len();
-        for octave in 1..=octaves {
-            for i in 0..base_len {
-                let mut tuning = tunings[i].clone();
-                tuning.octave += octave as i8;
-                tunings.push(tuning);
+        for octave in 0..=octaves {
+            for interval in self.intervals.iter() {
+                current = current.add_interval(interval);
+                tunings.push(current.clone());
             }
         }
 
@@ -270,8 +261,9 @@ mod tests {
     fn test_major_scale() {
         let c = Tuning::new(PitchClass::G, 4);
         let scale = c.scale(ScaleType::Major);
+        let tunings = scale.generate_tunings(0).unwrap();
         assert_eq!(
-            scale.notes[0..7],
+            tunings,
             vec![
                 Tuning::new(PitchClass::G, 4),
                 Tuning::new(PitchClass::A, 4),

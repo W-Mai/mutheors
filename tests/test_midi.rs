@@ -190,60 +190,56 @@ mod tests {
             .with_tempo(Tempo::Vivace)
             .with_time_signature(4, DurationBase::Quarter);
 
-        let scale = Scale::new(tuning!(C 4), ScaleType::InSen).unwrap();
+        let scale = Scale::new(tuning!(C 4), ScaleType::Hirajoshi).unwrap();
         let dg = score.duration_generator();
 
-        (0..1).for_each(|_| {
+        (0..2).for_each(|_| {
             score.new_measures(|m| {
                 m[0].chord(Chord::seventh(tuning!(C 4), ChordQuality::Dominant7).unwrap());
                 m[1].note(beats!(dg;
                     1.0 => scale.degree(1).unwrap(),
                     1.0 => scale.degree(2).unwrap(),
                     1.0 => scale.degree(3).unwrap(),
-                    1.0 => scale.degree(4).unwrap(),
-                    1.0 => scale.degree(5).unwrap(),
-                    1.0 => scale.degree(6).unwrap(),
-                    1.0 => scale.degree(7).unwrap(),
+                    1.0 => scale.degree(1).unwrap(),
                 ));
             });
         });
-        
-        // 
-        // (0..2).for_each(|_| {
-        //     score.new_measures(|m| {
-        //         m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Diminished).unwrap());
-        //         m[1].note(beats!(dg;
-        //             1.0 => scale.degree(3).unwrap(),
-        //             1.0 => scale.degree(4).unwrap(),
-        //             2.0 => scale.degree(5).unwrap(),
-        //         ));
-        //     });
-        // });
-        // 
-        // (0..2).for_each(|_| {
-        //     score.new_measures(|m| {
-        //         m[0].chord(Chord::seventh(tuning!(A 4), ChordQuality::FullyDiminished).unwrap());
-        //         m[1].note(beats!(dg;
-        //             0.5 => scale.degree(5).unwrap(),
-        //             0.5 => scale.degree(6).unwrap(),
-        //             0.5 => scale.degree(5).unwrap(),
-        //             0.5 => scale.degree(4).unwrap(),
-        //             1.0 => scale.degree(3).unwrap(),
-        //             1.0 => scale.degree(1).unwrap(),
-        //         ));
-        //     });
-        // });
-        // 
-        // (0..2).for_each(|_| {
-        //     score.new_measures(|m| {
-        //         m[0].chord(Chord::triad(tuning!(E 4), ChordQuality::Major).unwrap());
-        //         m[1].note(beats!(dg;
-        //             1.0 => scale.degree(3).unwrap(),
-        //             1.0 => scale.degree(5).unwrap() / 2,
-        //             2.0 => scale.degree(1).unwrap(),
-        //         ));
-        //     });
-        // });
+
+        (0..2).for_each(|_| {
+            score.new_measures(|m| {
+                m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Diminished).unwrap());
+                m[1].note(beats!(dg;
+                    1.0 => scale.degree(3).unwrap(),
+                    1.0 => scale.degree(4).unwrap(),
+                    2.0 => scale.degree(5).unwrap(),
+                ));
+            });
+        });
+
+        (0..2).for_each(|_| {
+            score.new_measures(|m| {
+                m[0].chord(Chord::seventh(tuning!(A 4), ChordQuality::FullyDiminished).unwrap());
+                m[1].note(beats!(dg;
+                    0.5 => scale.degree(5).unwrap(),
+                    0.5 => scale.degree(6).unwrap(),
+                    0.5 => scale.degree(5).unwrap(),
+                    0.5 => scale.degree(4).unwrap(),
+                    1.0 => scale.degree(3).unwrap(),
+                    1.0 => scale.degree(1).unwrap(),
+                ));
+            });
+        });
+
+        (0..2).for_each(|_| {
+            score.new_measures(|m| {
+                m[0].chord(Chord::triad(tuning!(E 4), ChordQuality::Major).unwrap());
+                m[1].note(beats!(dg;
+                    1.0 => scale.degree(3).unwrap(),
+                    1.0 => scale.degree(5).unwrap() / 2,
+                    2.0 => scale.degree(1).unwrap(),
+                ));
+            });
+        });
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
         midi_player.play_score(score).unwrap();
