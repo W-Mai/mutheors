@@ -171,7 +171,7 @@ impl Scale {
         // TODO: Dealing with a pentatonic scale where there are only five notes but the scales are not continuous
         let tunings = self.generate_tunings(octave + 1)?;
         tunings
-            .get(degree as usize)
+            .get(degree as usize - 1)
             .cloned()
             .ok_or(MusicError::InvalidScaleDegree(degree))
     }
