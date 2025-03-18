@@ -270,7 +270,7 @@ impl Add<u8> for Scale {
 
     fn add(self, rhs: u8) -> Self::Output {
         Self {
-            root: self.degree(rhs).unwrap(),
+            root: self.degree(rhs + 1).unwrap(),
             ..self
         }
     }
