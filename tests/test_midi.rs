@@ -248,23 +248,26 @@ mod tests {
     fn test_degrees() {
         let mut score = Score::<1>::new()
             .with_tempo(Tempo::Vivace)
-            .with_time_signature(10, DurationBase::Quarter);
+            .with_time_signature(14, DurationBase::Quarter);
 
         let s = Scale::new(tuning!(C 4), ScaleType::PentatonicMajor).unwrap();
         let dg = score.duration_generator();
 
         score.new_measures(|m| {
             m[0].note(beats!(dg;
+                1.0 => s - 6,
+                1.0 => s - 5,
+                1.0 => s - 4,
+                1.0 => s - 3,
+                1.0 => s - 2,
+                1.0 => s - 1,
                 1.0 => s,
-                1.0 => s,
-                1.0 => s,
-                1.0 => s,
-                1.0 => s,
-                1.0 => s,
-                1.0 => s,
-                1.0 => s,
-                1.0 => s,
-                1.0 => s,
+                1.0 => s + 1,
+                1.0 => s + 2,
+                1.0 => s + 3,
+                1.0 => s + 4,
+                1.0 => s + 5,
+                1.0 => s + 6,
             ));
         });
 

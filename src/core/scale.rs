@@ -37,7 +37,7 @@
 use crate::interval::Interval;
 use crate::tuning::Tuning;
 use crate::MusicError;
-use std::ops::{Add, Div, Mul};
+use std::ops::{Add, Div, Mul, Sub};
 
 /// Scale type classification
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -176,6 +176,11 @@ impl Scale {
             .ok_or(MusicError::InvalidScaleDegree(degree))
     }
 
+    pub fn interval_count(&self) -> u8 {
+        let intervals = Self::get_intervals(self.scale_type).unwrap();
+        intervals.len() as u8
+    }
+
     pub fn semitone_count(&self) -> u8 {
         let intervals = Self::get_intervals(self.scale_type).unwrap();
         intervals.iter().map(|i| i.semitones()).sum::<i8>() as u8
@@ -253,10 +258,29 @@ impl Scale {
 }
 
 impl Add<u8> for Scale {
-    type Output = Tuning;
+    type Output = Scale;
 
     fn add(self, rhs: u8) -> Self::Output {
-        self.degree(rhs).unwrap()
+        Self {
+            root: self.degree(rhs).unwrap(),
+            ..self
+        }
+    }
+}
+
+impl Sub<u8> for Scale {
+    type Output = Scale;
+
+    fn sub(self, rhs: u8) -> Self::Output {
+        let interval_count = self.interval_count();
+        let octave = rhs / interval_count + 2;
+        let scale = self / octave;
+        Scale {
+            root: scale
+                .degree(interval_count - rhs % interval_count)
+                .unwrap(),
+            ..scale
+        }
     }
 }
 
