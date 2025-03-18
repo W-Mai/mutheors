@@ -272,6 +272,7 @@ mod tests {
                 Tuning::new(PitchClass::D, 5),
                 Tuning::new(PitchClass::E, 5),
                 Tuning::new(PitchClass::FSharpOrGFlat, 5),
+                Tuning::new(PitchClass::G, 5),
             ]
         );
     }
