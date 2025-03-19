@@ -45,7 +45,7 @@ mod tests {
         });
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(score).unwrap();
+        midi_player.play_score(&score).unwrap();
     }
 
     #[test]
@@ -67,7 +67,7 @@ mod tests {
         });
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(score).unwrap();
+        midi_player.play_score(&score).unwrap();
         midi_player.close();
     }
 
@@ -88,7 +88,7 @@ mod tests {
         });
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(score).unwrap();
+        midi_player.play_score(&score).unwrap();
 
         midi_player.close();
     }
@@ -182,7 +182,7 @@ mod tests {
         });
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(score).unwrap();
+        midi_player.play_score(&score).unwrap();
     }
 
     #[test]
@@ -243,7 +243,7 @@ mod tests {
         });
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(score).unwrap();
+        midi_player.play_score(&score).unwrap();
     }
 
     #[test]
@@ -274,7 +274,7 @@ mod tests {
         });
 
         let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(score).unwrap();
+        midi_player.play_score(&score).unwrap();
         midi_player.close();
     }
 
@@ -310,7 +310,7 @@ mod tests {
             });
         }
         let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(score).unwrap();
+        midi_player.play_score(&score).unwrap();
         midi_player.close();
     }
 }

@@ -158,7 +158,7 @@ impl MidiPlayer {
     /// TODO: optimize the performance
     pub fn play_score<const TRACK_COUNT: usize>(
         &mut self,
-        score: Score<TRACK_COUNT>,
+        score: &Score<TRACK_COUNT>,
     ) -> Result<(), String> {
         use std::time;
 
@@ -286,5 +286,13 @@ impl MidiPlayer {
         }
 
         Ok(())
+    }
+}
+
+impl<const TRACK_CNT: usize> Score<TRACK_CNT> {
+    pub fn play(&self, name: &str) -> Result<(), String> {
+        let mut midi_player = MidiPlayer::new(name);
+        midi_player.play_score(self)?;
+        Ok(midi_player.close())
     }
 }
