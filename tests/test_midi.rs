@@ -309,8 +309,7 @@ mod tests {
                 ));
             });
         }
-        let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(&score).unwrap();
-        midi_player.close();
+
+        score.play(func!()).unwrap()
     }
 }

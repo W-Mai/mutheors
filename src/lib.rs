@@ -24,6 +24,8 @@ pub use midi::*;
 
 mod composition;
 mod core;
+mod tests;
 
 pub use composition::*;
 pub use core::*;
+pub use tests::*;
