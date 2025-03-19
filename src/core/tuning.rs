@@ -150,6 +150,16 @@ impl Tuning {
             Ok(Tuning::new(class, new_octave))
         }
     }
+
+    pub fn sharp(&self) -> Self {
+        self.add_interval(&Interval::from_semitones(1).unwrap())
+            .unwrap()
+    }
+
+    pub fn flat(&self) -> Self {
+        self.add_interval(&Interval::from_semitones(-1).unwrap())
+            .unwrap()
+    }
 }
 
 impl Mul<u8> for Tuning {
@@ -208,6 +218,14 @@ mod tests {
         assert_eq!(pc.modulation(0), PitchClass::C);
         assert_eq!(PitchClass::None.modulation(1), PitchClass::None);
     }
+
+    #[test]
+    fn test_modulation_2() {
+        let tuning = tuning!(C 4);
+        assert_eq!(tuning.sharp(), tuning!(# C 4));
+        assert_eq!(tuning.flat(), tuning!(b C 3));
+    }
+
     #[test]
     fn test_interval() -> Result<(), MusicError> {
         let tuning = tuning!(C 4);
