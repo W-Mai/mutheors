@@ -142,12 +142,12 @@ impl<'a> MidiPlayerChannel {
 impl Tuning {
     /// Get MIDI pitch number (A4=69)
     pub fn midi_number(&self) -> Result<u8, MusicError> {
-        let base = self.class as u8;
+        let base = self.class as i8;
         if base == 0 {
             return Ok(0);
         }
         let base = base - 1;
-        let num = (self.octave + 1) * 12 + base as i8;
+        let num = (self.octave + 1).saturating_mul(12).saturating_add(base);
         num.try_into().map_err(|_| MusicError::InvalidPitch)
     }
 }

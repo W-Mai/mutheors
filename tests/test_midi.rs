@@ -282,22 +282,33 @@ mod tests {
     fn test_degree_scale_iter() {
         let mut score = Score::<1>::new()
             .with_tempo(480)
-            .with_time_signature(4, DurationBase::Quarter);
+            .with_time_signature(16, DurationBase::Quarter);
 
-        let s = Scale::new(tuning!(C 0), ScaleType::Major).unwrap();
+        let s = Scale::new(tuning!(C 0), ScaleType::Blues).unwrap();
         let dg = score.duration_generator();
 
         for chunk in s.into_iter().array_chunks::<4>() {
             score.new_measures(|m| {
                 m[0].note(beats!(dg;
-                    1.0 => chunk[0],
-                    1.0 => chunk[1],
+                    0.75 => chunk[0],
+                    0.25 => chunk[1],
+                    2.00 => chunk[1],
+
+                    0.75 => chunk[1],
+                    0.25 => chunk[2],
+                    2.00 => chunk[2],
+
+                    1.0 => chunk[2],
+                    2.0 => chunk[3],
+                    1.0 => chunk[3],
+
                     1.0 => chunk[2],
                     1.0 => chunk[3],
+                    1.0 => chunk[2],
+                    3.0 => chunk[0],
                 ));
             });
         }
-
         let mut midi_player = MidiPlayer::new("Simple Compose");
         midi_player.play_score(score).unwrap();
         midi_player.close();
