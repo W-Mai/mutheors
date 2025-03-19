@@ -55,7 +55,8 @@ impl PitchClass {
         const BASIC_DEGREES: [i8; 7] = [0, 2, 4, 5, 7, 9, 11];
         let tuning = Tuning::new(*self, octave);
         let new_tuning = tuning
-            .add_interval(&Interval::from_semitones(BASIC_DEGREES[(degree - 1) as usize]).unwrap()).unwrap();
+            .add_interval(&Interval::from_semitones(BASIC_DEGREES[(degree - 1) as usize]).unwrap())
+            .unwrap();
 
         let quality = match degree {
             1 | 4 | 5 => ChordQuality::Major,
@@ -182,6 +183,15 @@ mod tests {
         assert_eq!(tuning.class, PitchClass::C);
         assert_eq!(tuning.octave, 4);
         assert_eq!(tuning.frequency(), 440.0 * 2f32.powf((60.0 - 69.0) / 12.0));
+    }
+
+    #[test]
+    fn test_tuning_2() {
+        let pitch = PitchClass::DSharpOrEFlat;
+        for i in 1..=6 {
+            let c = pitch.common_chord(i, 3);
+            println!("{}", c);
+        }
     }
 
     #[test]
