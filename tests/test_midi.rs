@@ -44,8 +44,7 @@ mod tests {
             m[1].rest();
         });
 
-        let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(&score).unwrap();
+        score.play(func!()).unwrap()
     }
 
     #[test]
@@ -66,9 +65,7 @@ mod tests {
             ));
         });
 
-        let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(&score).unwrap();
-        midi_player.close();
+        score.play(func!()).unwrap()
     }
 
     #[test]
@@ -87,10 +84,7 @@ mod tests {
             })
         });
 
-        let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(&score).unwrap();
-
-        midi_player.close();
+        score.play(func!()).unwrap()
     }
 
     #[test]
@@ -181,8 +175,7 @@ mod tests {
             ));
         });
 
-        let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(&score).unwrap();
+        score.play(func!()).unwrap()
     }
 
     #[test]
@@ -242,21 +235,22 @@ mod tests {
             });
         });
 
-        let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(&score).unwrap();
+        score.play(func!()).unwrap()
     }
 
     #[test]
     fn test_degrees() {
         let mut score = Score::<1>::new()
             .with_tempo(Tempo::Vivace)
-            .with_time_signature(14, DurationBase::Quarter);
+            .with_time_signature(16, DurationBase::Quarter);
 
         let s = Scale::new(tuning!(C 4), ScaleType::PentatonicMajor).unwrap();
         let dg = score.duration_generator();
 
         score.new_measures(|m| {
             m[0].note(beats!(dg;
+                1.0 => s - 8,
+                1.0 => s - 7,
                 1.0 => s - 6,
                 1.0 => s - 5,
                 1.0 => s - 4,
@@ -270,12 +264,11 @@ mod tests {
                 1.0 => s + 4,
                 1.0 => s + 5,
                 1.0 => s + 6,
+                1.0 => s + 7,
             ));
         });
 
-        let mut midi_player = MidiPlayer::new("Simple Compose");
-        midi_player.play_score(&score).unwrap();
-        midi_player.close();
+        score.play(func!()).unwrap()
     }
 
     #[test]
