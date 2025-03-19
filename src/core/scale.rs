@@ -197,6 +197,22 @@ impl Scale {
 }
 
 impl Scale {
+    pub fn sharp(self) -> Scale {
+        Self {
+            root: self.root.sharp(),
+            ..self
+        }
+    }
+
+    pub fn flat(self) -> Scale {
+        Self {
+            root: self.root.flat(),
+            ..self
+        }
+    }
+}
+
+impl Scale {
     /// Gets the standard interval pattern of the scale
     fn get_intervals(scale_type: ScaleType) -> Result<Vec<Interval>, MusicError> {
         const NATURE_MAJOR: [i8; 7] = [2, 2, 1, 2, 2, 2, 1];
@@ -396,5 +412,14 @@ mod tests {
         for t in s {
             println!("{:?}", t);
         }
+    }
+
+    #[test]
+    fn test_scale_1() {
+        let s = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
+
+        assert_eq!(s.sharp().sharp()(1), tuning!(D 4));
+        assert_eq!(s.flat().sharp()(1), tuning!(C 4));
+        assert_eq!(s.flat().sharp()(1), s(1).sharp().flat());
     }
 }
