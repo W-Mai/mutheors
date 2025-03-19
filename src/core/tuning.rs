@@ -133,6 +133,10 @@ impl Tuning {
     pub fn scale(&self, scale_type: ScaleType) -> Scale {
         Scale::new(*self, scale_type).unwrap()
     }
+
+    pub fn common_chord(&self, degree: u8) -> Chord {
+        self.class.common_chord(degree, self.octave)
+    }
 }
 
 impl Tuning {
