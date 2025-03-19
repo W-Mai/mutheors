@@ -281,10 +281,10 @@ mod tests {
     #[test]
     fn test_degree_scale_iter() {
         let mut score = Score::<1>::new()
-            .with_tempo(Tempo::Presto)
-            .with_time_signature(4, DurationBase::Sixteenth);
+            .with_tempo(480)
+            .with_time_signature(4, DurationBase::Quarter);
 
-        let s = Scale::new(tuning!(C 0), ScaleType::Hirajoshi).unwrap();
+        let s = Scale::new(tuning!(C 0), ScaleType::Major).unwrap();
         let dg = score.duration_generator();
 
         for chunk in s.into_iter().array_chunks::<4>() {

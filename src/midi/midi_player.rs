@@ -171,6 +171,7 @@ impl MidiPlayer {
         self.select_port(0)?;
         let channels = self.connect("Mutheors Port 0")?;
         let max_track_count = TRACK_COUNT.min(channels.len());
+        let dg = score.duration_generator();
 
         let tempo = score.tempo();
         let beats_per_measure = score.time_signature().beats_per_measure();
@@ -224,11 +225,11 @@ impl MidiPlayer {
                         for note in notes {
                             let duration = note.duration();
                             let start = current_start;
-                            current_start += duration.in_quarters();
+                            current_start += duration.in_beats(&dg);
                             let note_start = measure_duration * measure_idx as u32
                                 + beat_duration.mul_f64(start as f64);
                             let note_end =
-                                note_start + beat_duration.mul_f64(duration.in_quarters() as f64);
+                                note_start + beat_duration.mul_f64(duration.in_beats(&dg) as f64);
 
                             let midi_num = note.tuning().midi_number().unwrap();
 
