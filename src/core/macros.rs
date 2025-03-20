@@ -1,71 +1,59 @@
 #[macro_export]
 macro_rules! tuning {
     (# $note:ident $octave:expr) => {
-        Tuning {
-            class: pitch_class!(# $note),
-            octave: $octave,
-            freq: None,
-        }
+        Into::<Tuning>::into(pitch_tuning!(# $note)).with_octave($octave)
     };
     (b $note:ident $octave:expr) => {
-        Tuning {
-            class: pitch_class!(b $note),
-            octave: $octave,
-            freq: None,
-        }
+        Into::<Tuning>::into(pitch_tuning!(b $note)).with_octave($octave)
     };
     ($note:ident $octave:expr) => {
-        Tuning {
-            class: pitch_class!($note),
-            octave: $octave,
-            freq: None,
-        }
+        Into::<Tuning>::into(pitch_tuning!($note)).with_octave($octave)
     };
 }
 
 #[macro_export]
-macro_rules! pitch_class {
+macro_rules! pitch_tuning {
     (# C) => {
-        PitchClass::CSharpOrDFlat
+        PitchClass::C.sharp()
     };
     (b C) => {
         PitchClass::B
     };
     (# D) => {
-        PitchClass::DSharpOrEFlat
+        PitchClass::D.sharp()
     };
     (b D) => {
-        PitchClass::CSharpOrDFlat
+        PitchClass::D.flat()
     };
     (# E) => {
         PitchClass::F
     };
     (b E) => {
-        PitchClass::DSharpOrEFlat
+        PitchClass::E.flat()
     };
     (# F) => {
-        PitchClass::FSharpOrGFlat
+        PitchClass::F.sharp()
     };
     (b F) => {
-        PitchClass::E
+        PitchClass::F.flat()
     };
     (# G) => {
-        PitchClass::GSharpOrAFlat
+        PitchClass::G.sharp()
     };
     (b G) => {
-        PitchClass::FSharpOrGFlat
+        PitchClass::G.flat()
     };
     (# A) => {
-        PitchClass::ASharpOrBFlat
+        PitchClass::A.sharp()
     };
     (b A) => {
-        PitchClass::GSharpOrAFlat
+        PitchClass::A.flat()
     };
     (# B) => {
-        PitchClass::C
+        PitchClass::B.sharp()
     };
     (b B) => {
-        PitchClass::ASharpOrBFlat
+        PitchClass::B.flat()
     };
     (C) => {
         PitchClass::C

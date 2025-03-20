@@ -252,14 +252,14 @@ mod tests {
         assert_eq!(tuning1, tuning2);
     }
 
-    // #[test]
-    // fn test_tuning() {
-    //     let tuning = tuning!(C 4);
-    //     assert_eq!(tuning.class, PitchClass::C);
-    //     assert_eq!(tuning.octave, 4);
-    //     assert_eq!(tuning.frequency(), 440.0 * 2f32.powf((60.0 - 69.0) / 12.0));
-    // }
-    //
+    #[test]
+    fn test_tuning() {
+        let tuning = tuning!(C 4);
+        assert_eq!(tuning.class, PitchClass::C);
+        assert_eq!(tuning.octave, 4);
+        assert_eq!(tuning.frequency(), 440.0 * 2f32.powf((60.0 - 69.0) / 12.0));
+    }
+
     // #[test]
     // fn test_tuning_2() {
     //     let pitch = PitchClass::DSharpOrEFlat;
