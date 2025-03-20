@@ -164,6 +164,13 @@ impl Tuning {
                     }
                 }
                 8 => PitchClass::G.into(),
+                9 => {
+                    if is_sharp {
+                        PitchClass::G.sharp()
+                    } else {
+                        PitchClass::A.flat()
+                    }
+                }
                 10 => PitchClass::A.into(),
                 11 => {
                     if is_sharp {
@@ -275,14 +282,14 @@ mod tests {
         assert_eq!(tuning.frequency(), 440.0 * 2f32.powf((60.0 - 69.0) / 12.0));
     }
 
-    // #[test]
-    // fn test_tuning_2() {
-    //     let pitch = PitchClass::DSharpOrEFlat;
-    //     for i in 1..=6 {
-    //         let c = pitch.common_chord(i, 3);
-    //         println!("{}", c);
-    //     }
-    // }
+    #[test]
+    fn test_tuning_2() {
+        let pitch = PitchClass::E.flat().with_octave(3);
+        for i in 1..=6 {
+            let c = pitch.common_chord(i);
+            println!("{}", c);
+        }
+    }
     //
     // #[test]
     // fn test_modulation() {
