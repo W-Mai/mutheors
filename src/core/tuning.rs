@@ -7,37 +7,42 @@ use std::ops::{Div, Mul};
 #[repr(u8)]
 #[derive(PartialEq, PartialOrd)]
 pub enum PitchClass {
-    None = 0,
-    C = 1,
-    CSharpOrDFlat = 2,
-    D = 3,
-    DSharpOrEFlat = 4,
-    E = 5,
-    F = 6,
-    FSharpOrGFlat = 7,
-    G = 8,
-    GSharpOrAFlat = 9,
-    A = 10,
-    ASharpOrBFlat = 11,
-    B = 12,
+    None,
+    C,
+    D,
+    E,
+    F,
+    G,
+    A,
+    B,
+}
+
+impl From<PitchClass> for u8 {
+    fn from(value: PitchClass) -> Self {
+        match value {
+            PitchClass::None => 0,
+            PitchClass::C => 1,
+            PitchClass::D => 3,
+            PitchClass::E => 5,
+            PitchClass::F => 6,
+            PitchClass::G => 8,
+            PitchClass::A => 10,
+            PitchClass::B => 12,
+        }
+    }
 }
 
 impl From<u8> for PitchClass {
     fn from(value: u8) -> Self {
         match value {
             1 => PitchClass::C,
-            2 => PitchClass::CSharpOrDFlat,
             3 => PitchClass::D,
-            4 => PitchClass::DSharpOrEFlat,
             5 => PitchClass::E,
             6 => PitchClass::F,
-            7 => PitchClass::FSharpOrGFlat,
             8 => PitchClass::G,
-            9 => PitchClass::GSharpOrAFlat,
             10 => PitchClass::A,
-            11 => PitchClass::ASharpOrBFlat,
             12 => PitchClass::B,
-            _ => panic!("Invalid value"),
+            _ => PitchClass::None,
         }
     }
 }
@@ -83,16 +88,11 @@ impl Display for PitchClass {
         let str = match self {
             PitchClass::None => " ",
             PitchClass::C => "C",
-            PitchClass::CSharpOrDFlat => "C#/Db",
             PitchClass::D => "D",
-            PitchClass::DSharpOrEFlat => "D#/Eb",
             PitchClass::E => "E",
             PitchClass::F => "F",
-            PitchClass::FSharpOrGFlat => "F#/Gb",
             PitchClass::G => "G",
-            PitchClass::GSharpOrAFlat => "G#/Ab",
             PitchClass::A => "A",
-            PitchClass::ASharpOrBFlat => "A#/Bb",
             PitchClass::B => "B",
         }
         .to_string();
@@ -103,6 +103,7 @@ impl Display for PitchClass {
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct Tuning {
     pub class: PitchClass,
+    pub accidentals: i8,
     pub octave: i8,
     pub freq: Option<f32>, // 自定义频率
 }
@@ -111,6 +112,7 @@ impl Tuning {
     pub fn new(class: PitchClass, octave: i8) -> Self {
         Self {
             class,
+            accidentals: 0,
             octave,
             freq: None,
         }
@@ -151,14 +153,18 @@ impl Tuning {
         }
     }
 
-    pub fn sharp(&self) -> Self {
-        self.add_interval(&Interval::from_semitones(1).unwrap())
-            .unwrap()
+    pub fn sharp(self) -> Self {
+        Self {
+            accidentals: self.accidentals.wrapping_add(1),
+            ..self
+        }
     }
 
-    pub fn flat(&self) -> Self {
-        self.add_interval(&Interval::from_semitones(-1).unwrap())
-            .unwrap()
+    pub fn flat(self) -> Self {
+        Self {
+            accidentals: self.accidentals.wrapping_sub(1),
+            ..self
+        }
     }
 }
 
@@ -182,7 +188,17 @@ impl Div<u8> for Tuning {
 
 impl Display for Tuning {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}", self.class, self.octave)
+        let acc_str = match self.accidentals {
+            0 => String::new(),
+            1 => "#".to_owned(),
+            -1 => "b".to_owned(),
+            2 => "##".to_owned(),
+            -2 => "bb".to_owned(),
+            n if n > 0 => "#".repeat(n as usize),
+            n if n < 0 => "b".repeat((-n) as usize),
+            _ => unreachable!(),
+        };
+        write!(f, "{}{}{}", self.class, acc_str, self.octave)
     }
 }
 
