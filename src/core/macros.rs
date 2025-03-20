@@ -17,7 +17,7 @@ macro_rules! pitch_tuning {
         PitchClass::C.sharp()
     };
     (b C) => {
-        PitchClass::B
+        PitchClass::C.flat()
     };
     (# D) => {
         PitchClass::D.sharp()
@@ -26,7 +26,7 @@ macro_rules! pitch_tuning {
         PitchClass::D.flat()
     };
     (# E) => {
-        PitchClass::F
+        PitchClass::E.sharp()
     };
     (b E) => {
         PitchClass::E.flat()
