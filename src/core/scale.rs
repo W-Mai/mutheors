@@ -391,7 +391,7 @@ mod tests {
                 Tuning::new(PitchClass::C, 5),
                 Tuning::new(PitchClass::D, 5),
                 Tuning::new(PitchClass::E, 5),
-                // Tuning::new(PitchClass::FSharpOrGFlat, 5),
+                Tuning::new(PitchClass::F, 5).sharp(),
                 Tuning::new(PitchClass::G, 5),
             ]
         );
@@ -402,24 +402,25 @@ mod tests {
         let a = Tuning::new(PitchClass::A, 4);
         let scale = a.scale(ScaleType::Blues);
         assert!(scale.contains(&Tuning::new(PitchClass::C, 5)));
-        // assert!(scale.contains(&Tuning::new(PitchClass::DSharpOrEFlat, 5)));
+        assert!(scale.contains(&Tuning::new(PitchClass::D, 5).sharp()));
     }
 
     #[test]
     fn test_scale_iter() {
-        // let s = Scale::new(tuning!(C 4), ScaleType::PentatonicMajor).unwrap();
-        //
-        // for t in s {
-        //     println!("{:?}", t);
-        // }
+        let s = Scale::new(tuning!(C 4), ScaleType::PentatonicMajor).unwrap();
+        
+        for t in s {
+            println!("{}", t);
+        }
     }
 
     #[test]
     fn test_scale_1() {
-        // let s = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
-        //
-        // assert_eq!(s.sharp().sharp()(1), tuning!(D 4));
-        // assert_eq!(s.flat().sharp()(1), tuning!(C 4));
-        // assert_eq!(s.flat().sharp()(1), s(1).sharp().flat());
+        let s = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
+        
+        // FIXME: How to judge C## and D
+        assert_eq!(s.sharp().sharp()(1), tuning!(D 4));
+        assert_eq!(s.flat().sharp()(1), tuning!(C 4));
+        assert_eq!(s.flat().sharp()(1), s(1).sharp().flat());
     }
 }
