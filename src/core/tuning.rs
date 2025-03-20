@@ -48,6 +48,24 @@ impl From<u8> for PitchClass {
 }
 
 impl PitchClass {
+    pub fn sharp(self) -> Tuning {
+        Tuning {
+            class: self,
+            accidentals: 1,
+            octave: 0,
+            freq: None,
+        }
+    }
+
+    pub fn flat(self) -> Tuning {
+        Tuning {
+            class: self,
+            accidentals: -1,
+            octave: 0,
+            freq: None,
+        }
+    }
+
     pub fn modulation(&self, degree: i8) -> PitchClass {
         match self {
             PitchClass::None => PitchClass::None,
@@ -79,6 +97,17 @@ impl PitchClass {
         match self {
             PitchClass::None => PitchClass::C,
             _ => PitchClass::from((*self as i8 + basic_degrees[nth] - 1).rem_euclid(12) as u8 + 1),
+        }
+    }
+}
+
+impl From<PitchClass> for Tuning {
+    fn from(pc: PitchClass) -> Self {
+        Tuning {
+            class: pc,
+            accidentals: 0,
+            octave: 0,
+            freq: None,
         }
     }
 }
@@ -118,10 +147,15 @@ impl Tuning {
         }
     }
 
+    pub fn with_octave(self, octave: i8) -> Self {
+        Self { octave, ..self }
+    }
+
     pub fn with_freq(self, freq: f32) -> Self {
-        let mut n = self;
-        n.freq = Some(freq);
-        self
+        Self {
+            freq: Some(freq),
+            ..self
+        }
     }
 
     /// Calculation of physical frequency (A4 = 440 Hz)
@@ -149,7 +183,11 @@ impl Tuning {
             Err(MusicError::InvalidOctave { octave: new_octave })
         } else {
             let class = PitchClass::from(((new_semitones + 11) % 12 + 1) as u8);
-            Ok(Tuning::new(class, new_octave))
+            Ok(Self {
+                class,
+                octave: new_octave,
+                ..*self
+            })
         }
     }
 
@@ -204,8 +242,15 @@ impl Display for Tuning {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::*;
+
+    #[test]
+    fn test_tuning_01() {
+        let pc = PitchClass::C;
+        let tuning1 = pc.sharp().with_octave(3) * 2;
+        let tuning2 = Tuning::new(PitchClass::C, 4).sharp();
+        assert_eq!(tuning1, tuning2);
+    }
 
     // #[test]
     // fn test_tuning() {
