@@ -7,44 +7,14 @@ use std::ops::{Div, Mul};
 #[repr(u8)]
 #[derive(PartialEq, PartialOrd)]
 pub enum PitchClass {
-    None,
-    C,
-    D,
-    E,
-    F,
-    G,
-    A,
-    B,
-}
-
-impl From<PitchClass> for u8 {
-    fn from(value: PitchClass) -> Self {
-        match value {
-            PitchClass::None => 0,
-            PitchClass::C => 1,
-            PitchClass::D => 3,
-            PitchClass::E => 5,
-            PitchClass::F => 6,
-            PitchClass::G => 8,
-            PitchClass::A => 10,
-            PitchClass::B => 12,
-        }
-    }
-}
-
-impl From<u8> for PitchClass {
-    fn from(value: u8) -> Self {
-        match value {
-            1 => PitchClass::C,
-            3 => PitchClass::D,
-            5 => PitchClass::E,
-            6 => PitchClass::F,
-            8 => PitchClass::G,
-            10 => PitchClass::A,
-            12 => PitchClass::B,
-            _ => PitchClass::None,
-        }
-    }
+    None = 0,
+    C = 1,
+    D = 3,
+    E = 5,
+    F = 6,
+    G = 8,
+    A = 10,
+    B = 12,
 }
 
 impl PitchClass {
@@ -66,13 +36,6 @@ impl PitchClass {
         }
     }
 
-    pub fn modulation(&self, degree: i8) -> PitchClass {
-        match self {
-            PitchClass::None => PitchClass::None,
-            _ => PitchClass::from(((*self as i8 - 1 + 12 + degree) % 12 + 1) as u8),
-        }
-    }
-
     pub fn common_chord(&self, degree: u8, octave: i8) -> Chord {
         assert!(degree > 0 && degree < 7, "Degree must be in [1, 6]");
         const BASIC_DEGREES: [i8; 7] = [0, 2, 4, 5, 7, 9, 11];
@@ -88,16 +51,6 @@ impl PitchClass {
         };
 
         Chord::triad(new_tuning, quality).unwrap()
-    }
-
-    pub fn next_basic_degree(&self, nth: i8) -> PitchClass {
-        let nth = nth.rem_euclid(7) as usize;
-        let basic_degrees = vec![0, 2, 4, 5, 7, 9, 11];
-
-        match self {
-            PitchClass::None => PitchClass::C,
-            _ => PitchClass::from((*self as i8 + basic_degrees[nth] - 1).rem_euclid(12) as u8 + 1),
-        }
     }
 }
 
@@ -177,16 +130,55 @@ impl Tuning {
 
 impl Tuning {
     pub fn add_interval(&self, interval: &Interval) -> Result<Self, MusicError> {
-        let new_semitones = interval.semitones() + self.class as i8;
+        let new_semitones = interval.semitones() + self.class as i8 + self.accidentals;
         let new_octave = self.octave + (new_semitones + 11) / 12 - 1;
         if !(0..=11).contains(&new_octave) {
             Err(MusicError::InvalidOctave { octave: new_octave })
         } else {
-            let class = PitchClass::from(((new_semitones + 11) % 12 + 1) as u8);
+            let semi = (new_semitones + 11) % 12 + 1;
+            let is_sharp = interval.semitones() > 0;
+            let tuning: Tuning = match semi {
+                1 => PitchClass::C.into(),
+                2 => {
+                    if is_sharp {
+                        PitchClass::C.sharp()
+                    } else {
+                        PitchClass::D.flat()
+                    }
+                }
+                3 => PitchClass::D.into(),
+                4 => {
+                    if is_sharp {
+                        PitchClass::D.sharp()
+                    } else {
+                        PitchClass::E.flat()
+                    }
+                }
+                5 => PitchClass::E.into(),
+                6 => PitchClass::F.into(),
+                7 => {
+                    if is_sharp {
+                        PitchClass::F.sharp()
+                    } else {
+                        PitchClass::G.flat()
+                    }
+                }
+                8 => PitchClass::G.into(),
+                10 => PitchClass::A.into(),
+                11 => {
+                    if is_sharp {
+                        PitchClass::A.sharp()
+                    } else {
+                        PitchClass::B.flat()
+                    }
+                }
+                12 => PitchClass::B.into(),
+                _ => unreachable!(),
+            };
+
             Ok(Self {
-                class,
                 octave: new_octave,
-                ..*self
+                ..tuning
             })
         }
     }
@@ -250,6 +242,29 @@ mod tests {
         let tuning1 = pc.sharp().with_octave(3) * 2;
         let tuning2 = Tuning::new(PitchClass::C, 4).sharp();
         assert_eq!(tuning1, tuning2);
+    }
+
+    #[test]
+    fn test_tuning_02() {
+        let pc = PitchClass::C;
+        let tuning = pc.sharp().with_octave(3);
+        let tuning1 = tuning
+            .add_interval(&Interval::from_semitones(1).unwrap())
+            .unwrap();
+        let tuning2 = tuning1
+            .add_interval(&Interval::from_semitones(1).unwrap())
+            .unwrap();
+        let tuning3 = tuning2
+            .add_interval(&Interval::from_semitones(1).unwrap())
+            .unwrap();
+        let tuning4 = tuning3
+            .add_interval(&Interval::from_semitones(-1).unwrap())
+            .unwrap();
+
+        println!("tuning1: {}", tuning1);
+        println!("tuning2: {}", tuning2);
+        println!("tuning2: {}", tuning3);
+        println!("tuning2: {}", tuning4);
     }
 
     #[test]
