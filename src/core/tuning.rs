@@ -321,48 +321,44 @@ mod tests {
 
     #[test]
     fn test_common_chord() {
-        fn collect_class(chord: &Chord) -> Vec<Tuning> {
-            chord.components()
-        }
-
         // Test the common chord for C
-        let pitch_class = PitchClass::C;
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(1, 4));
+        let pitch_class = tuning!(C 4);
+        let notes = pitch_class.common_chord(1).components();
         assert_eq!(notes, vec![tuning!(C 4), tuning!(E 4), tuning!(G 4)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(2, 4));
+        let notes = pitch_class.common_chord(2).components();
         assert_eq!(notes, vec![tuning!(D 4), tuning!(F 4), tuning!(A 4)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(3, 4));
+        let notes = pitch_class.common_chord(3).components();
         assert_eq!(notes, vec![tuning!(E 4), tuning!(G 4), tuning!(B 4)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(4, 4));
+        let notes = pitch_class.common_chord(4).components();
         assert_eq!(notes, vec![tuning!(F 4), tuning!(A 4), tuning!(C 5)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(5, 4));
+        let notes = pitch_class.common_chord(5).components();
         assert_eq!(notes, vec![tuning!(G 4), tuning!(B 4), tuning!(D 5)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(6, 4));
+        let notes = pitch_class.common_chord(6).components();
         assert_eq!(notes, vec![tuning!(A 4), tuning!(C 5), tuning!(E 5)]);
 
         // Test the common chord for D
-        let pitch_class = PitchClass::D;
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(1, 4));
+        let pitch_class = tuning!(D 4);
+        let notes = pitch_class.common_chord(1).components();
         assert_eq!(notes, vec![tuning!(D 4), tuning!(# F 4), tuning!(A 4)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(2, 4));
+        let notes = pitch_class.common_chord(2).components();
         assert_eq!(notes, vec![tuning!(E 4), tuning!(G 4), tuning!(B 4)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(3, 4));
+        let notes = pitch_class.common_chord(3).components();
         assert_eq!(notes, vec![tuning!(# F 4), tuning!(A 4), tuning!(# C 5)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(4, 4));
+        let notes = pitch_class.common_chord(4).components();
         assert_eq!(notes, vec![tuning!(G 4), tuning!(B 4), tuning!(D 5)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(5, 4));
+        let notes = pitch_class.common_chord(5).components();
         assert_eq!(notes, vec![tuning!(A 4), tuning!(# C 5), tuning!(E 5)]);
 
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(6, 4));
+        let notes = pitch_class.common_chord(6).components();
         assert_eq!(notes, vec![tuning!(B 4), tuning!(D 5), tuning!(# F 5)]);
     }
 }
