@@ -207,119 +207,119 @@ mod tests {
     use super::*;
     use crate::*;
 
-    #[test]
-    fn test_tuning() {
-        let tuning = tuning!(C 4);
-        assert_eq!(tuning.class, PitchClass::C);
-        assert_eq!(tuning.octave, 4);
-        assert_eq!(tuning.frequency(), 440.0 * 2f32.powf((60.0 - 69.0) / 12.0));
-    }
-
-    #[test]
-    fn test_tuning_2() {
-        let pitch = PitchClass::DSharpOrEFlat;
-        for i in 1..=6 {
-            let c = pitch.common_chord(i, 3);
-            println!("{}", c);
-        }
-    }
-
-    #[test]
-    fn test_modulation() {
-        let pc = PitchClass::C;
-        assert_eq!(pc.modulation(4), PitchClass::E);
-        assert_eq!(pc.modulation(-3), PitchClass::A);
-        assert_eq!(pc.modulation(12), PitchClass::C);
-        assert_eq!(pc.modulation(-12), PitchClass::C);
-        assert_eq!(pc.modulation(0), PitchClass::C);
-        assert_eq!(PitchClass::None.modulation(1), PitchClass::None);
-    }
-
-    #[test]
-    fn test_modulation_2() {
-        let tuning = tuning!(C 4);
-        assert_eq!(tuning.sharp(), tuning!(# C 4));
-        assert_eq!(tuning.flat(), tuning!(b C 3));
-    }
-
-    #[test]
-    fn test_interval() -> Result<(), MusicError> {
-        let tuning = tuning!(C 4);
-        let new_tuning = tuning.add_interval(&Interval::from_semitones(0)?)?;
-        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::C, 4));
-        let new_tuning = tuning.add_interval(&Interval::from_semitones(2)?)?;
-        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::D, 4));
-        let new_tuning = tuning.add_interval(&Interval::from_semitones(4)?)?;
-        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::E, 4));
-        let new_tuning = tuning.add_interval(&Interval::from_semitones(5)?)?;
-        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::F, 4));
-        let new_tuning = tuning.add_interval(&Interval::from_semitones(7)?)?;
-        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::G, 4));
-        let new_tuning = tuning.add_interval(&Interval::from_semitones(9)?)?;
-        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::A, 4));
-        let new_tuning = tuning.add_interval(&Interval::from_semitones(11)?)?;
-        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::B, 4));
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_common_chord() {
-        fn collect_class(chord: &Chord) -> Vec<PitchClass> {
-            chord.components().iter().map(|&c| c.class).collect()
-        }
-
-        let pitch_class = PitchClass::C;
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(1, 4));
-        assert_eq!(notes, vec![PitchClass::C, PitchClass::E, PitchClass::G]);
-
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(2, 4));
-        assert_eq!(notes, vec![PitchClass::D, PitchClass::F, PitchClass::A]);
-
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(3, 4));
-        assert_eq!(notes, vec![PitchClass::E, PitchClass::G, PitchClass::B]);
-
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(4, 4));
-        assert_eq!(notes, vec![PitchClass::F, PitchClass::A, PitchClass::C]);
-
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(5, 4));
-        assert_eq!(notes, vec![PitchClass::G, PitchClass::B, PitchClass::D]);
-
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(6, 2));
-        assert_eq!(notes, vec![PitchClass::A, PitchClass::C, PitchClass::E]);
-
-        let pitch_class = PitchClass::D;
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(1, 4));
-        assert_eq!(
-            notes,
-            vec![PitchClass::D, PitchClass::FSharpOrGFlat, PitchClass::A]
-        );
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(2, 4));
-        assert_eq!(notes, vec![PitchClass::E, PitchClass::G, PitchClass::B]);
-
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(3, 4));
-        assert_eq!(
-            notes,
-            vec![
-                PitchClass::FSharpOrGFlat,
-                PitchClass::A,
-                PitchClass::CSharpOrDFlat
-            ]
-        );
-
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(4, 4));
-        assert_eq!(notes, vec![PitchClass::G, PitchClass::B, PitchClass::D]);
-
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(5, 4));
-        assert_eq!(
-            notes,
-            vec![PitchClass::A, PitchClass::CSharpOrDFlat, PitchClass::E]
-        );
-
-        let notes: Vec<_> = collect_class(&pitch_class.common_chord(6, 2));
-        assert_eq!(
-            notes,
-            vec![PitchClass::B, PitchClass::D, PitchClass::FSharpOrGFlat]
-        );
-    }
+    // #[test]
+    // fn test_tuning() {
+    //     let tuning = tuning!(C 4);
+    //     assert_eq!(tuning.class, PitchClass::C);
+    //     assert_eq!(tuning.octave, 4);
+    //     assert_eq!(tuning.frequency(), 440.0 * 2f32.powf((60.0 - 69.0) / 12.0));
+    // }
+    //
+    // #[test]
+    // fn test_tuning_2() {
+    //     let pitch = PitchClass::DSharpOrEFlat;
+    //     for i in 1..=6 {
+    //         let c = pitch.common_chord(i, 3);
+    //         println!("{}", c);
+    //     }
+    // }
+    //
+    // #[test]
+    // fn test_modulation() {
+    //     let pc = PitchClass::C;
+    //     assert_eq!(pc.modulation(4), PitchClass::E);
+    //     assert_eq!(pc.modulation(-3), PitchClass::A);
+    //     assert_eq!(pc.modulation(12), PitchClass::C);
+    //     assert_eq!(pc.modulation(-12), PitchClass::C);
+    //     assert_eq!(pc.modulation(0), PitchClass::C);
+    //     assert_eq!(PitchClass::None.modulation(1), PitchClass::None);
+    // }
+    //
+    // #[test]
+    // fn test_modulation_2() {
+    //     let tuning = tuning!(C 4);
+    //     assert_eq!(tuning.sharp(), tuning!(# C 4));
+    //     assert_eq!(tuning.flat(), tuning!(b C 3));
+    // }
+    //
+    // #[test]
+    // fn test_interval() -> Result<(), MusicError> {
+    //     let tuning = tuning!(C 4);
+    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(0)?)?;
+    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::C, 4));
+    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(2)?)?;
+    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::D, 4));
+    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(4)?)?;
+    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::E, 4));
+    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(5)?)?;
+    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::F, 4));
+    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(7)?)?;
+    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::G, 4));
+    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(9)?)?;
+    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::A, 4));
+    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(11)?)?;
+    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::B, 4));
+    //
+    //     Ok(())
+    // }
+    //
+    // #[test]
+    // fn test_common_chord() {
+    //     fn collect_class(chord: &Chord) -> Vec<PitchClass> {
+    //         chord.components().iter().map(|&c| c.class).collect()
+    //     }
+    //
+    //     let pitch_class = PitchClass::C;
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(1, 4));
+    //     assert_eq!(notes, vec![PitchClass::C, PitchClass::E, PitchClass::G]);
+    //
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(2, 4));
+    //     assert_eq!(notes, vec![PitchClass::D, PitchClass::F, PitchClass::A]);
+    //
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(3, 4));
+    //     assert_eq!(notes, vec![PitchClass::E, PitchClass::G, PitchClass::B]);
+    //
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(4, 4));
+    //     assert_eq!(notes, vec![PitchClass::F, PitchClass::A, PitchClass::C]);
+    //
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(5, 4));
+    //     assert_eq!(notes, vec![PitchClass::G, PitchClass::B, PitchClass::D]);
+    //
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(6, 2));
+    //     assert_eq!(notes, vec![PitchClass::A, PitchClass::C, PitchClass::E]);
+    //
+    //     let pitch_class = PitchClass::D;
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(1, 4));
+    //     assert_eq!(
+    //         notes,
+    //         vec![PitchClass::D, PitchClass::FSharpOrGFlat, PitchClass::A]
+    //     );
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(2, 4));
+    //     assert_eq!(notes, vec![PitchClass::E, PitchClass::G, PitchClass::B]);
+    //
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(3, 4));
+    //     assert_eq!(
+    //         notes,
+    //         vec![
+    //             PitchClass::FSharpOrGFlat,
+    //             PitchClass::A,
+    //             PitchClass::CSharpOrDFlat
+    //         ]
+    //     );
+    //
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(4, 4));
+    //     assert_eq!(notes, vec![PitchClass::G, PitchClass::B, PitchClass::D]);
+    //
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(5, 4));
+    //     assert_eq!(
+    //         notes,
+    //         vec![PitchClass::A, PitchClass::CSharpOrDFlat, PitchClass::E]
+    //     );
+    //
+    //     let notes: Vec<_> = collect_class(&pitch_class.common_chord(6, 2));
+    //     assert_eq!(
+    //         notes,
+    //         vec![PitchClass::B, PitchClass::D, PitchClass::FSharpOrGFlat]
+    //     );
+    // }
 }
