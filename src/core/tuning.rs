@@ -290,45 +290,34 @@ mod tests {
             println!("{}", c);
         }
     }
-    //
-    // #[test]
-    // fn test_modulation() {
-    //     let pc = PitchClass::C;
-    //     assert_eq!(pc.modulation(4), PitchClass::E);
-    //     assert_eq!(pc.modulation(-3), PitchClass::A);
-    //     assert_eq!(pc.modulation(12), PitchClass::C);
-    //     assert_eq!(pc.modulation(-12), PitchClass::C);
-    //     assert_eq!(pc.modulation(0), PitchClass::C);
-    //     assert_eq!(PitchClass::None.modulation(1), PitchClass::None);
-    // }
-    //
-    // #[test]
-    // fn test_modulation_2() {
-    //     let tuning = tuning!(C 4);
-    //     assert_eq!(tuning.sharp(), tuning!(# C 4));
-    //     assert_eq!(tuning.flat(), tuning!(b C 3));
-    // }
-    //
-    // #[test]
-    // fn test_interval() -> Result<(), MusicError> {
-    //     let tuning = tuning!(C 4);
-    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(0)?)?;
-    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::C, 4));
-    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(2)?)?;
-    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::D, 4));
-    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(4)?)?;
-    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::E, 4));
-    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(5)?)?;
-    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::F, 4));
-    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(7)?)?;
-    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::G, 4));
-    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(9)?)?;
-    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::A, 4));
-    //     let new_tuning = tuning.add_interval(&Interval::from_semitones(11)?)?;
-    //     assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::B, 4));
-    //
-    //     Ok(())
-    // }
+
+    #[test]
+    fn test_modulation_2() {
+        let tuning = tuning!(C 4);
+        assert_eq!(tuning.sharp(), tuning!(# C 4));
+        assert_eq!(tuning.flat(), tuning!(b C 4));
+    }
+
+    #[test]
+    fn test_interval() -> Result<(), MusicError> {
+        let tuning = tuning!(C 4);
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(0)?)?;
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::C, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(2)?)?;
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::D, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(4)?)?;
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::E, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(5)?)?;
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::F, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(7)?)?;
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::G, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(9)?)?;
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::A, 4));
+        let new_tuning = tuning.add_interval(&Interval::from_semitones(11)?)?;
+        assert_eq!((new_tuning.class, new_tuning.octave), (PitchClass::B, 4));
+
+        Ok(())
+    }
     //
     // #[test]
     // fn test_common_chord() {
