@@ -265,7 +265,7 @@ impl Scale {
             ScaleType::Custom(pattern) => {
                 let semitones = pattern
                     .iter()
-                    .map(|&s| Interval::from_semitones(s as i8))
+                    .map(|&s| Interval::from_semitones(s))
                     .collect::<Result<Vec<_>, _>>()?;
                 Ok(semitones)
             }
