@@ -408,7 +408,7 @@ mod tests {
     #[test]
     fn test_scale_iter() {
         let s = Scale::new(tuning!(C 4), ScaleType::PentatonicMajor).unwrap();
-        
+
         for t in s {
             println!("{}", t);
         }
@@ -417,9 +417,8 @@ mod tests {
     #[test]
     fn test_scale_1() {
         let s = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
-        
-        // FIXME: How to judge C## and D
-        assert_eq!(s.sharp().sharp()(1), tuning!(D 4));
+
+        assert_eq!(s.sharp().sharp()(1).simple(), tuning!(D 4));
         assert_eq!(s.flat().sharp()(1), tuning!(C 4));
         assert_eq!(s.flat().sharp()(1), s(1).sharp().flat());
     }

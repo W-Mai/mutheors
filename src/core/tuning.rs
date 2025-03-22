@@ -203,6 +203,18 @@ impl Tuning {
             ..self
         }
     }
+
+    pub fn simple(self) -> Self {
+        let accidentals = self.accidentals;
+        let new_tuning = Self {
+            accidentals: 0,
+            ..self
+        };
+
+        new_tuning
+            .add_interval(&Interval::from_semitones(accidentals).unwrap())
+            .unwrap()
+    }
 }
 
 impl Mul<u8> for Tuning {
