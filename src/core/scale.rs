@@ -192,8 +192,10 @@ impl Scale {
     // TODO: 分析调式特征音程
     // pub fn characteristic_interval(&self) -> Option<Interval> {}
 
-    // TODO: 获取音阶调式主音
-    // pub fn modal_tonic(&self) -> Option<Tuning> {}
+    // Get the modal tonic
+    pub fn modal_tonic(&self) -> Tuning {
+        self.root
+    }
 }
 
 impl Scale {
