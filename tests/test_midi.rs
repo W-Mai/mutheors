@@ -8,6 +8,7 @@ macro_rules! degrees {
 
 #[cfg(all(test))]
 mod tests {
+    use mutheors::duration_utils::DurationProgress;
     use mutheors::*;
 
     #[test]
@@ -77,10 +78,18 @@ mod tests {
         let deg = degrees!(1 6 4 5);
         let chords = deg.map(|degree| scale.degree_chord(degree).unwrap());
 
+        let duration_progress_random = DurationProgress::Random(vec![2.0, 1.0]);
+        let duration_progress_fixed = DurationProgress::Fixed(vec![1.0, 1.0, 1.0, 1.0]);
+
         (0..deg.len()).for_each(|i| {
             score.new_measures(|m| {
                 m[0].chord(chords[i].clone());
-                m[1] = duration_utils::generate_one_measure(&dg, chords[i].clone(), 4);
+                m[1] = duration_utils::generate_one_measure(
+                    &dg,
+                    chords[i].clone(),
+                    4,
+                    duration_progress_random.clone(),
+                );
             })
         });
 
@@ -91,7 +100,12 @@ mod tests {
         (0..deg.len()).for_each(|i| {
             score.new_measures(|m| {
                 m[0].chord(chords[i].clone());
-                m[1] = duration_utils::generate_one_measure(&dg, chords[i].clone(), 4);
+                m[1] = duration_utils::generate_one_measure(
+                    &dg,
+                    chords[i].clone(),
+                    4,
+                    duration_progress_fixed.clone(),
+                );
             })
         });
 
@@ -102,7 +116,12 @@ mod tests {
         (0..deg.len()).for_each(|i| {
             score.new_measures(|m| {
                 m[0].chord(chords[i].clone());
-                m[1] = duration_utils::generate_one_measure(&dg, chords[i].clone(), 4);
+                m[1] = duration_utils::generate_one_measure(
+                    &dg,
+                    chords[i].clone(),
+                    4,
+                    duration_progress_fixed.clone(),
+                );
             })
         });
 

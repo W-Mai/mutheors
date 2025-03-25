@@ -408,31 +408,62 @@ pub mod duration_utils {
     use rand::prelude::*;
     use rand::rng;
 
-    pub fn generate_one_measure(dg: &DurationGenerator, chord: Chord, beat: u8) -> Measure {
+    #[derive(Debug, Clone)]
+    pub enum DurationProgress {
+        Random(Vec<f32>),
+        Fixed(Vec<f32>),
+    }
+
+    pub fn generate_one_measure(
+        dg: &DurationGenerator,
+        chord: Chord,
+        beat: u8,
+        duration_progress: DurationProgress,
+    ) -> Measure {
         let beat = beat as f32;
         let chord_components = chord.components();
         let mut notes: Vec<Note> = vec![];
         let mut rng = rng();
         let mut beats_sum = 0.0;
-        while beats_sum < beat {
-            let beats_choice = *[2.0, 1.0, 0.5].choose(&mut rng).unwrap();
-            let duration = dg.beat(beats_choice);
-            if beats_sum + beats_choice > beat {
-                break;
+
+        match &duration_progress {
+            DurationProgress::Random(beats_choices) => {
+                while beats_sum < beat {
+                    let beats_choice = *beats_choices.choose(&mut rng).unwrap();
+                    let duration = dg.beat(beats_choice);
+                    if beats_sum + beats_choice > beat {
+                        break;
+                    }
+                    beats_sum += beats_choice;
+                    notes.push(
+                        duration
+                            .with_note(chord_components.choose(&mut rng).unwrap().clone().into()),
+                    );
+                }
+
+                let remainder = beat - beats_sum;
+                if remainder > 0.0 {
+                    notes.push(
+                        dg.beat(remainder)
+                            .with_note(chord_components.choose(&mut rng).unwrap().clone().into()),
+                    );
+                }
             }
-            beats_sum += beats_choice;
-            notes.push(
-                duration.with_note(chord_components.choose(&mut rng).unwrap().clone().into()),
-            );
+            DurationProgress::Fixed(beats_program) => {
+                for beats_choice in beats_program {
+                    let duration = dg.beat(*beats_choice);
+                    if beats_sum + *beats_choice > beat as f32 {
+                        break;
+                    }
+                    beats_sum += *beats_choice;
+                    notes.push(
+                        duration
+                            .with_note(chord_components.choose(&mut rng).unwrap().clone().into()),
+                    );
+                }
+            }
         }
 
-        let remainder = beat - beats_sum;
-        if remainder > 0.0 {
-            notes.push(
-                dg.beat(remainder)
-                    .with_note(chord_components.choose(&mut rng).unwrap().clone().into()),
-            );
-        }
         Measure::Note(notes)
     }
 }
