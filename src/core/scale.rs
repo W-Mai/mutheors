@@ -630,4 +630,38 @@ mod tests {
         let e = s.chord(3, ChordQuality::Major).ok();
         assert_eq!(e, Chord::triad(tuning!(E 4), ChordQuality::Major).ok());
     }
+
+    #[test]
+    fn test_scale_3() {
+        let s = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
+
+        assert_eq!(
+            s.degree_chord(1).ok(),
+            Chord::triad(tuning!(C 4), ChordQuality::Major).ok()
+        );
+        assert_eq!(
+            s.degree_chord(2).ok(),
+            Chord::triad(tuning!(D 4), ChordQuality::Minor).ok()
+        );
+        assert_eq!(
+            s.degree_chord(3).ok(),
+            Chord::triad(tuning!(E 4), ChordQuality::Minor).ok()
+        );
+        assert_eq!(
+            s.degree_chord(4).ok(),
+            Chord::triad(tuning!(F 4), ChordQuality::Major).ok()
+        );
+        assert_eq!(
+            s.degree_chord(5).ok(),
+            Chord::triad(tuning!(G 4), ChordQuality::Major).ok()
+        );
+        assert_eq!(
+            s.degree_chord(6).ok(),
+            Chord::triad(tuning!(A 4), ChordQuality::Minor).ok()
+        );
+        assert_eq!(
+            s.degree_chord(7).ok(),
+            Chord::triad(tuning!(B 4), ChordQuality::Diminished).ok()
+        );
+    }
 }
