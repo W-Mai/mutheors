@@ -37,7 +37,7 @@ impl PitchClass {
     }
 
     pub fn common_chord(&self, degree: u8, octave: i8) -> Chord {
-        assert!(degree > 0 && degree < 7, "Degree must be in [1, 6]");
+        assert!(degree > 0 && degree < 8, "Degree must be in [1, 6]");
         const BASIC_DEGREES: [i8; 7] = [0, 2, 4, 5, 7, 9, 11];
         let tuning = Tuning::new(*self, octave);
         let new_tuning = tuning
@@ -47,6 +47,7 @@ impl PitchClass {
         let quality = match degree {
             1 | 4 | 5 => ChordQuality::Major,
             2 | 3 | 6 => ChordQuality::Minor,
+            7 => ChordQuality::Diminished,
             _ => panic!("Invalid degree"),
         };
 
