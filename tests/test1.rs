@@ -1,15 +1,22 @@
 #[cfg(test)]
 mod tests {
+    use mutheors::duration_utils::DurationProgress;
     use mutheors::*;
 
     fn sum_duration(dg: &DurationGenerator, ds: &Vec<Note>) -> f32 {
-        ds.iter().fold(0.0f32, |acc, x| acc + x.duration().in_beats(dg))
+        ds.iter()
+            .fold(0.0f32, |acc, x| acc + x.duration().in_beats(dg))
     }
 
     fn do_a_measure_test(beat: u8) {
         let dg = DurationGenerator::new(DurationBase::Quarter);
         let chord = Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
-        let measure = duration_utils::generate_one_measure(&dg, chord, beat);
+        let measure = duration_utils::generate_one_measure(
+            &dg,
+            chord,
+            beat,
+            DurationProgress::Random(vec![3.0, 2.0, 1.0]),
+        );
         match measure {
             Measure::Note(notes) => {
                 println!(
