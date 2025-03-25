@@ -415,7 +415,7 @@ pub mod duration_utils {
         let mut rng = rng();
         let mut beats_sum = 0.0;
         while beats_sum < beat {
-            let beats_choice = *[3.0, 2.0, 1.0].choose(&mut rng).unwrap();
+            let beats_choice = *[2.0, 1.0, 0.5].choose(&mut rng).unwrap();
             let duration = dg.beat(beats_choice);
             if beats_sum + beats_choice > beat {
                 break;

@@ -70,18 +70,52 @@ mod tests {
 
     #[test]
     fn test_random_measure() {
-        let pitch_class = PitchClass::G;
-        let deg = degrees!(1 5 6 2 4 1 4 5 1 5 6 2 4 1 4 5 1 5 6 2 4 1 4 5 1 5 6 2 4 1 4 5 1 1);
-        let chords = deg.map(|degree| pitch_class.common_chord(degree, 4));
-
-        let mut score = Score::<2>::new().with_tempo(140);
+        let mut score = Score::<2>::new().with_tempo(200);
         let dg = score.duration_generator();
+
+        let scale = tuning!(C 4).scale(ScaleType::Major);
+        let deg = degrees!(1 6 4 5);
+        let chords = deg.map(|degree| scale.degree_chord(degree).unwrap());
 
         (0..deg.len()).for_each(|i| {
             score.new_measures(|m| {
                 m[0].chord(chords[i].clone());
                 m[1] = duration_utils::generate_one_measure(&dg, chords[i].clone(), 4);
             })
+        });
+
+        let scale = tuning!(A 4).scale(ScaleType::NaturalMinor);
+        let deg = degrees!(1 6 4 5);
+        let chords = deg.map(|degree| scale.degree_chord(degree).unwrap());
+
+        (0..deg.len()).for_each(|i| {
+            score.new_measures(|m| {
+                m[0].chord(chords[i].clone());
+                m[1] = duration_utils::generate_one_measure(&dg, chords[i].clone(), 4);
+            })
+        });
+
+        let scale = tuning!(C 4).scale(ScaleType::NaturalMinor);
+        let deg = degrees!(1 6 4 5);
+        let chords = deg.map(|degree| scale.degree_chord(degree).unwrap());
+
+        (0..deg.len()).for_each(|i| {
+            score.new_measures(|m| {
+                m[0].chord(chords[i].clone());
+                m[1] = duration_utils::generate_one_measure(&dg, chords[i].clone(), 4);
+            })
+        });
+
+        score.new_measures(|m| {
+            let chord = scale.degree_chord(deg[0]).unwrap();
+            let components = chord.components();
+            m[0].chord(chord);
+            m[1].note(beats!(dg;
+                1.0 => components[0],
+                1.0 => components[1],
+                1.0 => components[2],
+                1.0 => components[0]
+            ));
         });
 
         score.play(func!()).unwrap()
