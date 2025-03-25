@@ -36,7 +36,7 @@
 
 use crate::interval::Interval;
 use crate::tuning::Tuning;
-use crate::MusicError;
+use crate::{IntervalQuality, MusicError};
 use std::ops::{Add, Div, Mul, Sub};
 
 /// Scale type classification
@@ -189,8 +189,48 @@ impl Scale {
     // TODO: 生成音阶和弦
     // pub fn chord(&self, degree: u8, quality: ChordQuality) -> Result<Chord, MusicError> {}
 
-    // TODO: 分析调式特征音程
-    // pub fn characteristic_interval(&self) -> Option<Interval> {}
+    // Get the characteristic interval of the scale
+    pub fn characteristic_interval(&self) -> Option<Interval> {
+        match self.scale_type {
+            ScaleType::Dorian => Interval::from_quality_degree(IntervalQuality::Major, 6).ok(),
+            ScaleType::Phrygian => Interval::from_quality_degree(IntervalQuality::Minor, 2).ok(),
+            ScaleType::Lydian => Interval::from_quality_degree(IntervalQuality::Augmented, 4).ok(),
+            ScaleType::Mixolydian => Interval::from_quality_degree(IntervalQuality::Minor, 7).ok(),
+            ScaleType::Aeolian | ScaleType::NaturalMinor => {
+                Interval::from_quality_degree(IntervalQuality::Minor, 6).ok()
+            }
+            ScaleType::Locrian => {
+                Interval::from_quality_degree(IntervalQuality::Diminished, 5).ok()
+            }
+
+            ScaleType::HarmonicMinor => {
+                Interval::from_quality_degree(IntervalQuality::Augmented, 7).ok()
+            }
+            ScaleType::MelodicMinor => {
+                Interval::from_quality_degree(IntervalQuality::Major, 6).ok()
+            }
+
+            ScaleType::Blues => Interval::from_quality_degree(IntervalQuality::Diminished, 5).ok(),
+            ScaleType::WholeTone => {
+                Interval::from_quality_degree(IntervalQuality::Augmented, 4).ok()
+            }
+            ScaleType::Octatonic => Interval::from_quality_degree(IntervalQuality::Minor, 3).ok(),
+            ScaleType::BebopDominant => {
+                Interval::from_quality_degree(IntervalQuality::Major, 7).ok()
+            }
+            ScaleType::Hijaz => Interval::from_quality_degree(IntervalQuality::Augmented, 2).ok(),
+
+            ScaleType::Hirajoshi => Interval::from_quality_degree(IntervalQuality::Perfect, 4).ok(),
+            ScaleType::InSen => Interval::from_quality_degree(IntervalQuality::Perfect, 4).ok(),
+
+            ScaleType::Major
+            | ScaleType::Ionian
+            | ScaleType::PentatonicMajor
+            | ScaleType::PentatonicMinor
+            | ScaleType::Chromatic
+            | ScaleType::Custom(_) => None,
+        }
+    }
 
     // Get the modal tonic
     pub fn modal_tonic(&self) -> Tuning {
