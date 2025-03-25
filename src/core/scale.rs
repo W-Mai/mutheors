@@ -450,6 +450,10 @@ mod tests {
         let scale = a.scale(ScaleType::Blues);
         assert!(scale.contains(&Tuning::new(PitchClass::C, 5)));
         assert!(scale.contains(&Tuning::new(PitchClass::D, 5).sharp()));
+        assert_eq!(
+            scale.characteristic_tuning(),
+            Some(Tuning::new(PitchClass::D, 5).sharp())
+        );
     }
 
     #[test]
