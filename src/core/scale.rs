@@ -36,7 +36,7 @@
 
 use crate::interval::Interval;
 use crate::tuning::Tuning;
-use crate::{IntervalQuality, MusicError};
+use crate::{Chord, ChordQuality, IntervalQuality, MusicError};
 use std::ops::{Add, Div, Mul, Sub};
 
 /// Scale type classification
@@ -186,8 +186,11 @@ impl Scale {
         intervals.iter().map(|i| i.semitones()).sum::<i8>() as u8
     }
 
-    // TODO: 生成音阶和弦
-    // pub fn chord(&self, degree: u8, quality: ChordQuality) -> Result<Chord, MusicError> {}
+    /// Get the chord of the scale in the given degree
+    pub fn chord(&self, degree: u8, quality: ChordQuality) -> Result<Chord, MusicError> {
+        Chord::triad(self.degree(degree)?, quality)
+            .or_else(|_| Chord::seventh(self.degree(degree)?, quality))
+    }
 
     // Get the characteristic interval of the scale
     pub fn characteristic_interval(&self) -> Option<Interval> {
@@ -472,5 +475,19 @@ mod tests {
         assert_eq!(s.sharp().sharp()(1).simple(), tuning!(D 4));
         assert_eq!(s.flat().sharp()(1), tuning!(C 4));
         assert_eq!(s.flat().sharp()(1), s(1).sharp().flat());
+    }
+
+    #[test]
+    fn test_scale_2() {
+        let s = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
+
+        let c = s.chord(1, ChordQuality::Major).ok();
+        assert_eq!(c, Chord::triad(tuning!(C 4), ChordQuality::Major).ok());
+
+        let d = s.chord(2, ChordQuality::Major).ok();
+        assert_eq!(d, Chord::triad(tuning!(D 4), ChordQuality::Major).ok());
+
+        let e = s.chord(3, ChordQuality::Major).ok();
+        assert_eq!(e, Chord::triad(tuning!(E 4), ChordQuality::Major).ok());
     }
 }
