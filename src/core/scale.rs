@@ -232,6 +232,11 @@ impl Scale {
         }
     }
 
+    pub fn characteristic_tuning(&self) -> Option<Tuning> {
+        self.characteristic_interval()
+            .and_then(|i| self.root.add_interval(&i).ok())
+    }
+
     // Get the modal tonic
     pub fn modal_tonic(&self) -> Tuning {
         self.root
