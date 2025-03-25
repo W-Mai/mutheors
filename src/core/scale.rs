@@ -192,6 +192,146 @@ impl Scale {
             .or_else(|_| Chord::seventh(self.degree(degree)?, quality))
     }
 
+    pub fn degree_chord(&self, degree: u8) -> Result<Chord, MusicError> {
+        const NATURE_MAJOR: [ChordQuality; 7] = [
+            ChordQuality::Major,
+            ChordQuality::Minor,
+            ChordQuality::Minor,
+            ChordQuality::Major,
+            ChordQuality::Major,
+            ChordQuality::Minor,
+            ChordQuality::Diminished,
+        ];
+
+        fn shift_major(shift: i8) -> Vec<ChordQuality> {
+            let mut major = NATURE_MAJOR.to_vec();
+            major.rotate_left(shift as usize);
+            major
+        }
+
+        let scale_qualities = match self.scale_type {
+            // Natural scales
+            ScaleType::Major => shift_major(0),
+            ScaleType::NaturalMinor => shift_major(6),
+            // i (m), ii° (d), III+ (aug), iv (m), V (M), VI (M), vii° (d)
+            ScaleType::HarmonicMinor => vec![
+                ChordQuality::Minor,
+                ChordQuality::Diminished,
+                ChordQuality::Augmented,
+                ChordQuality::Minor,
+                ChordQuality::Major,
+                ChordQuality::Major,
+                ChordQuality::Diminished,
+            ],
+            // i (m), ii (m), III+ (aug), IV (M), V (M), vi° (d), vii° (d)
+            ScaleType::MelodicMinor => vec![
+                ChordQuality::Minor,
+                ChordQuality::Minor,
+                ChordQuality::Augmented,
+                ChordQuality::Major,
+                ChordQuality::Major,
+                ChordQuality::Diminished,
+                ChordQuality::Diminished,
+            ],
+
+            // Mediaeval mode
+            ScaleType::Ionian => shift_major(0),
+            ScaleType::Dorian => shift_major(1),
+            ScaleType::Phrygian => shift_major(2),
+            ScaleType::Lydian => shift_major(3),
+            ScaleType::Mixolydian => shift_major(4),
+            ScaleType::Aeolian => shift_major(5),
+            ScaleType::Locrian => shift_major(6),
+
+            // Pentatonic scale
+            // I (M), ii (m), iii (m), V (M), vi (m)
+            ScaleType::PentatonicMajor => vec![
+                ChordQuality::Major,
+                ChordQuality::Minor,
+                ChordQuality::Minor,
+                ChordQuality::Major,
+                ChordQuality::Minor,
+            ],
+            // i (m), III (M), IV (m), V (M), VII (M)
+            ScaleType::PentatonicMinor => vec![
+                ChordQuality::Minor,
+                ChordQuality::Major,
+                ChordQuality::Minor,
+                ChordQuality::Major,
+                ChordQuality::Major,
+            ],
+            // i7, IV7, V7
+            ScaleType::Blues => vec![
+                ChordQuality::Diminished,
+                ChordQuality::Major,
+                ChordQuality::Major,
+            ],
+
+            // Special scales
+            ScaleType::WholeTone => vec![
+                ChordQuality::Augmented,
+                ChordQuality::Augmented,
+                ChordQuality::Augmented,
+                ChordQuality::Augmented,
+                ChordQuality::Augmented,
+                ChordQuality::Augmented,
+            ],
+            ScaleType::Octatonic => vec![
+                ChordQuality::Diminished,
+                ChordQuality::Diminished,
+                ChordQuality::Diminished,
+                ChordQuality::Diminished,
+                ChordQuality::Diminished,
+                ChordQuality::Diminished,
+                ChordQuality::Diminished,
+                ChordQuality::Diminished,
+            ],
+            ScaleType::BebopDominant => vec![
+                ChordQuality::Dominant7,
+                ChordQuality::Minor7,
+                ChordQuality::HalfDiminished,
+                ChordQuality::Major7,
+                ChordQuality::Dominant7,
+                ChordQuality::Minor7,
+                ChordQuality::Minor7,
+                ChordQuality::FullyDiminished,
+            ],
+
+            // National scales
+            // i (m), II (M), III+ (aug), iv (m), V (M), VI (M), vii° (d)
+            ScaleType::Hijaz => vec![
+                ChordQuality::Minor,
+                ChordQuality::Major,
+                ChordQuality::Augmented,
+                ChordQuality::Minor,
+                ChordQuality::Major,
+                ChordQuality::Major,
+                ChordQuality::Diminished,
+            ],
+            ScaleType::Hirajoshi => vec![
+                ChordQuality::Major,
+                ChordQuality::Minor,
+                ChordQuality::Augmented,
+                ChordQuality::Minor,
+                ChordQuality::Augmented,
+            ],
+            // i (m), IV (M), V (m)
+            ScaleType::InSen => vec![
+                ChordQuality::Minor,
+                ChordQuality::Major,
+                ChordQuality::Minor,
+            ],
+
+            ScaleType::Custom(_) | ScaleType::Chromatic => vec![],
+        };
+
+        if degree < 1 || degree > scale_qualities.len() as u8 {
+            Err(MusicError::InvalidScaleDegree(degree))?
+        }
+        let quality = scale_qualities[(degree - 1) as usize];
+        self.chord(degree, quality)
+    }
+
     // Get the characteristic interval of the scale
     pub fn characteristic_interval(&self) -> Option<Interval> {
         match self.scale_type {
