@@ -24,3 +24,9 @@
 - Midi: play the score using midi
   Other Abilities:
 - Interval: describe the distance between two `Tuning`s
+
+## Simple Usage
+
+1. Pick a PitchClass
+2. From PitchClass, generate a Tuning
+3. Generate a Chord from Tuning
