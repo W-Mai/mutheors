@@ -1,11 +1,15 @@
 //! Chord system module
 //! It includes core functions such as chord construction, analysis, inversion and voice arrangement
 
+mod quality;
+
 use crate::interval::{Interval, IntervalQuality};
 use crate::tuning::Tuning;
 use crate::MusicError;
 use std::fmt::Display;
 use std::str::FromStr;
+
+pub use quality::*;
 
 /// Chord quality classification (basic triad)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -192,21 +196,6 @@ impl Chord {
     // }
 }
 
-/// Classification of chord masses (basic triads)
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ChordQuality {
-    Major,
-    Minor,
-    Diminished,
-    Augmented,
-    Major7,
-    Dominant7,
-    Minor7,
-    MinorMajor7,
-    HalfDiminished,
-    FullyDiminished,
-}
-
 /// Functional classification of chords (tonal analysis)
 #[derive(Debug, PartialEq)]
 pub enum ChordFunction {
@@ -216,20 +205,6 @@ pub enum ChordFunction {
     SecondaryDominant,
     Neapolitan,
     //... Other Functional Categories
-}
-
-impl ChordQuality {
-    pub fn base_quality(&self) -> ChordQuality {
-        match self {
-            ChordQuality::Major7 => ChordQuality::Major,
-            ChordQuality::Dominant7 => ChordQuality::Major,
-            ChordQuality::Minor7 => ChordQuality::Minor,
-            ChordQuality::MinorMajor7 => ChordQuality::Minor,
-            ChordQuality::HalfDiminished => ChordQuality::Diminished,
-            ChordQuality::FullyDiminished => ChordQuality::Diminished,
-            _ => *self,
-        }
-    }
 }
 
 impl Chord {
@@ -281,24 +256,6 @@ impl FromStr for Chord {
 impl Display for Chord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = format!("{}{}", self.root, self.quality);
-        write!(f, "{}", str)
-    }
-}
-
-impl Display for ChordQuality {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str = match self {
-            ChordQuality::Major => "M",
-            ChordQuality::Minor => "m",
-            ChordQuality::Diminished => "dim",
-            ChordQuality::Augmented => "aug",
-            ChordQuality::Major7 => "M7",
-            ChordQuality::Dominant7 => "7",
-            ChordQuality::Minor7 => "m7",
-            ChordQuality::MinorMajor7 => "mM7",
-            ChordQuality::HalfDiminished => "Ø",
-            ChordQuality::FullyDiminished => "°7",
-        };
         write!(f, "{}", str)
     }
 }
