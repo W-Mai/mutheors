@@ -315,13 +315,13 @@ pub mod play_utils {
 
     impl Note {
         pub fn play(&self, name: &str) -> Result<(), String> {
-            Measure::Note(vec![self.clone()]).play(name)
+            Measure::from([self.clone()]).play(name)
         }
     }
 
     impl Tuning {
         pub fn play(&self, name: &str) -> Result<(), String> {
-            Into::<Note>::into(*self).play(name)
+            Note::from(self.clone()).play(name)
         }
     }
 }
