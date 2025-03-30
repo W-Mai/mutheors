@@ -378,6 +378,12 @@ mod tests {
     }
 
     #[test]
+    fn test_play_scale() {
+        let scale = Scale::new(tuning!(C 4), ScaleType::Blues).unwrap();
+        scale.play(func!()).unwrap()
+    }
+
+    #[test]
     fn test_play_notes() {
         let notes = [
             Note::new(tuning!(C 4)),

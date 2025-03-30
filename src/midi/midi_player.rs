@@ -296,6 +296,7 @@ impl MidiPlayer {
 
 pub mod play_utils {
     use super::*;
+    use crate::Scale;
 
     impl<const TRACK_CNT: usize> Score<TRACK_CNT> {
         pub fn play(&self, name: &str) -> Result<(), String> {
@@ -312,7 +313,7 @@ pub mod play_utils {
             score.play(name)
         }
     }
-    
+
     impl Chord {
         pub fn play(&self, name: &str) -> Result<(), String> {
             Measure::from(self.clone()).play(name)
@@ -322,6 +323,15 @@ pub mod play_utils {
     impl Note {
         pub fn play(&self, name: &str) -> Result<(), String> {
             Measure::from([self.clone()]).play(name)
+        }
+    }
+
+    impl Scale {
+        pub fn play(&self, name: &str) -> Result<(), String> {
+            let tunings = self
+                .generate_tunings(0)
+                .or(Err("No tuning generated".to_owned()))?;
+            Measure::from(tunings.iter().map(|t| Note::from(*t)).collect::<Vec<_>>()).play(name)
         }
     }
 
