@@ -2,6 +2,7 @@
 //! It includes core functions such as chord construction, analysis, inversion and voice arrangement
 
 mod quality;
+mod parser;
 
 use crate::interval::{Interval, IntervalQuality};
 use crate::tuning::Tuning;
