@@ -39,17 +39,17 @@ mod tests {
         );
 
         score.new_measures(|ms| {
-            ms[0].chord(Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap());
-            ms[1].chord(Chord::triad(Tuning::new(PitchClass::G, 4), ChordQuality::Major).unwrap());
-            ms[2].chord(Chord::triad(Tuning::new(PitchClass::A, 4), ChordQuality::Major).unwrap());
-            ms[3].chord(Chord::triad(Tuning::new(PitchClass::F, 4), ChordQuality::Major).unwrap());
+            ms[0].chord(Chord::new(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap());
+            ms[1].chord(Chord::new(Tuning::new(PitchClass::G, 4), ChordQuality::Major).unwrap());
+            ms[2].chord(Chord::new(Tuning::new(PitchClass::A, 4), ChordQuality::Major).unwrap());
+            ms[3].chord(Chord::new(Tuning::new(PitchClass::F, 4), ChordQuality::Major).unwrap());
         });
 
         score.new_measures(|ms| {
-            ms[0].chord(Chord::triad(Tuning::new(PitchClass::D, 4), ChordQuality::Major).unwrap());
+            ms[0].chord(Chord::new(Tuning::new(PitchClass::D, 4), ChordQuality::Major).unwrap());
             ms[1].rest();
             ms[2].rest();
-            ms[3].chord(Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap());
+            ms[3].chord(Chord::new(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap());
         })
     }
 }

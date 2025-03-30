@@ -81,7 +81,7 @@ impl Chord {
 }
 
 impl Chord {
-    fn new(
+    fn construct(
         tuning: Tuning,
         intervals: Vec<Interval>,
         chord_type: ChordType,
@@ -99,7 +99,7 @@ impl Chord {
     }
 
     /// Constructive triad (musical chord)
-    pub fn triad(root: Tuning, quality: ChordQuality) -> Result<Self, MusicError> {
+    pub fn new(root: Tuning, quality: ChordQuality) -> Result<Self, MusicError> {
         let intervals = match quality {
             ChordQuality::Major => vec![
                 Interval::from_quality_degree(IntervalQuality::Major, 3)?,
@@ -117,28 +117,111 @@ impl Chord {
                 Interval::from_quality_degree(IntervalQuality::Major, 3)?,
                 Interval::from_quality_degree(IntervalQuality::Augmented, 5)?,
             ],
-            _ => return Err(MusicError::TheoryViolation("Invalid triad".to_owned())),
+            ChordQuality::Major7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 7)?,
+            ],
+            ChordQuality::Dominant7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Minor, 7)?,
+            ],
+            ChordQuality::Minor7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Minor, 7)?,
+            ],
+            ChordQuality::MinorMajor7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 7)?,
+            ],
+            ChordQuality::HalfDiminished7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Diminished, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Minor, 7)?,
+            ],
+            ChordQuality::Diminished7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Diminished, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Diminished, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Diminished, 7)?,
+            ],
+            ChordQuality::Augmented7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Augmented, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Augmented, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Minor, 7)?,
+            ],
+            ChordQuality::AugmentedMajor7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Augmented, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Augmented, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 7)?,
+            ],
+            ChordQuality::Major6 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 6)?,
+            ],
+            ChordQuality::Minor6 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 6)?,
+            ],
+            ChordQuality::Major9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 7)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 9)?,
+            ],
+            ChordQuality::Dominant9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Minor, 7)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 9)?,
+            ],
+            ChordQuality::Minor9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Minor, 7)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 9)?,
+            ],
+            ChordQuality::Add9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 9)?,
+            ],
+            ChordQuality::MinorAdd9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 9)?,
+            ],
+            ChordQuality::Suspended2 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 2)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+            ],
+            ChordQuality::Suspended4 => vec![
+                Interval::from_quality_degree(IntervalQuality::Perfect, 4)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+            ],
+            ChordQuality::Suspended7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Perfect, 4)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Minor, 7)?,
+            ],
+            ChordQuality::Suspended9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Perfect, 4)?,
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+                Interval::from_quality_degree(IntervalQuality::Minor, 7)?,
+                Interval::from_quality_degree(IntervalQuality::Major, 9)?,
+            ],
         };
 
-        Ok(Self::new(root, intervals, ChordType::Triad, quality))
-    }
-
-    /// Construct seventh chord
-    pub fn seventh(root: Tuning, quality: ChordQuality) -> Result<Self, MusicError> {
-        let mut base = Self::triad(root, quality.base_quality())?.with_extension(match quality {
-            ChordQuality::Major7 | ChordQuality::MinorMajor7 => {
-                Interval::from_quality_degree(IntervalQuality::Major, 7)?
-            }
-            ChordQuality::Dominant7 | ChordQuality::HalfDiminished | ChordQuality::Minor7 => {
-                Interval::from_quality_degree(IntervalQuality::Minor, 7)?
-            }
-            ChordQuality::FullyDiminished => {
-                Interval::from_quality_degree(IntervalQuality::Diminished, 7)?
-            }
-            _ => return Err(MusicError::TheoryViolation("Invalid 7th chord".to_owned())),
-        });
-        base.chord_type = ChordType::Seventh;
-        Ok(base)
+        Ok(Self::construct(
+            root,
+            intervals,
+            ChordType::Triad,
+            quality,
+        ))
     }
 
     /// Adding Extended interval
@@ -267,7 +350,7 @@ mod tests {
 
     #[test]
     fn test_major_triad() {
-        let c_major = Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
+        let c_major = Chord::new(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
         assert_eq!(
             c_major.components(),
             vec![
@@ -280,7 +363,7 @@ mod tests {
 
     #[test]
     fn test_dominant_seventh() {
-        let g7 = Chord::seventh(Tuning::new(PitchClass::G, 4), ChordQuality::Dominant7).unwrap();
+        let g7 = Chord::new(Tuning::new(PitchClass::G, 4), ChordQuality::Dominant7).unwrap();
         assert_eq!(
             g7.components(),
             vec![
@@ -294,7 +377,7 @@ mod tests {
 
     #[test]
     fn test_inversion() {
-        let mut cmaj = Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
+        let mut cmaj = Chord::new(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
         cmaj.invert(Inversion::First);
         assert_eq!(
             cmaj.components(),

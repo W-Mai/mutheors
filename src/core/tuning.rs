@@ -51,7 +51,7 @@ impl PitchClass {
             _ => panic!("Invalid degree"),
         };
 
-        Chord::triad(new_tuning, quality).unwrap()
+        Chord::new(new_tuning, quality).unwrap()
     }
 }
 

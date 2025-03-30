@@ -30,8 +30,8 @@ mod tests {
             ));
         });
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Major).unwrap());
-            m[1].chord(Chord::triad(tuning!(B 3), ChordQuality::Major).unwrap());
+            m[0].chord(Chord::new(tuning!(G 4), ChordQuality::Major).unwrap());
+            m[1].chord(Chord::new(tuning!(B 3), ChordQuality::Major).unwrap());
         });
         score.new_measures(|m| {
             m[0].note(beats!(dg;
@@ -149,7 +149,7 @@ mod tests {
         let dg = score.duration_generator();
 
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(tuning!(C 4), ChordQuality::Major).unwrap());
+            m[0].chord(Chord::new(tuning!(C 4), ChordQuality::Major).unwrap());
             m[1].note(beats!(dg;
                 0.5 => tuning!(C 4),
                 0.5 => tuning!(D 4),
@@ -159,7 +159,7 @@ mod tests {
         });
 
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(tuning!(C 4), ChordQuality::Major).unwrap());
+            m[0].chord(Chord::new(tuning!(C 4), ChordQuality::Major).unwrap());
             m[1].note(beats!(dg;
                 0.5 => tuning!(C 4),
                 0.5 => tuning!(D 4),
@@ -169,7 +169,7 @@ mod tests {
         });
 
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Major).unwrap());
+            m[0].chord(Chord::new(tuning!(G 4), ChordQuality::Major).unwrap());
             m[1].note(beats!(dg;
                 0.5 => tuning!(E 4),
                 0.5 => tuning!(F 4),
@@ -178,7 +178,7 @@ mod tests {
         });
 
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Major).unwrap());
+            m[0].chord(Chord::new(tuning!(G 4), ChordQuality::Major).unwrap());
             m[1].note(beats!(dg;
                 0.5 => tuning!(E 4),
                 0.5 => tuning!(F 4),
@@ -187,7 +187,7 @@ mod tests {
         });
 
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(tuning!(A 4), ChordQuality::Minor).unwrap());
+            m[0].chord(Chord::new(tuning!(A 4), ChordQuality::Minor).unwrap());
             m[1].note(beats!(dg;
                 0.25 => tuning!(G 4),
                 0.25 => tuning!(A 4),
@@ -199,7 +199,7 @@ mod tests {
         });
 
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(tuning!(A 4), ChordQuality::Minor).unwrap());
+            m[0].chord(Chord::new(tuning!(A 4), ChordQuality::Minor).unwrap());
             m[1].note(beats!(dg;
                 0.25 => tuning!(G 4),
                 0.25 => tuning!(A 4),
@@ -211,7 +211,7 @@ mod tests {
         });
 
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(tuning!(E 4), ChordQuality::Minor).unwrap());
+            m[0].chord(Chord::new(tuning!(E 4), ChordQuality::Minor).unwrap());
             m[1].note(beats!(dg;
                 0.5 => tuning!(E 4),
                 0.5 => tuning!(G 3),
@@ -220,7 +220,7 @@ mod tests {
         });
 
         score.new_measures(|m| {
-            m[0].chord(Chord::triad(tuning!(E 4), ChordQuality::Minor).unwrap());
+            m[0].chord(Chord::new(tuning!(E 4), ChordQuality::Minor).unwrap());
             m[1].note(beats!(dg;
                 0.5 => tuning!(E 4),
                 0.5 => tuning!(G 3),
@@ -242,7 +242,7 @@ mod tests {
 
         (0..2).for_each(|_| {
             score.new_measures(|m| {
-                m[0].chord(Chord::seventh(tuning!(C 4), ChordQuality::Dominant7).unwrap());
+                m[0].chord(Chord::new(tuning!(C 4), ChordQuality::Dominant7).unwrap());
                 m[1].note(beats!(dg;
                     0.5 => scale(1),
                     0.5 => scale(2),
@@ -254,7 +254,7 @@ mod tests {
 
         (0..2).for_each(|_| {
             score.new_measures(|m| {
-                m[0].chord(Chord::triad(tuning!(G 4), ChordQuality::Diminished).unwrap());
+                m[0].chord(Chord::new(tuning!(G 4), ChordQuality::Diminished).unwrap());
                 m[1].note(beats!(dg;
                     0.5 => scale(3),
                     0.5 => scale(4),
@@ -265,7 +265,7 @@ mod tests {
 
         (0..2).for_each(|_| {
             score.new_measures(|m| {
-                m[0].chord(Chord::seventh(tuning!(A 4), ChordQuality::FullyDiminished).unwrap());
+                m[0].chord(Chord::new(tuning!(A 4), ChordQuality::Diminished7).unwrap());
                 m[1].note(beats!(dg;
                     0.25 => scale(5),
                     0.25 => scale(6),
@@ -279,7 +279,7 @@ mod tests {
 
         (0..2).for_each(|_| {
             score.new_measures(|m| {
-                m[0].chord(Chord::triad(tuning!(E 4), ChordQuality::Major).unwrap());
+                m[0].chord(Chord::new(tuning!(E 4), ChordQuality::Major).unwrap());
                 m[1].note(beats!(dg;
                     0.5 => scale(3),
                     0.5 => scale(5) / 2,

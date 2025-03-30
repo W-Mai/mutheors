@@ -27,7 +27,7 @@ mod tests {
 
         assert_eq!(
             chord,
-            Chord::triad(Tuning::new(PitchClass::C, 4).sharp(), ChordQuality::Major).unwrap()
+            Chord::new(Tuning::new(PitchClass::C, 4).sharp(), ChordQuality::Major).unwrap()
         );
     }
 }

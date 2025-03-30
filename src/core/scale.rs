@@ -188,8 +188,7 @@ impl Scale {
 
     /// Get the chord of the scale in the given degree
     pub fn chord(&self, degree: u8, quality: ChordQuality) -> Result<Chord, MusicError> {
-        Chord::triad(self.degree(degree)?, quality)
-            .or_else(|_| Chord::seventh(self.degree(degree)?, quality))
+        Chord::new(self.degree(degree)?, quality)
     }
 
     pub fn degree_chord(&self, degree: u8) -> Result<Chord, MusicError> {
@@ -289,12 +288,12 @@ impl Scale {
             ScaleType::BebopDominant => vec![
                 ChordQuality::Dominant7,
                 ChordQuality::Minor7,
-                ChordQuality::HalfDiminished,
+                ChordQuality::HalfDiminished7,
                 ChordQuality::Major7,
                 ChordQuality::Dominant7,
                 ChordQuality::Minor7,
                 ChordQuality::Minor7,
-                ChordQuality::FullyDiminished,
+                ChordQuality::Diminished7,
             ],
 
             // National scales
@@ -622,13 +621,13 @@ mod tests {
         let s = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
 
         let c = s.chord(1, ChordQuality::Major).ok();
-        assert_eq!(c, Chord::triad(tuning!(C 4), ChordQuality::Major).ok());
+        assert_eq!(c, Chord::new(tuning!(C 4), ChordQuality::Major).ok());
 
         let d = s.chord(2, ChordQuality::Major).ok();
-        assert_eq!(d, Chord::triad(tuning!(D 4), ChordQuality::Major).ok());
+        assert_eq!(d, Chord::new(tuning!(D 4), ChordQuality::Major).ok());
 
         let e = s.chord(3, ChordQuality::Major).ok();
-        assert_eq!(e, Chord::triad(tuning!(E 4), ChordQuality::Major).ok());
+        assert_eq!(e, Chord::new(tuning!(E 4), ChordQuality::Major).ok());
     }
 
     #[test]
@@ -637,31 +636,31 @@ mod tests {
 
         assert_eq!(
             s.degree_chord(1).ok(),
-            Chord::triad(tuning!(C 4), ChordQuality::Major).ok()
+            Chord::new(tuning!(C 4), ChordQuality::Major).ok()
         );
         assert_eq!(
             s.degree_chord(2).ok(),
-            Chord::triad(tuning!(D 4), ChordQuality::Minor).ok()
+            Chord::new(tuning!(D 4), ChordQuality::Minor).ok()
         );
         assert_eq!(
             s.degree_chord(3).ok(),
-            Chord::triad(tuning!(E 4), ChordQuality::Minor).ok()
+            Chord::new(tuning!(E 4), ChordQuality::Minor).ok()
         );
         assert_eq!(
             s.degree_chord(4).ok(),
-            Chord::triad(tuning!(F 4), ChordQuality::Major).ok()
+            Chord::new(tuning!(F 4), ChordQuality::Major).ok()
         );
         assert_eq!(
             s.degree_chord(5).ok(),
-            Chord::triad(tuning!(G 4), ChordQuality::Major).ok()
+            Chord::new(tuning!(G 4), ChordQuality::Major).ok()
         );
         assert_eq!(
             s.degree_chord(6).ok(),
-            Chord::triad(tuning!(A 4), ChordQuality::Minor).ok()
+            Chord::new(tuning!(A 4), ChordQuality::Minor).ok()
         );
         assert_eq!(
             s.degree_chord(7).ok(),
-            Chord::triad(tuning!(B 4), ChordQuality::Diminished).ok()
+            Chord::new(tuning!(B 4), ChordQuality::Diminished).ok()
         );
     }
 }

@@ -10,7 +10,7 @@ mod tests {
 
     fn do_a_measure_test(beat: u8) {
         let dg = DurationGenerator::new(DurationBase::Quarter);
-        let chord = Chord::triad(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
+        let chord = Chord::new(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
         let measure = duration_utils::generate_one_measure(
             &dg,
             chord,
