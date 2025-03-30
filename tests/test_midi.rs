@@ -358,4 +358,10 @@ mod tests {
 
         score.play(func!()).unwrap()
     }
+
+    #[test]
+    fn test_play_measure() {
+        let measure = Measure::Chord(Chord::new(tuning!(C 4), ChordQuality::Suspended2).unwrap());
+        measure.play(func!()).unwrap()
+    }
 }

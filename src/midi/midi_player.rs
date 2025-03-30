@@ -292,10 +292,24 @@ impl MidiPlayer {
     }
 }
 
-impl<const TRACK_CNT: usize> Score<TRACK_CNT> {
-    pub fn play(&self, name: &str) -> Result<(), String> {
-        let mut midi_player = MidiPlayer::new(name);
-        midi_player.play_score(self)?;
-        Ok(midi_player.close())
+/// Implement some utils play functions
+
+pub mod play_utils {
+    use super::*;
+
+    impl<const TRACK_CNT: usize> Score<TRACK_CNT> {
+        pub fn play(&self, name: &str) -> Result<(), String> {
+            let mut midi_player = MidiPlayer::new(name);
+            midi_player.play_score(self)?;
+            Ok(midi_player.close())
+        }
+    }
+
+    impl Measure {
+        pub fn play(&self, name: &str) -> Result<(), String> {
+            let mut score = Score::<1>::new();
+            score.push_measures([self.clone()]);
+            score.play(name)
+        }
     }
 }
