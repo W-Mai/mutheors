@@ -318,4 +318,10 @@ pub mod play_utils {
             Measure::Note(vec![self.clone()]).play(name)
         }
     }
+    
+    impl Tuning {
+        pub fn play(&self, name: &str) -> Result<(), String> {
+            Into::<Note>::into(*self).play(name)
+        }
+    }
 }

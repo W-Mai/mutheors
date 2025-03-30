@@ -370,4 +370,10 @@ mod tests {
         let note = Note::new(tuning!(C 4));
         note.play(func!()).unwrap()
     }
+    
+    #[test]
+    fn test_play_tuning() {
+        let tuning = tuning!(C 4);
+        tuning.play(func!()).unwrap()
+    }
 }
