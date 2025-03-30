@@ -312,6 +312,12 @@ pub mod play_utils {
             score.play(name)
         }
     }
+    
+    impl Chord {
+        pub fn play(&self, name: &str) -> Result<(), String> {
+            Measure::from(self.clone()).play(name)
+        }
+    }
 
     impl Note {
         pub fn play(&self, name: &str) -> Result<(), String> {

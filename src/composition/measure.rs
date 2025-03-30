@@ -44,3 +44,15 @@ impl<const NOTE_COUNT: usize> From<[Note; NOTE_COUNT]> for Measure {
         Measure::Note(value.to_vec())
     }
 }
+
+impl From<Vec<Note>> for Measure {
+    fn from(value: Vec<Note>) -> Self {
+        Measure::Note(value)
+    }
+}
+
+impl From<Chord> for Measure {
+    fn from(value: Chord) -> Self {
+        Measure::Chord(value)
+    }
+}

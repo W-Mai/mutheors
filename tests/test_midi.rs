@@ -366,11 +366,17 @@ mod tests {
     }
 
     #[test]
+    fn test_play_chord() {
+        let chord = Chord::new(tuning!(C 4), ChordQuality::Major).unwrap();
+        chord.play(func!()).unwrap()
+    }
+
+    #[test]
     fn test_play_note() {
         let note = Note::new(tuning!(C 4));
         note.play(func!()).unwrap()
     }
-    
+
     #[test]
     fn test_play_notes() {
         let notes = [
