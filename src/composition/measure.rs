@@ -38,3 +38,9 @@ impl Display for Measure {
         }
     }
 }
+
+impl<const NOTE_COUNT: usize> From<[Note; NOTE_COUNT]> for Measure {
+    fn from(value: [Note; NOTE_COUNT]) -> Self {
+        Measure::Note(value.to_vec())
+    }
+}

@@ -142,3 +142,11 @@ impl TimeSignature {
         self.beat_type
     }
 }
+
+impl From<Measure> for Score<1> {
+    fn from(value: Measure) -> Self {
+        let mut score = Score::new();
+        score.push_measures([value]);
+        score
+    }
+}

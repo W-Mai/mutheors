@@ -372,6 +372,17 @@ mod tests {
     }
     
     #[test]
+    fn test_play_notes() {
+        let notes = [
+            Note::new(tuning!(C 4)),
+            Note::new(tuning!(E 4)),
+            Note::new(tuning!(G 4)),
+            Note::new(tuning!(B 4)),
+        ];
+        Measure::from(notes).play(func!()).unwrap()
+    }
+
+    #[test]
     fn test_play_tuning() {
         let tuning = tuning!(C 4);
         tuning.play(func!()).unwrap()
