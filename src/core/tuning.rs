@@ -83,6 +83,53 @@ impl Display for PitchClass {
     }
 }
 
+impl<T> From<T> for Tuning
+where
+    T: Into<String>,
+{
+    fn from(value: T) -> Self {
+        let pitch_class_string = value.into();
+        let chars = pitch_class_string.split_whitespace().collect::<String>();
+        let mut chars = chars.chars().peekable();
+        let mut root = String::new();
+
+        if let Some(&c) = chars.peek() {
+            if ('A'..='G').contains(&c) {
+                root.push(c);
+                chars.next();
+            } else {
+                panic!("Invalid pitch class");
+            }
+        }
+
+        let mut root = Tuning::from(match root.as_str() {
+            "C" => PitchClass::C,
+            "D" => PitchClass::D,
+            "E" => PitchClass::E,
+            "F" => PitchClass::F,
+            "G" => PitchClass::G,
+            "A" => PitchClass::A,
+            "B" => PitchClass::B,
+            _ => panic!("Invalid pitch class"),
+        })
+        .with_octave(4);
+
+        while let Some(&c) = chars.peek() {
+            if c == '#' {
+                root = root.sharp();
+                chars.next();
+            } else if c == 'b' {
+                root = root.flat();
+                chars.next();
+            } else {
+                break;
+            }
+        }
+
+        root
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct Tuning {
     pub class: PitchClass,
@@ -302,6 +349,21 @@ mod tests {
             let c = pitch.common_chord(i);
             println!("{}", c);
         }
+    }
+
+    #[test]
+    fn test_tuning_3() {
+        let tuning = Tuning::from("C#");
+        assert_eq!(tuning, tuning!(# C 4));
+
+        let tuning = Tuning::from("C");
+        assert_eq!(tuning, tuning!(C 4));
+
+        let tuning = Tuning::from("C##");
+        assert_eq!(tuning, tuning!(# C 4).sharp());
+
+        let tuning = Tuning::from("Cb");
+        assert_eq!(tuning, tuning!(b C 4));
     }
 
     #[test]
