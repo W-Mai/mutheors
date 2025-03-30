@@ -246,10 +246,10 @@ impl Scale {
             // I (M), ii (m), iii (m), V (M), vi (m)
             ScaleType::PentatonicMajor => vec![
                 ChordQuality::Major,
-                ChordQuality::Minor,
-                ChordQuality::Minor,
-                ChordQuality::Major,
-                ChordQuality::Minor,
+                ChordQuality::Suspended2,
+                ChordQuality::Suspended4,
+                ChordQuality::Suspended2,
+                ChordQuality::Suspended4,
             ],
             // i (m), III (M), IV (m), V (M), VII (M)
             ScaleType::PentatonicMinor => vec![
