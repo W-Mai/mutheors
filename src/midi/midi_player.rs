@@ -312,4 +312,12 @@ pub mod play_utils {
             score.play(name)
         }
     }
+
+    impl Note {
+        pub fn play(&self, name: &str) -> Result<(), String> {
+            let mut score = Score::<1>::new();
+            score.push_measures([Measure::Note(vec![self.clone()])]);
+            score.play(name)
+        }
+    }
 }
