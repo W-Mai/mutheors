@@ -13,7 +13,7 @@
 //! - "Dbdim" for Db diminished
 //! - "Db dim7" for Db diminished 7th
 
-use crate::{Chord, ChordQuality, MusicError, PitchClass, Tuning};
+use crate::{Chord, ChordQuality, MusicError, Tuning};
 
 impl TryFrom<&str> for Chord {
     type Error = MusicError;
@@ -26,7 +26,7 @@ impl TryFrom<&str> for Chord {
 
         println!("Root: {}, Quality: {}", root, quality);
 
-        Chord::new(Tuning::new(PitchClass::C, 4), ChordQuality::Major)
+        Chord::new(root, ChordQuality::Major)
     }
 }
 
