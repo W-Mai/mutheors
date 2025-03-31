@@ -1,4 +1,6 @@
+use crate::MusicError;
 use std::fmt::Display;
+use std::str::FromStr;
 
 /// Classification of chord masses (basic triads)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -81,5 +83,39 @@ impl Display for ChordQuality {
             ChordQuality::Suspended9 => "9sus4",
         };
         write!(f, "{}", str)
+    }
+}
+
+impl FromStr for ChordQuality {
+    type Err = MusicError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let quality_string = s.split_whitespace().collect::<String>();
+        match quality_string.as_str() {
+            "" | "M" | "maj" | "major" => Ok(ChordQuality::Major),
+            "m" | "min" | "minor" => Ok(ChordQuality::Minor),
+            "dim" | "diminished" => Ok(ChordQuality::Diminished),
+            "aug" | "augmented" => Ok(ChordQuality::Augmented),
+            "M7" | "maj7" | "major7" => Ok(ChordQuality::Major7),
+            "7" | "dom7" | "dominant7" => Ok(ChordQuality::Dominant7),
+            "m7" | "min7" | "minor7" => Ok(ChordQuality::Minor7),
+            "mM7" | "minM7" | "minorMajor7" => Ok(ChordQuality::MinorMajor7),
+            "Ø" | "half-diminished7" => Ok(ChordQuality::HalfDiminished7),
+            "°7" | "diminished7" => Ok(ChordQuality::Diminished7),
+            "aug7" | "augmented7" => Ok(ChordQuality::Augmented7),
+            "augM7" | "augmentedMajor7" => Ok(ChordQuality::AugmentedMajor7),
+            "M6" | "maj6" | "major6" => Ok(ChordQuality::Major6),
+            "m6" | "min6" | "minor6" => Ok(ChordQuality::Minor6),
+            "M9" | "maj9" | "major9" => Ok(ChordQuality::Major9),
+            "9" | "dom9" | "dominant9" => Ok(ChordQuality::Dominant9),
+            "m9" | "min9" | "minor9" => Ok(ChordQuality::Minor9),
+            "add9" => Ok(ChordQuality::Add9),
+            "madd9" => Ok(ChordQuality::MinorAdd9),
+            "sus2" => Ok(ChordQuality::Suspended2),
+            "sus4" => Ok(ChordQuality::Suspended4),
+            "7sus4" => Ok(ChordQuality::Suspended7),
+            "9sus4" => Ok(ChordQuality::Suspended9),
+            _ => Err(MusicError::InvalidIntervalQuality),
+        }
     }
 }

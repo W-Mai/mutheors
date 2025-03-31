@@ -29,9 +29,7 @@ impl FromStr for Chord {
         let root = Tuning::take(chars.by_ref())?;
         let quality = chars.collect::<String>();
 
-        println!("Root: {}, Quality: {}", root, quality);
-
-        Chord::new(root, ChordQuality::Major)
+        Chord::new(root, ChordQuality::from_str(&quality)?)
     }
 }
 
@@ -43,7 +41,14 @@ mod tests {
     fn test_chord_parser() -> Result<(), MusicError> {
         let chord = Chord::from_str("C")?;
         println!("Parsed chord: {}", chord);
+
         let chord = Chord::from_str("C#m")?;
+        println!("Parsed chord: {}", chord);
+
+        let chord = Chord::from_str("CmM7")?;
+        println!("Parsed chord: {}", chord);
+
+        let chord = Chord::from_str("Gbsus2")?;
         println!("Parsed chord: {}", chord);
 
         Ok(())
