@@ -10,6 +10,7 @@ macro_rules! degrees {
 mod tests {
     use mutheors::duration_utils::DurationProgress;
     use mutheors::*;
+    use std::str::FromStr;
 
     #[test]
     fn test_score_with_midi_player() {
@@ -369,6 +370,12 @@ mod tests {
     fn test_play_chord() {
         let chord = Chord::new(tuning!(C 4), ChordQuality::Major).unwrap();
         chord.play(func!()).unwrap()
+    }
+
+    #[test]
+    fn test_play_chord_2() {
+        let chord = Chord::from_str("Gbsus4").unwrap();
+        chord.play(func!()).unwrap();
     }
 
     #[test]
