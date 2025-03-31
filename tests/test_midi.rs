@@ -422,4 +422,32 @@ mod tests {
         let tuning = tuning!(C 4);
         tuning.play(func!()).unwrap()
     }
+
+    #[test]
+    fn test_motor_v8_engine() {
+        // This is a test for the V8 engine
+        // Select your instrument with a Kick drum for MIDI channel 1
+        let mut score = Score::<1>::new()
+            .with_tempo(900)
+            .with_time_signature(4, DurationBase::Quarter);
+
+        let dg = score.duration_generator();
+
+        for _ in 0..100 {
+            score.new_measures(|m| {
+                m[0].note(beats!(dg;
+                    0.5 => tuning!(# D 3),
+                    0.5 => tuning!(C 3),
+                    0.5 => tuning!(C 3),
+                    0.5 => tuning!(# D 3),
+                    0.5 => tuning!(C 3),
+                    0.5 => tuning!(# D 3),
+                    0.5 => tuning!(# D 3),
+                    0.5 => tuning!(C 3),
+                ));
+            });
+        }
+
+        score.play(func!()).unwrap();
+    }
 }
