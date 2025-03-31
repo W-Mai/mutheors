@@ -362,7 +362,8 @@ mod tests {
 
     #[test]
     fn test_play_measure() {
-        let measure = Measure::Chords(vec![Chord::new(tuning!(C 4), ChordQuality::Suspended2).unwrap()]);
+        let mut measure = Measure::new();
+        measure.chord(Chord::new(tuning!(C 4), ChordQuality::Suspended2).unwrap());
         measure.play(func!()).unwrap()
     }
 
@@ -376,6 +377,21 @@ mod tests {
     fn test_play_chord_2() {
         let chord = Chord::from_str("Gbsus4").unwrap();
         chord.play(func!()).unwrap();
+    }
+
+    #[test]
+    fn test_play_chord_3() {
+        let chords = [
+            Chord::from_str("Cmaj7").unwrap(),
+            Chord::from_str("G7").unwrap(),
+            Chord::from_str("Fmaj7").unwrap(),
+            Chord::new(tuning!(C 4), ChordQuality::Major).unwrap(),
+            Chord::new(tuning!(G 4), ChordQuality::Major).unwrap(),
+            Chord::new(tuning!(A 4), ChordQuality::Major).unwrap(),
+            Chord::new(tuning!(B 4), ChordQuality::Diminished).unwrap(),
+        ];
+        let measure = Measure::from(chords);
+        measure.play(func!()).unwrap()
     }
 
     #[test]

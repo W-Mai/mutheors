@@ -65,8 +65,20 @@ impl From<Vec<Note>> for Measure {
 
 impl From<Chord> for Measure {
     fn from(value: Chord) -> Self {
+        Measure::from(vec![value])
+    }
+}
+
+impl<const CHORD_COUNT: usize> From<[Chord; CHORD_COUNT]> for Measure {
+    fn from(value: [Chord; CHORD_COUNT]) -> Self {
+        Measure::from(value.to_vec())
+    }
+}
+
+impl From<Vec<Chord>> for Measure {
+    fn from(value: Vec<Chord>) -> Self {
         let mut m = Measure::new();
-        m.chord(value);
+        m.chords(value);
         m
     }
 }
