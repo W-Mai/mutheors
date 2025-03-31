@@ -196,32 +196,37 @@ impl MidiPlayer {
             for (measure_idx, measure) in track.get_measures().iter().enumerate() {
                 match measure {
                     Measure::Rest => {}
-                    Measure::Chord(chord) => {
-                        let chord_notes: Vec<u8> = chord
-                            .components()
-                            .iter()
-                            .map(|t| t.midi_number().unwrap())
-                            .collect();
-
+                    Measure::Chords(chords) => {
+                        let avg_measure_duration = measure_duration / chords.len() as u32;
                         let start_time = measure_duration * measure_idx as u32;
-                        let end_time = start_time + measure_duration;
 
-                        events.push(TimedEvent {
-                            trigger_time: start_time,
-                            track_idx,
-                            chord: Some(chord.clone()),
-                            original_notes: None,
-                            notes: chord_notes.clone(),
-                            is_start: true,
-                        });
-                        events.push(TimedEvent {
-                            trigger_time: end_time,
-                            track_idx,
-                            chord: Some(chord.clone()),
-                            original_notes: None,
-                            notes: chord_notes,
-                            is_start: false,
-                        });
+                        for (i, chord) in chords.iter().enumerate() {
+                            let start_time = start_time + avg_measure_duration * i as u32;
+                            let end_time = start_time + avg_measure_duration;
+
+                            let chord_notes: Vec<u8> = chord
+                                .components()
+                                .iter()
+                                .map(|t| t.midi_number().unwrap())
+                                .collect();
+
+                            events.push(TimedEvent {
+                                trigger_time: start_time,
+                                track_idx,
+                                chord: Some(chord.clone()),
+                                original_notes: None,
+                                notes: chord_notes.clone(),
+                                is_start: true,
+                            });
+                            events.push(TimedEvent {
+                                trigger_time: end_time,
+                                track_idx,
+                                chord: Some(chord.clone()),
+                                original_notes: None,
+                                notes: chord_notes,
+                                is_start: false,
+                            });
+                        }
                     }
                     Measure::Note(notes) => {
                         let mut current_start = 0.0;
