@@ -84,21 +84,18 @@ impl Display for PitchClass {
     }
 }
 
-impl<T> From<T> for Tuning
-where
-    T: Into<String>,
-{
-    fn from(value: T) -> Self {
-        let pitch_class_string = value.into();
-        let chars = pitch_class_string.split_whitespace().collect::<String>();
-        let mut chars = chars.chars().peekable();
+impl TryFrom<&str> for Tuning {
+    type Error = MusicError;
 
-        Tuning::take(&mut chars)
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let mut chars = value.chars().peekable();
+
+        Tuning::take(chars.by_ref())
     }
 }
 
 impl Tuning {
-    pub fn take(chars: &mut Peekable<std::str::Chars>) -> Tuning {
+    pub fn take(chars: &mut Peekable<std::str::Chars>) -> Result<Tuning, MusicError> {
         let mut root = String::new();
 
         if let Some(&c) = chars.peek() {
@@ -106,7 +103,7 @@ impl Tuning {
                 root.push(c);
                 chars.next();
             } else {
-                panic!("Invalid pitch class");
+                return Err(MusicError::InvalidPitch);
             }
         }
 
@@ -118,7 +115,7 @@ impl Tuning {
             "G" => PitchClass::G,
             "A" => PitchClass::A,
             "B" => PitchClass::B,
-            _ => panic!("Invalid pitch class"),
+            _ => unreachable!("{}", MusicError::InvalidPitch),
         })
         .with_octave(4);
 
@@ -134,7 +131,7 @@ impl Tuning {
             }
         }
 
-        root
+        Ok(root)
     }
 }
 
@@ -360,18 +357,20 @@ mod tests {
     }
 
     #[test]
-    fn test_tuning_3() {
-        let tuning = Tuning::from("C#");
+    fn test_tuning_3() -> Result<(), MusicError> {
+        let tuning = Tuning::try_from("C#")?;
         assert_eq!(tuning, tuning!(# C 4));
 
-        let tuning = Tuning::from("C");
+        let tuning = Tuning::try_from("C")?;
         assert_eq!(tuning, tuning!(C 4));
 
-        let tuning = Tuning::from("C##");
+        let tuning = Tuning::try_from("C##")?;
         assert_eq!(tuning, tuning!(# C 4).sharp());
 
-        let tuning = Tuning::from("Cb");
+        let tuning = Tuning::try_from("Cb")?;
         assert_eq!(tuning, tuning!(b C 4));
+
+        Ok(())
     }
 
     #[test]

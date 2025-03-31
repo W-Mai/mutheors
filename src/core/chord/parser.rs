@@ -13,32 +13,20 @@
 //! - "Dbdim" for Db diminished
 //! - "Db dim7" for Db diminished 7th
 
-use crate::{Chord, ChordQuality, PitchClass, Tuning};
+use crate::{Chord, ChordQuality, MusicError, PitchClass, Tuning};
 
-impl<T> From<T> for Chord
-where
-    T: Into<String>,
-{
-    fn from(value: T) -> Self {
-        let chord_string = value.into();
-        let chars = chord_string.split_whitespace().collect::<String>();
+impl TryFrom<&str> for Chord {
+    type Error = MusicError;
+
+    fn try_from(value: &str) -> Result<Self, MusicError> {
+        let chars = value.split_whitespace().collect::<String>();
         let mut chars = chars.chars().peekable();
-        let mut root = String::new();
-
-        while let Some(&c) = chars.peek() {
-            if ('A'..='G').contains(&c) || c == '#' || c == 'b' {
-                root.push(c);
-                chars.next();
-            } else {
-                break;
-            }
-        }
-
+        let root = Tuning::take(chars.by_ref())?;
         let quality = chars.collect::<String>();
 
         println!("Root: {}, Quality: {}", root, quality);
 
-        Chord::new(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap()
+        Chord::new(Tuning::new(PitchClass::C, 4), ChordQuality::Major)
     }
 }
 
@@ -47,8 +35,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_chord_parser() {
-        let chord = Chord::from("C");
-        let chord = Chord::from("C#m");
+    fn test_chord_parser() -> Result<(), MusicError> {
+        let chord = Chord::try_from("C")?;
+        println!("Parsed chord: {}", chord);
+        let chord = Chord::try_from("C#m")?;
+        println!("Parsed chord: {}", chord);
+
+        Ok(())
     }
 }
