@@ -1,6 +1,7 @@
 use crate::chord::Chord;
 use crate::{ChordQuality, Interval, MusicError, Scale, ScaleType};
 use std::fmt::Display;
+use std::iter::Peekable;
 use std::ops::{Div, Mul};
 
 #[derive(Copy, Clone, Debug)]
@@ -91,6 +92,13 @@ where
         let pitch_class_string = value.into();
         let chars = pitch_class_string.split_whitespace().collect::<String>();
         let mut chars = chars.chars().peekable();
+
+        Tuning::take(&mut chars)
+    }
+}
+
+impl Tuning {
+    pub fn take(chars: &mut Peekable<std::str::Chars>) -> Tuning {
         let mut root = String::new();
 
         if let Some(&c) = chars.peek() {
