@@ -14,12 +14,17 @@
 //! - "Db dim7" for Db diminished 7th
 
 use crate::{Chord, ChordQuality, MusicError, Tuning};
+use std::str::FromStr;
 
-impl TryFrom<&str> for Chord {
-    type Error = MusicError;
+impl FromStr for Chord {
+    type Err = MusicError;
 
-    fn try_from(value: &str) -> Result<Self, MusicError> {
-        let chars = value.split_whitespace().collect::<String>();
+    /// Eg：
+    /// - "Cmaj7"   => C Major 7th chord
+    /// - "G7/B"    => G Dominant 7th chord with B bass
+    /// - "Dm9"     => D minor 9th chord
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let chars = s.split_whitespace().collect::<String>();
         let mut chars = chars.chars().peekable();
         let root = Tuning::take(chars.by_ref())?;
         let quality = chars.collect::<String>();
@@ -36,9 +41,9 @@ mod tests {
 
     #[test]
     fn test_chord_parser() -> Result<(), MusicError> {
-        let chord = Chord::try_from("C")?;
+        let chord = Chord::from_str("C")?;
         println!("Parsed chord: {}", chord);
-        let chord = Chord::try_from("C#m")?;
+        let chord = Chord::from_str("C#m")?;
         println!("Parsed chord: {}", chord);
 
         Ok(())

@@ -3,6 +3,7 @@ use crate::{ChordQuality, Interval, MusicError, Scale, ScaleType};
 use std::fmt::Display;
 use std::iter::Peekable;
 use std::ops::{Div, Mul};
+use std::str::FromStr;
 
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
@@ -84,11 +85,11 @@ impl Display for PitchClass {
     }
 }
 
-impl TryFrom<&str> for Tuning {
-    type Error = MusicError;
+impl FromStr for Tuning {
+    type Err = MusicError;
 
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let mut chars = value.chars().peekable();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut chars = s.chars().peekable();
 
         Tuning::take(chars.by_ref())
     }
@@ -306,6 +307,7 @@ impl Display for Tuning {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
     use crate::*;
 
     #[test]
@@ -358,16 +360,16 @@ mod tests {
 
     #[test]
     fn test_tuning_3() -> Result<(), MusicError> {
-        let tuning = Tuning::try_from("C#")?;
+        let tuning = Tuning::from_str("C#")?;
         assert_eq!(tuning, tuning!(# C 4));
 
-        let tuning = Tuning::try_from("C")?;
+        let tuning = Tuning::from_str("C")?;
         assert_eq!(tuning, tuning!(C 4));
 
-        let tuning = Tuning::try_from("C##")?;
+        let tuning = Tuning::from_str("C##")?;
         assert_eq!(tuning, tuning!(# C 4).sharp());
 
-        let tuning = Tuning::try_from("Cb")?;
+        let tuning = Tuning::from_str("Cb")?;
         assert_eq!(tuning, tuning!(b C 4));
 
         Ok(())
