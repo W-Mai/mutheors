@@ -50,7 +50,7 @@ impl PitchClass {
             1 | 4 | 5 => ChordQuality::Major,
             2 | 3 | 6 => ChordQuality::Minor,
             7 => ChordQuality::Diminished,
-            _ => panic!("Invalid degree"),
+            _ => unreachable!(),
         };
 
         Chord::new(new_tuning, quality).unwrap()
@@ -307,8 +307,8 @@ impl Display for Tuning {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
     use crate::*;
+    use std::str::FromStr;
 
     #[test]
     fn test_tuning_01() {
