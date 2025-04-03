@@ -95,4 +95,15 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_chord_analyze_supported() {
+        for quality in ChordQuality::iter() {
+            let c = Chord::new(tuning!(C 4), quality).unwrap();
+            println!("Chord: {}, components: {:?}", c, c.components());
+            let c2 = Chord::analyze_from(&c.components()).unwrap();
+
+            assert_eq!(c, c2, "Chord: {} != Chord: {}", c, c2);
+        }
+    }
 }
