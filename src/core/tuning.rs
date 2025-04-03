@@ -180,6 +180,23 @@ impl Tuning {
     pub fn common_chord(&self, degree: u8) -> Chord {
         self.class.common_chord(degree, self.octave)
     }
+
+    pub fn class_semitones(&self) -> i8 {
+        (self.class as i8 + self.accidentals + 11) % 12
+    }
+
+    pub fn number(&self) -> i8 {
+        let base = self.class as i8;
+        if base == 0 {
+            return 0;
+        }
+        let base = base - 1;
+        let num = (self.octave + 1)
+            .saturating_mul(12)
+            .saturating_add(base)
+            .saturating_add(self.accidentals);
+        num
+    }
 }
 
 impl Tuning {

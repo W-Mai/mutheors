@@ -13,7 +13,8 @@
 //! - "Dbdim" for Db diminished
 //! - "Db dim7" for Db diminished 7th
 
-use crate::{Chord, ChordQuality, MusicError, Tuning};
+use crate::{Chord, ChordQuality, Interval, MusicError, Tuning};
+use std::collections::BTreeSet;
 use std::str::FromStr;
 
 impl FromStr for Chord {
@@ -33,9 +34,36 @@ impl FromStr for Chord {
     }
 }
 
+impl Chord {
+    pub fn analyze_from(tunings: &[Tuning]) -> Result<Self, MusicError> {
+        if tunings.is_empty() {
+            return Err(MusicError::InvalidPitch);
+        }
+
+        let number_set = tunings.iter().map(|t| t.number()).collect::<BTreeSet<_>>();
+        let min_tuning = number_set.iter().min().ok_or(MusicError::InvalidPitch)?;
+        let tuning_classes = number_set.iter().map(|&t| t % 12).collect::<BTreeSet<_>>();
+
+        println!("Analyzing chord from tunings: {:?}", number_set);
+
+        for root_class in tuning_classes.iter().by_ref() {
+            let intervals_sorted = tuning_classes
+                .iter()
+                .by_ref()
+                .filter_map(|&t| Interval::from_semitones(t - root_class).ok())
+                .collect::<Vec<_>>();
+            
+            println!("Intervals sorted: {:#?}", intervals_sorted);
+        }
+
+        Err(MusicError::UnsupportedChord {})
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::*;
 
     #[test]
     fn test_chord_parser() -> Result<(), MusicError> {
@@ -50,6 +78,16 @@ mod tests {
 
         let chord = Chord::from_str("Gbsus2")?;
         println!("Parsed chord: {}", chord);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_chord_analyze_from() -> Result<(), MusicError> {
+        let tunings = vec![tuning!(C 4), tuning!(E 4), tuning!(B 4)];
+
+        let chord = Chord::analyze_from(&tunings)?;
+        println!("Analyzed chord: {}", chord);
 
         Ok(())
     }
