@@ -4,7 +4,7 @@
 mod parser;
 mod quality;
 
-use crate::interval::{Interval, IntervalQuality};
+use crate::interval::Interval;
 use crate::tuning::Tuning;
 use crate::MusicError;
 pub use quality::*;

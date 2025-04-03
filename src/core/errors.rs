@@ -43,4 +43,7 @@ pub enum MusicError {
         "Invalid Octave {octave}, IT MUST BE IN [0, 10]. Because Humans can only hear 10 octaves."
     )]
     InvalidOctave { octave: i8 },
+
+    #[error("Invalid chord quality")]
+    InvalidChordQuality,
 }

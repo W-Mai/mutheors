@@ -88,6 +88,26 @@ impl ChordQuality {
         .into_iter()
     }
 
+    pub fn analyze_from(intervals: &[Interval]) -> Result<Self, MusicError> {
+        for quality in ChordQuality::iter() {
+            let base_pattern = quality.intervals();
+            // let mut extra_notes = 0;
+            let mut matches = true;
+
+            for interval in intervals.iter() {
+                if !base_pattern.contains(interval) {
+                    // extra_notes += 1;
+                    matches = false;
+                }
+            }
+
+            if matches {
+                return Ok(quality);
+            }
+        }
+        Err(MusicError::InvalidChordQuality)
+    }
+
     pub fn intervals(&self) -> Vec<Interval> {
         match self {
             ChordQuality::Major => vec![
