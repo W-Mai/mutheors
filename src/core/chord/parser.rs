@@ -27,9 +27,9 @@ impl FromStr for Chord {
         let chars = s.split_whitespace().collect::<String>();
         let mut chars = chars.chars().peekable();
         let root = Tuning::take(chars.by_ref())?;
-        let quality = chars.collect::<String>();
+        let quality = ChordQuality::from_str(&chars.collect::<String>())?;
 
-        Chord::new(root, ChordQuality::from_str(&quality)?)
+        Chord::new(root, quality)
     }
 }
 
