@@ -1,4 +1,4 @@
-use crate::MusicError;
+use crate::{Interval, IntervalQuality, MusicError};
 use std::fmt::Display;
 use std::str::FromStr;
 
@@ -51,6 +51,158 @@ impl ChordQuality {
             ChordQuality::Augmented7 => ChordQuality::Augmented,
             ChordQuality::AugmentedMajor7 => ChordQuality::Augmented,
             _ => *self,
+        }
+    }
+
+    pub fn iter() -> impl Iterator<Item = ChordQuality> {
+        [
+            // Triad
+            ChordQuality::Major,
+            ChordQuality::Minor,
+            ChordQuality::Diminished,
+            ChordQuality::Augmented,
+            // Seventh chord
+            ChordQuality::Major7,
+            ChordQuality::Dominant7,
+            ChordQuality::Minor7,
+            ChordQuality::MinorMajor7,
+            ChordQuality::HalfDiminished7,
+            ChordQuality::Diminished7,
+            ChordQuality::Augmented7,
+            ChordQuality::AugmentedMajor7,
+            // Sixth chord
+            ChordQuality::Major6,
+            ChordQuality::Minor6,
+            // Ninth chord
+            ChordQuality::Major9,
+            ChordQuality::Dominant9,
+            ChordQuality::Minor9,
+            ChordQuality::Add9,
+            ChordQuality::MinorAdd9,
+            // Suspended chord
+            ChordQuality::Suspended2,
+            ChordQuality::Suspended4,
+            ChordQuality::Suspended7,
+            ChordQuality::Suspended9,
+        ]
+        .into_iter()
+    }
+
+    pub fn intervals(&self) -> Vec<Interval> {
+        match self {
+            ChordQuality::Major => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+            ],
+            ChordQuality::Minor => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+            ],
+            ChordQuality::Diminished => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Diminished, 5).unwrap(),
+            ],
+            ChordQuality::Augmented => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Augmented, 5).unwrap(),
+            ],
+            ChordQuality::Major7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 7).unwrap(),
+            ],
+            ChordQuality::Dominant7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
+            ],
+            ChordQuality::Minor7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
+            ],
+            ChordQuality::MinorMajor7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 7).unwrap(),
+            ],
+            ChordQuality::HalfDiminished7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Diminished, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
+            ],
+            ChordQuality::Diminished7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Diminished, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Diminished, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Diminished, 7).unwrap(),
+            ],
+            ChordQuality::Augmented7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Augmented, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Augmented, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
+            ],
+            ChordQuality::AugmentedMajor7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Augmented, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Augmented, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 7).unwrap(),
+            ],
+            ChordQuality::Major6 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 6).unwrap(),
+            ],
+            ChordQuality::Minor6 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 6).unwrap(),
+            ],
+            ChordQuality::Major9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 7).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
+            ],
+            ChordQuality::Dominant9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
+            ],
+            ChordQuality::Minor9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
+            ],
+            ChordQuality::Add9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
+            ],
+            ChordQuality::MinorAdd9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
+            ],
+            ChordQuality::Suspended2 => vec![
+                Interval::from_quality_degree(IntervalQuality::Major, 2).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+            ],
+            ChordQuality::Suspended4 => vec![
+                Interval::from_quality_degree(IntervalQuality::Perfect, 4).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+            ],
+            ChordQuality::Suspended7 => vec![
+                Interval::from_quality_degree(IntervalQuality::Perfect, 4).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
+            ],
+            ChordQuality::Suspended9 => vec![
+                Interval::from_quality_degree(IntervalQuality::Perfect, 4).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
+                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
+            ],
         }
     }
 }
