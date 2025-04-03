@@ -90,12 +90,14 @@ impl ChordQuality {
 
     pub fn analyze_from(intervals: &[Interval]) -> Result<Self, MusicError> {
         for quality in ChordQuality::iter() {
-            let base_pattern = quality.intervals();
+            let base_pattern = quality.intervals().iter().map(|i| {
+                i.semitones()
+            }).collect::<Vec<_>>();
             // let mut extra_notes = 0;
             let mut matches = true;
 
             for interval in intervals.iter() {
-                if !base_pattern.contains(interval) {
+                if !base_pattern.contains(&interval.semitones()) {
                     // extra_notes += 1;
                     matches = false;
                 }
