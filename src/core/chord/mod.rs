@@ -7,9 +7,9 @@ mod quality;
 use crate::interval::{Interval, IntervalQuality};
 use crate::tuning::Tuning;
 use crate::MusicError;
-use std::fmt::Display;
-
 pub use quality::*;
+use std::fmt::Display;
+use std::str::FromStr;
 
 /// Chord quality classification (basic triad)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -147,11 +147,10 @@ impl Chord {
     //     // ...
     // }
 
-    // TODO: Parsing from chord symbols (e.g. " Cmaj7")
-    // pub fn from_symbol(symbol: &str) -> Result<Self, MusicError> {
-    //     // Implementing a chord symbol parser
-    //     // ...
-    // }
+    // Parsing from chord symbols (e.g. " Cmaj7")
+    pub fn from_symbol(symbol: &str) -> Result<Self, MusicError> {
+        Chord::from_str(symbol)
+    }
 
     // TODO: Generating arpeggios
     // pub fn arpeggio(&self, style: ArpeggioStyle) -> Vec<Note> {
