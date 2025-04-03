@@ -165,7 +165,7 @@ impl Duration {
                 // Check if the reference value matches.
                 if t.base_duration != self.base {
                     // In practical application, an error should be returned, but here we simplify the processing.
-                    panic!("Tuplet base duration mismatch");
+                    return 0.0;
                 }
                 dotted_value * t.ratio()
             }
