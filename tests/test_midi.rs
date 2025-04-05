@@ -395,6 +395,25 @@ mod tests {
     }
 
     #[test]
+    fn test_play_chord_4() {
+        // I IV V7 I
+        let chords = [
+            Chord::from_symbol("C").unwrap(),
+            Chord::from_symbol("F").unwrap(),
+            Chord::from_symbol("G7").unwrap(),
+            Chord::from_symbol("C").unwrap(),
+        ];
+
+        let measure = Measure::from(chords);
+        let mut score = Score::<1>::new()
+            .with_tempo(30)
+            .with_time_signature(4, DurationBase::Quarter);
+
+        score.push_measures([measure]);
+        score.play(func!()).unwrap()
+    }
+
+    #[test]
     fn test_play_note() {
         let note = Note::new(tuning!(C 4));
         note.play(func!()).unwrap()
