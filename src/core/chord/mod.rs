@@ -78,6 +78,17 @@ impl Chord {
     pub fn root(&self) -> Tuning {
         self.root
     }
+
+    pub fn with_root(self, root: Tuning) -> Self {
+        Self { root, ..self }
+    }
+
+    pub fn with_octave(self, octave: i8) -> Self {
+        Self {
+            root: self.root.with_octave(octave),
+            ..self
+        }
+    }
 }
 
 impl Chord {
