@@ -23,7 +23,6 @@ mod tests {
     fn test_breakdown_2() {
         let tuning = PitchClass::C.sharp().with_octave(4);
         let chord = tuning.common_chord(1);
-        let notes = chord.components();
 
         assert_eq!(
             chord,

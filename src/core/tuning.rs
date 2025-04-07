@@ -1,5 +1,5 @@
 use crate::chord::Chord;
-use crate::{ChordQuality, Interval, MusicError, Scale, ScaleType};
+use crate::{Interval, MusicError, Scale, ScaleType};
 use std::fmt::Display;
 use std::iter::Peekable;
 use std::ops::{Div, Mul};
@@ -39,21 +39,11 @@ impl PitchClass {
     }
 
     pub fn common_chord(&self, degree: u8, octave: i8) -> Chord {
-        assert!(degree > 0 && degree < 8, "Degree must be in [1, 6]");
-        const BASIC_DEGREES: [i8; 7] = [0, 2, 4, 5, 7, 9, 11];
-        let tuning = Tuning::new(*self, octave);
-        let new_tuning = tuning
-            .add_interval(&Interval::from_semitones(BASIC_DEGREES[(degree - 1) as usize]).unwrap())
-            .unwrap();
-
-        let quality = match degree {
-            1 | 4 | 5 => ChordQuality::Major,
-            2 | 3 | 6 => ChordQuality::Minor,
-            7 => ChordQuality::Diminished,
-            _ => unreachable!(),
-        };
-
-        Chord::new(new_tuning, quality).unwrap()
+        Tuning::from(*self)
+            .with_octave(octave)
+            .scale(ScaleType::Major)
+            .degree_chord(degree)
+            .unwrap()
     }
 }
 
@@ -178,7 +168,7 @@ impl Tuning {
     }
 
     pub fn common_chord(&self, degree: u8) -> Chord {
-        self.class.common_chord(degree, self.octave)
+        self.scale(ScaleType::Major).degree_chord(degree).unwrap()
     }
 
     pub fn class_semitones(&self) -> i8 {
