@@ -255,4 +255,20 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_perfect_interval() -> Result<(), MusicError> {
+        let intervals = [
+            Interval::from_quality_degree(IntervalQuality::Perfect, 1)?,
+            Interval::from_quality_degree(IntervalQuality::Perfect, 4)?,
+            Interval::from_quality_degree(IntervalQuality::Perfect, 5)?,
+            Interval::from_quality_degree(IntervalQuality::Perfect, 8)?,
+        ];
+
+        let interval_numbers = [0, 5, 7, 12];
+        let intervals = intervals.map(|i| i.semitones());
+        assert_eq!(intervals, interval_numbers);
+
+        Ok(())
+    }
 }
