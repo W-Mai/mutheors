@@ -191,6 +191,9 @@ impl Scale {
         Chord::new(self.degree(degree)?, quality)
     }
 
+    /// Get the chord of the scale in the given degree
+    /// - The chord is based on the scale degree (In-key chord)
+    /// TODO: This function is incomplete. Some chords maybe wrong.
     pub fn degree_chord(&self, degree: u8) -> Result<Chord, MusicError> {
         const NATURE_MAJOR: [ChordQuality; 7] = [
             ChordQuality::Major,
