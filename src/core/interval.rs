@@ -178,7 +178,7 @@ fn calculate_semitones(quality: IntervalQuality, degree: IntervalDegree) -> Resu
         }
         IntervalQuality::Minor => -1,
         IntervalQuality::Augmented => 1,
-        IntervalQuality::Diminished => -1,
+        IntervalQuality::Diminished => -2,
     };
 
     Ok((base_semitones as i8 + adjustment) as u8)

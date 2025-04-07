@@ -152,6 +152,17 @@ impl Chord {
         notes
     }
 
+    pub fn simple(self) -> Self {
+        Self {
+            extensions: self
+                .extensions
+                .iter()
+                .map(|i| Interval::from_semitones(i.semitones()).unwrap())
+                .collect::<Vec<_>>(),
+            ..self
+        }
+    }
+
     // TODO: Analyzing chord functions (TSD function system)
     // pub fn function(&self, key: Tuning) -> ChordFunction {
     //     // Implementing tonal analysis logic

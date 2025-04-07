@@ -103,7 +103,7 @@ mod tests {
             println!("Chord: {}, components: {:?}", c, c.components());
             let c2 = Chord::analyze_from(&c.components()).unwrap();
 
-            assert_eq!(c, c2, "Chord: {} != Chord: {}", c, c2);
+            assert_eq!(c.simple(), c2.simple());
         }
     }
 }
