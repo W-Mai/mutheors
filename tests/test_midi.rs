@@ -398,10 +398,10 @@ mod tests {
     fn test_play_chord_4() {
         // I IV V7 I
         let chords = [
-            Chord::from_symbol("C").unwrap(),
-            Chord::from_symbol("F").unwrap(),
-            Chord::from_symbol("G7").unwrap(),
-            Chord::from_symbol("C").unwrap(),
+            Chord::from_symbol("C").unwrap().with_octave(4),
+            Chord::from_symbol("F").unwrap().with_octave(3),
+            Chord::from_symbol("G7").unwrap().with_octave(3),
+            Chord::from_symbol("C").unwrap().with_octave(4),
         ];
 
         let measure = Measure::from(chords);
