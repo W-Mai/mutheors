@@ -273,4 +273,20 @@ mod tests {
 
         Ok(())
     }
+    
+    #[test]
+    fn test_major_interval() -> Result<(), MusicError> {
+        let intervals = [
+            Interval::from_quality_degree(IntervalQuality::Major, 2)?,
+            Interval::from_quality_degree(IntervalQuality::Major, 3)?,
+            Interval::from_quality_degree(IntervalQuality::Major, 6)?,
+            Interval::from_quality_degree(IntervalQuality::Major, 7)?,
+            Interval::from_quality_degree(IntervalQuality::Major, 9)?,
+        ];
+        
+        let interval_numbers = [2, 4, 9, 11, 14];
+        let intervals = intervals.map(|i| i.semitones());
+        assert_eq!(intervals, interval_numbers);
+        Ok(())
+    }
 }

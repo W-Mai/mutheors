@@ -45,7 +45,7 @@ impl Chord {
             .iter()
             .min_by(|t0, t1| t0.number().cmp(&t1.number()))
             .ok_or(MusicError::InvalidPitch)?;
-        let tuning_classes = number_set.iter().map(|&t| t % 12).collect::<BTreeSet<_>>();
+        let tuning_classes = number_set.iter().map(|&t| t).collect::<BTreeSet<_>>();
 
         for root_class in tuning_classes.iter().by_ref() {
             let intervals_sorted = tuning_classes
@@ -55,9 +55,9 @@ impl Chord {
                 .filter_map(|&t| Interval::from_semitones(t - root_class).ok())
                 .collect::<Vec<_>>();
 
-            let chord_quality = ChordQuality::analyze_from(&intervals_sorted)?;
-
-            return Chord::new(min_tuning, chord_quality);
+            if let Ok(chord_quality) = ChordQuality::analyze_from(&intervals_sorted) {
+                return Chord::new(min_tuning, chord_quality);
+            }
         }
 
         Err(MusicError::UnsupportedChord {})
@@ -109,7 +109,7 @@ mod tests {
 
     #[test]
     fn test_chord_from_symbol() -> Result<(), MusicError> {
-        let c = Chord::new(tuning!(C 4), ChordQuality::Add9)?;
+        let c = Chord::new(tuning!(C 4), ChordQuality::Major9)?;
         println!("Chord: {}, components: {:?}", c, c.components());
         let c2 = Chord::analyze_from(&c.components())?;
 
