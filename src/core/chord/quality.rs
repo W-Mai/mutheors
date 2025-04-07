@@ -90,11 +90,16 @@ impl ChordQuality {
     }
 
     pub fn analyze_from(intervals: &[Interval]) -> Result<Self, MusicError> {
-        let interval_set =
-            BTreeSet::from_iter(intervals.iter().map(|interval| interval.semitones()));
+        let interval_set = intervals
+            .iter()
+            .map(|interval| interval.semitones_mod())
+            .collect::<BTreeSet<_>>();
         for quality in ChordQuality::iter() {
-            let base_pattern_set =
-                BTreeSet::from_iter(quality.intervals().iter().map(|i| i.semitones()));
+            let base_pattern_set = quality
+                .intervals()
+                .iter()
+                .map(|i| i.semitones_mod())
+                .collect::<BTreeSet<_>>();
 
             if interval_set == base_pattern_set {
                 return Ok(quality);

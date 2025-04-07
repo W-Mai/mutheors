@@ -45,7 +45,7 @@ impl Chord {
             .iter()
             .min_by(|t0, t1| t0.number().cmp(&t1.number()))
             .ok_or(MusicError::InvalidPitch)?;
-        let tuning_classes = number_set.iter().map(|&t| t).collect::<BTreeSet<_>>();
+        let tuning_classes = tunings.iter().map(|&t| t.class_semitones()).collect::<BTreeSet<_>>();
 
         for root_class in tuning_classes.iter().by_ref() {
             let intervals_sorted = tuning_classes

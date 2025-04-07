@@ -49,6 +49,10 @@ impl Interval {
     pub fn semitones(&self) -> i8 {
         self.semitones
     }
+    
+    pub fn semitones_mod(&self) -> i8 {
+        self.semitones.rem_euclid(12)
+    }
 }
 
 impl Interval {
