@@ -106,4 +106,14 @@ mod tests {
             assert_eq!(c.simple(), c2.simple());
         }
     }
+
+    #[test]
+    fn test_chord_from_symbol() -> Result<(), MusicError> {
+        let c = Chord::new(tuning!(C 4), ChordQuality::Add9)?;
+        println!("Chord: {}, components: {:?}", c, c.components());
+        let c2 = Chord::analyze_from(&c.components())?;
+
+        assert_eq!(c, c2);
+        Ok(())
+    }
 }
