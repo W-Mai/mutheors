@@ -151,8 +151,8 @@ impl Interval {
 }
 
 fn calculate_semitones(quality: IntervalQuality, degree: IntervalDegree) -> Result<u8, MusicError> {
-    let degree_num = degree.0;
-    let base_semitones = match degree_num % 7 {
+    let degree_num = degree.0 % 7;
+    let base_semitones = match degree_num {
         1 => 0,  // 1 degree standard interval
         2 => 2,  // Major 2nd standard interval
         3 => 4,  // Major 3rd standard interval
@@ -164,21 +164,13 @@ fn calculate_semitones(quality: IntervalQuality, degree: IntervalDegree) -> Resu
     };
 
     let adjustment = match quality {
-        IntervalQuality::Perfect => {
-            if ![1, 4, 5, 8].contains(&degree_num) {
-                return Err(MusicError::InvalidIntervalQuality);
-            }
-            0
-        }
-        IntervalQuality::Major => {
-            if ![2, 3, 6, 7, 9, 10].contains(&degree_num) {
-                return Err(MusicError::InvalidIntervalQuality);
-            }
-            0
-        }
-        IntervalQuality::Minor => -1,
+        IntervalQuality::Perfect if [1, 4, 5, 8].contains(&degree_num) => 0,
+        IntervalQuality::Major if [2, 3, 6, 0].contains(&degree_num) => 0,
+        IntervalQuality::Minor if [2, 3, 6, 0].contains(&degree_num) => -1,
         IntervalQuality::Augmented => 1,
-        IntervalQuality::Diminished => -2,
+        IntervalQuality::Diminished if [2, 3, 6, 0].contains(&degree_num) => -2,
+        IntervalQuality::Diminished if [1, 4, 5, 8].contains(&degree_num) => -1,
+        _ => return Err(MusicError::InvalidIntervalQuality),
     };
 
     Ok((base_semitones as i8 + adjustment) as u8)
