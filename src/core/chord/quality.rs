@@ -1,4 +1,5 @@
 use crate::{Interval, IntervalQuality, MusicError};
+use std::collections::BTreeSet;
 use std::fmt::Display;
 use std::str::FromStr;
 
@@ -89,23 +90,22 @@ impl ChordQuality {
     }
 
     pub fn analyze_from(intervals: &[Interval]) -> Result<Self, MusicError> {
+        let interval_set =
+            BTreeSet::from_iter(intervals.iter().map(|interval| interval.semitones()));
         for quality in ChordQuality::iter() {
-            let base_pattern = quality.intervals().iter().map(|i| {
-                i.semitones()
-            }).collect::<Vec<_>>();
-            // let mut extra_notes = 0;
-            let mut matches = true;
+            let base_pattern_set =
+                BTreeSet::from_iter(quality.intervals().iter().map(|i| i.semitones()));
 
-            for interval in intervals.iter() {
-                if !base_pattern.contains(&interval.semitones()) {
-                    // extra_notes += 1;
-                    matches = false;
-                }
-            }
-
-            if matches {
+            if interval_set == base_pattern_set {
                 return Ok(quality);
             }
+
+            // TODO: support
+            // - [ ] chord inversion
+            // - [ ] chord extensions
+            // - [ ] chord jazzy extensions
+            // let diff = interval_set.difference(&base_pattern_set);
+            // let inter = interval_set.intersection(&base_pattern_set);
         }
         Err(MusicError::InvalidChordQuality)
     }
