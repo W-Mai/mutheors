@@ -6,7 +6,7 @@ use super::tuning::PitchClass;
 use std::convert::TryFrom;
 
 /// Interval quality (consonance/dissonance)
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub enum IntervalQuality {
     Perfect,    // Pure intervals (1,4,5,8 degrees)
     Major,      // Major intervals (2,3,6,7 degrees)
@@ -24,11 +24,11 @@ pub enum Consonance {
 }
 
 /// Degree of an interval
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct IntervalDegree(pub u8);
 
 /// Interval
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Ord, PartialOrd, Eq, Hash)]
 pub struct Interval {
     quality: IntervalQuality,
     degree: IntervalDegree,
@@ -255,12 +255,12 @@ mod tests {
     fn test_descending_interval() -> Result<(), MusicError> {
         let interval = Interval::from_semitones(-24)?;
         assert_eq!(interval.quality, IntervalQuality::Perfect);
-        
+
         let tuning = tuning!(C 3);
         let new_tuning = tuning.add_interval(&interval)?;
         assert_eq!(new_tuning.class, PitchClass::C);
         assert_eq!(new_tuning.octave, 1);
-        
+
         Ok(())
     }
 }
