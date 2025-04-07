@@ -148,6 +148,9 @@ impl Chord {
             notes.push(current);
         }
 
+        // Applying inversion
+        self.apply_inversion(&mut notes);
+        // Applying voicing
         self.apply_voicing(&mut notes);
         notes
     }
@@ -193,6 +196,24 @@ pub enum ChordFunction {
 }
 
 impl Chord {
+    // Applying the chord inversion
+    fn apply_inversion(&self, notes: &mut Vec<Tuning>) {
+        match self.inversion {
+            Inversion::RootPosition => return, // No inversion
+            Inversion::First => {
+                notes.rotate_left(1);
+            }
+            Inversion::Second => {
+                notes.rotate_left(2);
+            }
+            Inversion::Third => {
+                notes.rotate_left(3);
+            }
+        }
+
+        notes.last_mut().unwrap().octave += 1;
+    }
+
     // Applying the rules of vocal arrangement
     fn apply_voicing(&self, notes: &mut Vec<Tuning>) {
         match self.voicing {
