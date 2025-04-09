@@ -122,7 +122,11 @@ impl Chord {
         self
     }
 
-    /// TODO: Chord inversion
+    /// Chord inversion
+    /// - Root position
+    /// - First inversion
+    /// - Second inversion
+    /// - Third inversion (Seventh chord)
     pub fn invert(&mut self, inversion: Inversion) {
         self.inversion = inversion;
     }
