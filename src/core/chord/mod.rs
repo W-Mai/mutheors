@@ -63,7 +63,6 @@ pub enum Inversion {
 pub struct Chord {
     root: Tuning,
     quality: ChordQuality,
-    intervals: Vec<Interval>,
     chord_type: ChordType,
     inversion: Inversion,
     voicing: Voicing,
@@ -92,16 +91,10 @@ impl Chord {
 }
 
 impl Chord {
-    fn construct(
-        tuning: Tuning,
-        intervals: Vec<Interval>,
-        chord_type: ChordType,
-        chord_quality: ChordQuality,
-    ) -> Chord {
+    fn construct(tuning: Tuning, chord_type: ChordType, chord_quality: ChordQuality) -> Chord {
         Self {
             root: tuning,
             quality: chord_quality,
-            intervals,
             chord_type,
             inversion: Inversion::RootPosition,
             voicing: Voicing::ClosePosition,
@@ -111,9 +104,7 @@ impl Chord {
 
     /// Constructive triad (musical chord)
     pub fn new(root: Tuning, quality: ChordQuality) -> Result<Self, MusicError> {
-        let intervals = quality.intervals();
-
-        Ok(Self::construct(root, intervals, ChordType::Triad, quality))
+        Ok(Self::construct(root, ChordType::Triad, quality))
     }
 
     /// Adding Extended interval
@@ -136,19 +127,19 @@ impl Chord {
         self.voicing = voicing;
     }
 
+    pub fn intervals(&self) -> Vec<Interval> {
+        let mut intervals = self.quality.intervals().to_vec();
+        intervals.extend(self.extensions.clone());
+        intervals
+    }
+
     /// Getting Chord composition tones
     pub fn components(&self) -> Vec<Tuning> {
         let mut notes = vec![self.root];
 
         // Adding basic intervals
-        for interval in &self.intervals {
+        for interval in &self.intervals() {
             let current = self.root.add_interval(interval).unwrap();
-            notes.push(current);
-        }
-
-        // Adding Extended Tones
-        for ext in &self.extensions {
-            let current = self.root.add_interval(ext).unwrap();
             notes.push(current);
         }
 
