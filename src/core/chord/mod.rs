@@ -6,7 +6,7 @@ mod quality;
 
 use crate::interval::Interval;
 use crate::tuning::Tuning;
-use crate::MusicError;
+use crate::{MusicError, Scale};
 pub use quality::*;
 use std::fmt::Display;
 use std::str::FromStr;
@@ -170,11 +170,27 @@ impl Chord {
         }
     }
 
-    // TODO: Analyzing chord functions (TSD function system)
-    // pub fn function(&self, key: Tuning) -> ChordFunction {
-    //     // Implementing tonal analysis logic
-    //     // ...
-    // }
+    // Analyzing chord functions (TSD function system)
+    // - Tonic
+    // - Subdominant
+    // - Dominant
+    // TODO: Add more functions
+    pub fn function(&self, scale: Scale) -> ChordFunction {
+        let self_copy = self.clone().simple();
+        let t = scale.degree_chord(1).unwrap();
+        let s = scale.degree_chord(4).unwrap();
+        let d = scale.degree_chord(5).unwrap();
+
+        if self_copy == t {
+            ChordFunction::Tonic
+        } else if self_copy == s {
+            ChordFunction::Subdominant
+        } else if self_copy == d {
+            ChordFunction::Dominant
+        } else {
+            ChordFunction::Unknown
+        }
+    }
 
     // Parsing from chord symbols (e.g. " Cmaj7")
     pub fn from_symbol(symbol: &str) -> Result<Self, MusicError> {
@@ -191,6 +207,7 @@ impl Chord {
 /// Functional classification of chords (tonal analysis)
 #[derive(Debug, PartialEq)]
 pub enum ChordFunction {
+    Unknown,
     Tonic,
     Subdominant,
     Dominant,
