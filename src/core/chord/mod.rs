@@ -278,7 +278,7 @@ impl Display for Chord {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::PitchClass;
+    use crate::*;
 
     #[test]
     fn test_major_triad() {
@@ -319,5 +319,16 @@ mod tests {
                 Tuning::new(PitchClass::C, 5)
             ] // 第一转位
         );
+    }
+
+    #[test]
+    fn test_chord_function_1() {
+        let scale = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
+        let chord = Chord::new(tuning!(C 4), ChordQuality::Major).unwrap();
+
+        assert_eq!(chord.function(scale), ChordFunction::Tonic);
+
+        let chord = Chord::new(tuning!(C 3), ChordQuality::Major).unwrap();
+        assert_eq!(chord.function(scale), ChordFunction::Tonic);
     }
 }
