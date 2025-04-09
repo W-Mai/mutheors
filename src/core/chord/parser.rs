@@ -114,7 +114,7 @@ mod tests {
 
     #[test]
     fn test_chord_from_symbol() -> Result<(), MusicError> {
-        let c = Chord::new(tuning!(C 4), ChordQuality::Major9)?;
+        let c = Chord::new(tuning!(C 4), ChordQuality::Major7)?;
         println!("Chord: {}, components: {:?}", c, c.components());
         let c2 = Chord::analyze_from(&c.components())?;
 

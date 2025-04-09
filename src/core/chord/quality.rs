@@ -26,13 +26,6 @@ pub enum ChordQuality {
     Major6,
     Minor6,
 
-    // Ninth chord
-    Major9,
-    Dominant9,
-    Minor9,
-    Add9,
-    MinorAdd9,
-
     // Suspended chord
     Suspended2,
     Suspended4,
@@ -72,12 +65,6 @@ impl ChordQuality {
             // Sixth chord
             ChordQuality::Major6,
             ChordQuality::Minor6,
-            // Ninth chord
-            ChordQuality::Major9,
-            ChordQuality::Dominant9,
-            ChordQuality::Minor9,
-            ChordQuality::Add9,
-            ChordQuality::MinorAdd9,
             // Suspended chord
             ChordQuality::Suspended2,
             ChordQuality::Suspended4,
@@ -179,34 +166,6 @@ impl ChordQuality {
                 Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
                 Interval::from_quality_degree(IntervalQuality::Major, 6).unwrap(),
             ],
-            ChordQuality::Major9 => vec![
-                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Major, 7).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
-            ],
-            ChordQuality::Dominant9 => vec![
-                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
-            ],
-            ChordQuality::Minor9 => vec![
-                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
-            ],
-            ChordQuality::Add9 => vec![
-                Interval::from_quality_degree(IntervalQuality::Major, 3).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
-            ],
-            ChordQuality::MinorAdd9 => vec![
-                Interval::from_quality_degree(IntervalQuality::Minor, 3).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
-            ],
             ChordQuality::Suspended2 => vec![
                 Interval::from_quality_degree(IntervalQuality::Major, 2).unwrap(),
                 Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
@@ -236,11 +195,6 @@ impl Display for ChordQuality {
             ChordQuality::AugmentedMajor7 => "augM7",
             ChordQuality::Major6 => "M6",
             ChordQuality::Minor6 => "m6",
-            ChordQuality::Major9 => "M9",
-            ChordQuality::Dominant9 => "9",
-            ChordQuality::Minor9 => "m9",
-            ChordQuality::Add9 => "add9",
-            ChordQuality::MinorAdd9 => "madd9",
             ChordQuality::Suspended2 => "sus2",
             ChordQuality::Suspended4 => "sus4",
         };
@@ -268,11 +222,6 @@ impl FromStr for ChordQuality {
             "augM7" | "augmentedMajor7" => Ok(ChordQuality::AugmentedMajor7),
             "M6" | "maj6" | "major6" => Ok(ChordQuality::Major6),
             "m6" | "min6" | "minor6" => Ok(ChordQuality::Minor6),
-            "M9" | "maj9" | "major9" => Ok(ChordQuality::Major9),
-            "9" | "dom9" | "dominant9" => Ok(ChordQuality::Dominant9),
-            "m9" | "min9" | "minor9" => Ok(ChordQuality::Minor9),
-            "add9" => Ok(ChordQuality::Add9),
-            "madd9" => Ok(ChordQuality::MinorAdd9),
             "sus2" => Ok(ChordQuality::Suspended2),
             "sus4" => Ok(ChordQuality::Suspended4),
             _ => Err(MusicError::InvalidIntervalQuality),
