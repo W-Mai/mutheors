@@ -36,8 +36,6 @@ pub enum ChordQuality {
     // Suspended chord
     Suspended2,
     Suspended4,
-    Suspended7,
-    Suspended9,
 }
 
 impl ChordQuality {
@@ -83,8 +81,6 @@ impl ChordQuality {
             // Suspended chord
             ChordQuality::Suspended2,
             ChordQuality::Suspended4,
-            ChordQuality::Suspended7,
-            ChordQuality::Suspended9,
         ]
         .into_iter()
     }
@@ -219,17 +215,6 @@ impl ChordQuality {
                 Interval::from_quality_degree(IntervalQuality::Perfect, 4).unwrap(),
                 Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
             ],
-            ChordQuality::Suspended7 => vec![
-                Interval::from_quality_degree(IntervalQuality::Perfect, 4).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
-            ],
-            ChordQuality::Suspended9 => vec![
-                Interval::from_quality_degree(IntervalQuality::Perfect, 4).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Perfect, 5).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Minor, 7).unwrap(),
-                Interval::from_quality_degree(IntervalQuality::Major, 9).unwrap(),
-            ],
         }
     }
 }
@@ -258,8 +243,6 @@ impl Display for ChordQuality {
             ChordQuality::MinorAdd9 => "madd9",
             ChordQuality::Suspended2 => "sus2",
             ChordQuality::Suspended4 => "sus4",
-            ChordQuality::Suspended7 => "7sus4",
-            ChordQuality::Suspended9 => "9sus4",
         };
         write!(f, "{}", str)
     }
@@ -292,8 +275,6 @@ impl FromStr for ChordQuality {
             "madd9" => Ok(ChordQuality::MinorAdd9),
             "sus2" => Ok(ChordQuality::Suspended2),
             "sus4" => Ok(ChordQuality::Suspended4),
-            "7sus4" => Ok(ChordQuality::Suspended7),
-            "9sus4" => Ok(ChordQuality::Suspended9),
             _ => Err(MusicError::InvalidIntervalQuality),
         }
     }
