@@ -6,7 +6,7 @@ mod quality;
 
 use crate::interval::Interval;
 use crate::tuning::Tuning;
-use crate::{MusicError, Scale};
+use crate::{IntervalQuality, MusicError, Scale};
 pub use quality::*;
 use std::fmt::Display;
 use std::str::FromStr;
@@ -259,6 +259,25 @@ impl Chord {
     }
 }
 
+impl Chord {
+    pub fn add(self, interval: Interval) -> Self {
+        let mut c = self;
+        c.extensions.push(interval);
+        c
+    }
+
+    pub fn dom(self, n: u8) -> Self {
+        let mut c = self;
+
+        (7..=n).step_by(2).for_each(|i| {
+            c.extensions
+                .push(Interval::from_quality_degree(IntervalQuality::Major, i).unwrap());
+        });
+
+        c
+    }
+}
+
 impl Display for Chord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = format!("{}{}", self.root, self.quality);
@@ -296,6 +315,17 @@ mod tests {
                 Tuning::new(PitchClass::F, 5)
             ]
         );
+    }
+
+    #[test]
+    fn test_chord_extension_1() -> Result<(), MusicError> {
+        let s = tuning!(C 4).scale(ScaleType::Major);
+        let c = s.degree_chord(1)?;
+        let c9 = c.dom(9);
+
+        println!("Chord 1: {:?}", c9);
+
+        Ok(())
     }
 
     #[test]
