@@ -5,9 +5,11 @@ mod parser;
 mod quality;
 
 use crate::interval::Interval;
+use crate::pitch_tuning;
 use crate::tuning::Tuning;
-use crate::{IntervalQuality, MusicError, Scale};
+use crate::{tuning, IntervalQuality, MusicError, PitchClass, Scale, ScaleType};
 pub use quality::*;
+use std::collections::BTreeSet;
 use std::fmt::Display;
 use std::str::FromStr;
 
@@ -278,6 +280,49 @@ impl Chord {
     }
 }
 
+impl Chord {
+    pub fn in_scales(&self) -> Vec<Scale> {
+        let chord_tunings = self
+            .components()
+            .iter()
+            .map(|t| t.class_semitones())
+            .collect::<BTreeSet<_>>();
+        let tunings = [
+            tuning!(C 0),
+            tuning!(#C 0),
+            tuning!(D 0),
+            tuning!(#D 0),
+            tuning!(E 0),
+            tuning!(F 0),
+            tuning!(#F 0),
+            tuning!(G 0),
+            tuning!(#G 0),
+            tuning!(A 0),
+            tuning!(#A 0),
+            tuning!(B 0),
+        ];
+
+        let mut scales = Vec::new();
+        for scale_type in ScaleType::iter() {
+            for t in tunings.iter() {
+                let scale = t.scale(scale_type);
+                let scale_tunings_set = scale
+                    .generate_tunings(0)
+                    .unwrap()
+                    .iter()
+                    .map(|t| t.class_semitones())
+                    .collect::<BTreeSet<_>>();
+
+                if chord_tunings.is_subset(&scale_tunings_set) {
+                    scales.push(scale);
+                }
+            }
+        }
+
+        scales
+    }
+}
+
 impl Display for Chord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = format!("{}{}", self.root, self.quality);
@@ -351,5 +396,30 @@ mod tests {
 
         let chord = Chord::new(tuning!(C 3), ChordQuality::Major).unwrap();
         assert_eq!(chord.function(scale), ChordFunction::Tonic);
+    }
+
+    #[test]
+    fn test_in_chords() {
+        let c = Chord::from_symbol("C7").unwrap();
+        let r = c.root();
+        let ss = c.in_scales();
+
+        for s in ss.iter() {
+            println!(
+                "{}{:?} {:?} {}",
+                s.root(),
+                s.scale_type(),
+                c.function(*s),
+                s.generate_tunings(0)
+                    .unwrap()
+                    .iter()
+                    .map(|t| { t.with_octave(4) })
+                    .enumerate()
+                    .find(|x| { x.1 == r })
+                    .unwrap()
+                    .0
+                    + 1
+            );
+        }
     }
 }

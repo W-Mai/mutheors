@@ -160,6 +160,16 @@ pub struct Scale {
 }
 
 impl Scale {
+    pub fn scale_type(&self) -> ScaleType {
+        self.scale_type
+    }
+
+    pub fn root(&self) -> Tuning {
+        self.root
+    }
+}
+
+impl Scale {
     /// Create a new scale
     pub fn new(root: Tuning, scale_type: ScaleType) -> Result<Self, MusicError> {
         Ok(Self { root, scale_type })
