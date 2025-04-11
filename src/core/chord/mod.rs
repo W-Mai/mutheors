@@ -303,7 +303,7 @@ impl Chord {
         ];
 
         let mut scales = Vec::new();
-        for scale_type in ScaleType::iter() {
+        for scale_type in ScaleType::iter().filter(|t| ![ScaleType::Chromatic].contains(t)) {
             for t in tunings.iter() {
                 let scale = t.scale(scale_type);
                 let scale_tunings_set = scale
