@@ -167,10 +167,10 @@ impl Chord {
     // - Dominant
     // TODO: Add more functions
     pub fn function(&self, scale: Scale) -> ChordFunction {
-        let self_copy = self.clone().simple().with_octave(0);
-        let t = scale.degree_chord(1).unwrap().with_octave(0);
-        let s = scale.degree_chord(4).unwrap().with_octave(0);
-        let d = scale.degree_chord(5).unwrap().with_octave(0);
+        let self_copy = self.clone().root().with_octave(0);
+        let t = scale.degree(1).unwrap().with_octave(0);
+        let s = scale.degree(4).unwrap().with_octave(0);
+        let d = scale.degree(5).unwrap().with_octave(0);
 
         if self_copy == t {
             ChordFunction::Tonic
