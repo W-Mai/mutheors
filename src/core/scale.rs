@@ -119,6 +119,39 @@ pub enum ScaleType {
     Custom(&'static [i8]),
 }
 
+impl ScaleType {
+    pub fn iter() -> impl Iterator<Item = ScaleType> {
+        [
+            // Basic scale
+            ScaleType::Major,
+            ScaleType::NaturalMinor,
+            ScaleType::HarmonicMinor,
+            ScaleType::MelodicMinor,
+            ScaleType::Ionian,
+            ScaleType::Dorian,
+            ScaleType::Phrygian,
+            ScaleType::Lydian,
+            ScaleType::Mixolydian,
+            ScaleType::Aeolian,
+            ScaleType::Locrian,
+            // Pentatonic scale
+            ScaleType::PentatonicMajor,
+            ScaleType::PentatonicMinor,
+            ScaleType::Blues,
+            // Special scale
+            ScaleType::WholeTone,
+            ScaleType::Octatonic,
+            ScaleType::Chromatic,
+            ScaleType::BebopDominant,
+            // National scale
+            ScaleType::Hijaz,
+            ScaleType::Hirajoshi,
+            ScaleType::InSen,
+        ]
+        .into_iter()
+    }
+}
+
 /// Scale System
 #[derive(Debug, Clone, Copy)]
 pub struct Scale {
