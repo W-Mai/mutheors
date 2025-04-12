@@ -96,7 +96,6 @@ impl Chord {
     }
 }
 
-#[cfg_attr(feature = "bindgen", uniffi::export)]
 impl Chord {
     #[cfg_attr(feature = "bindgen", uniffi::constructor)]
     fn construct(tuning: Tuning, chord_type: ChordType, chord_quality: ChordQuality) -> Chord {
