@@ -14,6 +14,7 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 /// Chord quality classification (basic triad)
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ChordType {
     /// Triad
@@ -33,6 +34,7 @@ pub enum ChordType {
 }
 
 /// Chord voicing
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Voicing {
     // Dense arrangement (notes within an octave)
@@ -48,6 +50,7 @@ pub enum Voicing {
 }
 
 /// Chord inversion state
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Inversion {
     /// Root position
@@ -93,7 +96,9 @@ impl Chord {
     }
 }
 
+#[cfg_attr(feature = "bindgen", uniffi::export)]
 impl Chord {
+    #[cfg_attr(feature = "bindgen", uniffi::constructor)]
     fn construct(tuning: Tuning, chord_type: ChordType, chord_quality: ChordQuality) -> Chord {
         Self {
             root: tuning,
@@ -106,6 +111,7 @@ impl Chord {
     }
 
     /// Constructive triad (musical chord)
+    #[cfg_attr(feature = "bindgen", uniffi::constructor)]
     pub fn new(root: Tuning, quality: ChordQuality) -> Result<Self, MusicError> {
         Ok(Self::construct(root, ChordType::Triad, quality))
     }
@@ -187,6 +193,7 @@ impl Chord {
     }
 
     // Parsing from chord symbols (e.g. " Cmaj7")
+    #[cfg_attr(feature = "bindgen", uniffi::constructor)]
     pub fn from_symbol(symbol: &str) -> Result<Self, MusicError> {
         Chord::from_str(symbol)
     }
@@ -199,6 +206,7 @@ impl Chord {
 }
 
 /// Functional classification of chords (tonal analysis)
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, PartialEq)]
 pub enum ChordFunction {
     Unknown,

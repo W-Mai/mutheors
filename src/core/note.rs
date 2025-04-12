@@ -1,6 +1,7 @@
 use crate::{Duration, Tuning};
 use std::fmt::Display;
 
+#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Copy, Clone, Debug)]
 pub struct Note {
     tuning: Tuning,

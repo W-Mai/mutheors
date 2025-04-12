@@ -4,6 +4,7 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 /// Classification of chord masses (basic triads)
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ChordQuality {
     // Triad

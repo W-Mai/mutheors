@@ -1,3 +1,4 @@
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, thiserror::Error)]
 pub enum MusicError {
     #[error("Invalid pitch parameter")]

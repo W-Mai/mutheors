@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 #[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Copy, Clone, Debug)]
-#[repr(u8)]
+// #[repr(u8)]
 #[derive(PartialEq, PartialOrd)]
 pub enum PitchClass {
     None = 0,
@@ -193,6 +193,7 @@ impl Tuning {
     }
 }
 
+#[cfg_attr(feature = "bindgen", uniffi::export)]
 impl Tuning {
     pub fn add_interval(&self, interval: &Interval) -> Result<Self, MusicError> {
         let new_semitones = interval.semitones() + self.class as i8 + self.accidentals;

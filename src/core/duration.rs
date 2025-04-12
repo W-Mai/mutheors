@@ -5,6 +5,7 @@ use std::fmt::{Display, Formatter};
 ///
 /// Duration represents the length of a note.
 ///
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq)]
 pub enum DurationBase {
     Maxima,       // 8
@@ -19,6 +20,7 @@ pub enum DurationBase {
     SixtyFourth,  // 1 / 64
 }
 
+#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, Copy)]
 pub struct Duration {
     pub base: DurationBase,
@@ -26,6 +28,7 @@ pub struct Duration {
     pub tuplet: Option<Tuplet>,
 }
 
+#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DurationGenerator {
     type_of_beat: DurationBase,
@@ -85,6 +88,7 @@ impl DurationBase {
 }
 
 /// Structure that represents a tuplet
+#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Tuplet {
     pub actual_notes: u8,            // The number of actual notes played

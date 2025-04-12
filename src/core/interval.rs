@@ -6,6 +6,7 @@ use super::tuning::PitchClass;
 use std::convert::TryFrom;
 
 /// Interval quality (consonance/dissonance)
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub enum IntervalQuality {
     Perfect,    // Pure intervals (1,4,5,8 degrees)
@@ -16,6 +17,7 @@ pub enum IntervalQuality {
 }
 
 /// Consonance of an interval
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Consonance {
     Consonant,
@@ -24,10 +26,12 @@ pub enum Consonance {
 }
 
 /// Degree of an interval
+#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct IntervalDegree(pub u8);
 
 /// Interval
+#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, PartialEq, Ord, PartialOrd, Eq, Hash)]
 pub struct Interval {
     quality: IntervalQuality,
@@ -49,7 +53,7 @@ impl Interval {
     pub fn semitones(&self) -> i8 {
         self.semitones
     }
-    
+
     pub fn semitones_mod(&self) -> i8 {
         self.semitones.rem_euclid(12)
     }
@@ -175,8 +179,7 @@ fn calculate_semitones(quality: IntervalQuality, degree: IntervalDegree) -> Resu
         IntervalQuality::Augmented => 1,
         IntervalQuality::Diminished if [2, 3, 6, 7].contains(&degree_num) => -2,
         IntervalQuality::Diminished if [1, 4, 5, 8].contains(&degree_num) => -1,
-        _ => 
-            return Err(MusicError::InvalidIntervalQuality),
+        _ => return Err(MusicError::InvalidIntervalQuality),
     };
 
     Ok(((12 * octaves + base_semitones) as i8 + adjustment) as u8)
@@ -277,7 +280,7 @@ mod tests {
 
         Ok(())
     }
-    
+
     #[test]
     fn test_major_interval() -> Result<(), MusicError> {
         let intervals = [
@@ -287,7 +290,7 @@ mod tests {
             Interval::from_quality_degree(IntervalQuality::Major, 7)?,
             Interval::from_quality_degree(IntervalQuality::Major, 9)?,
         ];
-        
+
         let interval_numbers = [2, 4, 9, 11, 14];
         let intervals = intervals.map(|i| i.semitones());
         assert_eq!(intervals, interval_numbers);
