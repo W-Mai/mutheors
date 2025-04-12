@@ -40,6 +40,7 @@ use crate::{Chord, ChordQuality, IntervalQuality, MusicError};
 use std::ops::{Add, Div, Mul, Sub};
 
 /// Scale type classification
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ScaleType {
     // Basic scale
@@ -116,6 +117,7 @@ pub enum ScaleType {
     // Custom scales
     /// Custom scale
     /// - 自定义音程模式
+    #[cfg(not(feature = "bindgen"))]
     Custom(&'static [i8]),
 }
 
@@ -153,6 +155,7 @@ impl ScaleType {
 }
 
 /// Scale System
+#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, Copy)]
 pub struct Scale {
     root: Tuning,
@@ -366,8 +369,10 @@ impl Scale {
                 ChordQuality::Major,
                 ChordQuality::Minor,
             ],
+            ScaleType::Chromatic => vec![],
 
-            ScaleType::Custom(_) | ScaleType::Chromatic => vec![],
+            #[cfg(not(feature = "bindgen"))]
+            ScaleType::Custom(_) => vec![],
         };
 
         if degree < 1 || degree > scale_qualities.len() as u8 {
@@ -415,8 +420,9 @@ impl Scale {
             | ScaleType::Ionian
             | ScaleType::PentatonicMajor
             | ScaleType::PentatonicMinor
-            | ScaleType::Chromatic
-            | ScaleType::Custom(_) => None,
+            | ScaleType::Chromatic => None,
+            #[cfg(not(feature = "bindgen"))]
+            ScaleType::Custom(_) => None,
         }
     }
 
@@ -497,6 +503,7 @@ impl Scale {
             ScaleType::Hirajoshi => parse_intervals(&[2, 1, 4, 1, 4]),
             ScaleType::InSen => parse_intervals(&[1, 4, 2, 3, 2]),
 
+            #[cfg(not(feature = "bindgen"))]
             ScaleType::Custom(pattern) => {
                 let semitones = pattern
                     .iter()

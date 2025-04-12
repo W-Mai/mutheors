@@ -4,15 +4,32 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Benign X <1341398182@qq.com>"]
 
+[lib]
+crate-type = ["lib", "staticlib"]
+name = "mutheors"
+
 [features]
 default = []
 midi_io = ["midir"]
+bindgen = ["uniffi/cli", "uniffi/build"]
 
 [dependencies]
 rand = "0.9.0"
 thiserror = "2.0.11"
 
 midir = { version = "0.10.0", optional = true }
+
+uniffi = { version = "0.29.1", features = ["cli"], optional = true }
+
+[build-dependencies]
+uniffi = { version = "0.29.1", features = ["build"], optional = true }
+
+[[bin]]
+# This can be whatever name makes sense for your project, but the rest of this tutorial assumes uniffi-bindgen.
+name = "uniffi-bindgen"
+path = "uniffi-bindgen.rs"
+required-features = ["bindgen"]
+
 
 [[test]]
 name = "test_midi"

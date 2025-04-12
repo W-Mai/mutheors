@@ -5,6 +5,7 @@ use std::iter::Peekable;
 use std::ops::{Div, Mul};
 use std::str::FromStr;
 
+#[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
 #[derive(PartialEq, PartialOrd)]
@@ -126,6 +127,7 @@ impl Tuning {
     }
 }
 
+#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct Tuning {
     pub class: PitchClass,
@@ -134,7 +136,9 @@ pub struct Tuning {
     pub freq: Option<f32>, // 自定义频率
 }
 
+#[cfg_attr(feature = "bindgen", uniffi::export)]
 impl Tuning {
+    #[cfg_attr(feature = "bindgen", uniffi::constructor)]
     pub fn new(class: PitchClass, octave: i8) -> Self {
         Self {
             class,

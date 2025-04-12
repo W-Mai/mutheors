@@ -30,3 +30,6 @@ mod tests;
 pub use composition::*;
 pub use core::*;
 pub use tests::*;
+
+#[cfg(feature = "bindgen")]
+uniffi::setup_scaffolding!();

@@ -30,3 +30,12 @@
 1. Pick a PitchClass
 2. From PitchClass, generate a Tuning
 3. Generate a Chord from Tuning
+
+## Bindgen
+
+### Swift
+
+```bash
+cargo build --release --features bindgen
+cargo run --features bindgen --bin uniffi-bindgen generate --library target/release/libmutheors.a --language swift --out-dir bindgen
+```
