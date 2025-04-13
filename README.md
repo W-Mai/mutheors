@@ -39,13 +39,13 @@
 
 ```bash
 cargo build --release --features bindgen
-cargo run --features bindgen --bin uniffi-bindgen -- generate --library target/release/libmutheors.a --language swift --out-dir bindgen
+cargo run --features bindgen --bin uniffi-bindgen -- generate --library target/release/libmutheors.a --language swift --out-dir generated_bindgen
 ```
 
 #### Generate Dynamic Library
 
 ```bash
-pushd bindgen && swiftc \
+pushd generated_bindgen && swiftc \
     -module-name mutheors \
     -emit-library -o libmutheors.dylib \
     -emit-module -emit-module-path ./ \
