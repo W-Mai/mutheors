@@ -1,3 +1,5 @@
+use crate::Scale;
+
 trait IntoArc {
     fn into_arc(self) -> std::sync::Arc<Self>;
 }
@@ -96,6 +98,14 @@ impl Chord {
         Ok(Self {
             inner: crate::Chord::from_symbol(symbol)?.into_arc(),
         })
+    }
+
+    pub fn in_scales(&self) -> Vec<std::sync::Arc<Scale>> {
+        self.inner
+            .in_scales()
+            .into_iter()
+            .map(|i| i.into_arc())
+            .collect()
     }
 }
 
