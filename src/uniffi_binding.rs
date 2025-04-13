@@ -19,13 +19,15 @@ impl Chord {
         self.inner.quality()
     }
 
-    pub fn root(&self) -> crate::Tuning {
-        self.inner.root()
+    pub fn root(&self) -> Tuning {
+        Tuning {
+            inner: self.inner.root().into_arc(),
+        }
     }
 
-    pub fn with_root(&self, root: &crate::Tuning) -> Self {
+    pub fn with_root(&self, root: &Tuning) -> Self {
         Self {
-            inner: (*self.inner).clone().with_root(*root).into_arc(),
+            inner: (*self.inner).clone().with_root(*root.inner).into_arc(),
         }
     }
 
@@ -67,5 +69,54 @@ impl DurationBaseObject {
 
     pub fn inner(&self) -> crate::DurationBase {
         *self.inner
+    }
+}
+
+#[derive(uniffi::Object, Clone)]
+struct Tuning {
+    inner: std::sync::Arc<crate::Tuning>,
+}
+
+#[uniffi::export]
+impl Tuning {
+    #[uniffi::constructor]
+    pub fn new(class: crate::PitchClass, octave: i8) -> Self {
+        Self {
+            inner: crate::Tuning::new(class, octave).into_arc(),
+        }
+    }
+
+    pub fn with_octave(&self, octave: i8) -> Self {
+        Self {
+            inner: (*self.inner).clone().with_octave(octave).into_arc(),
+        }
+    }
+
+    pub fn with_freq(&self, freq: f32) -> Self {
+        Self {
+            inner: (*self.inner).clone().with_freq(freq).into_arc(),
+        }
+    }
+
+    pub fn frequency(&self) -> f32 {
+        self.inner.frequency()
+    }
+
+    pub fn scale(&self, scale_type: crate::ScaleType) -> crate::Scale {
+        crate::Scale::new(*self.inner, scale_type).unwrap()
+    }
+
+    pub fn common_chord(&self, degree: u8) -> Chord {
+        Chord {
+            inner: self.inner.common_chord(degree).into_arc(),
+        }
+    }
+
+    pub fn class_semitones(&self) -> i8 {
+        self.inner.class_semitones()
+    }
+
+    pub fn number(&self) -> i8 {
+        self.inner.number()
     }
 }

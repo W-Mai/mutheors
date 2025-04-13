@@ -127,7 +127,6 @@ impl Tuning {
     }
 }
 
-#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct Tuning {
     pub class: PitchClass,
@@ -137,7 +136,6 @@ pub struct Tuning {
 }
 
 impl Tuning {
-    #[cfg_attr(feature = "bindgen", uniffi::constructor)]
     pub fn new(class: PitchClass, octave: i8) -> Self {
         Self {
             class,
@@ -192,7 +190,6 @@ impl Tuning {
     }
 }
 
-#[cfg_attr(feature = "bindgen", uniffi::export)]
 impl Tuning {
     pub fn add_interval(&self, interval: &Interval) -> Result<Self, MusicError> {
         let new_semitones = interval.semitones() + self.class as i8 + self.accidentals;
