@@ -32,4 +32,6 @@ pub use core::*;
 pub use tests::*;
 
 #[cfg(feature = "bindgen")]
+mod uniffi_binding;
+#[cfg(feature = "bindgen")]
 uniffi::setup_scaffolding!();
