@@ -119,4 +119,28 @@ impl Tuning {
     pub fn number(&self) -> i8 {
         self.inner.number()
     }
+
+    pub fn add_interval(&self, interval: &crate::Interval) -> Result<Self, crate::MusicError> {
+        Ok(Self {
+            inner: (*self.inner).clone().add_interval(interval)?.into_arc(),
+        })
+    }
+
+    pub fn sharp(&self) -> Self {
+        Self {
+            inner: (*self.inner).clone().sharp().into_arc(),
+        }
+    }
+
+    pub fn flat(&self) -> Self {
+        Self {
+            inner: (*self.inner).clone().flat().into_arc(),
+        }
+    }
+
+    pub fn simple(&self) -> Self {
+        Self {
+            inner: (*self.inner).clone().simple().into_arc(),
+        }
+    }
 }
