@@ -136,7 +136,6 @@ pub struct Tuning {
     pub freq: Option<f32>, // 自定义频率
 }
 
-#[cfg_attr(feature = "bindgen", uniffi::export)]
 impl Tuning {
     #[cfg_attr(feature = "bindgen", uniffi::constructor)]
     pub fn new(class: PitchClass, octave: i8) -> Self {

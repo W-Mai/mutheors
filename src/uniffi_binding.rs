@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 trait IntoArc {
     fn into_arc(self) -> std::sync::Arc<Self>;
 }
@@ -7,6 +5,34 @@ trait IntoArc {
 impl<T> IntoArc for T {
     fn into_arc(self) -> std::sync::Arc<Self> {
         std::sync::Arc::new(self)
+    }
+}
+
+#[derive(uniffi::Object, Clone)]
+struct Chord {
+    inner: std::sync::Arc<crate::Chord>,
+}
+
+#[cfg_attr(feature = "bindgen", uniffi::export)]
+impl Chord {
+    pub fn quality(&self) -> crate::ChordQuality {
+        self.inner.quality()
+    }
+
+    pub fn root(&self) -> crate::Tuning {
+        self.inner.root()
+    }
+
+    pub fn with_root(&self, root: &crate::Tuning) -> Self {
+        Self {
+            inner: (*self.inner).clone().with_root(*root).into_arc(),
+        }
+    }
+
+    pub fn with_octave(&self, octave: i8) -> Self {
+        Self {
+            inner: (*self.inner).clone().with_octave(octave).into_arc(),
+        }
     }
 }
 

@@ -64,7 +64,6 @@ pub enum Inversion {
 }
 
 /// Complete Chord Description Structure
-#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Chord {
     root: Tuning,
