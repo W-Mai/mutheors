@@ -96,7 +96,6 @@ impl Chord {
 }
 
 impl Chord {
-    #[cfg_attr(feature = "bindgen", uniffi::constructor)]
     fn construct(tuning: Tuning, chord_type: ChordType, chord_quality: ChordQuality) -> Chord {
         Self {
             root: tuning,
@@ -109,15 +108,15 @@ impl Chord {
     }
 
     /// Constructive triad (musical chord)
-    #[cfg_attr(feature = "bindgen", uniffi::constructor)]
     pub fn new(root: Tuning, quality: ChordQuality) -> Result<Self, MusicError> {
         Ok(Self::construct(root, ChordType::Triad, quality))
     }
 
     /// Adding Extended interval
-    pub fn with_extension(mut self, interval: Interval) -> Self {
-        self.extensions.push(interval);
-        self
+    pub fn with_extension(&self, interval: Interval) -> Self {
+        let mut s = self.clone();
+        s.extensions.push(interval);
+        s
     }
 
     /// Chord inversion

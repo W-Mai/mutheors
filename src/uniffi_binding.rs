@@ -36,6 +36,67 @@ impl Chord {
             inner: (*self.inner).clone().with_octave(octave).into_arc(),
         }
     }
+
+    #[uniffi::constructor]
+    pub fn new(root: &Tuning, quality: crate::ChordQuality) -> Result<Self, crate::MusicError> {
+        Ok(Self {
+            inner: crate::Chord::new(*root.inner, quality)?.into_arc(),
+        })
+    }
+
+    /// Adding Extended interval
+    pub fn with_extension(&self, interval: &crate::Interval) -> Self {
+        Self {
+            inner: (*self.inner).clone().with_extension(*interval).into_arc(),
+        }
+    }
+
+    pub fn invert(&self, inversion: &crate::Inversion) -> Self {
+        let mut self_copy = (*self.inner).clone();
+        self_copy.invert(*inversion);
+        Self {
+            inner: self_copy.into_arc(),
+        }
+    }
+
+    pub fn intervals(&self) -> Vec<std::sync::Arc<crate::Interval>> {
+        self.inner
+            .intervals()
+            .into_iter()
+            .map(|i| i.into_arc())
+            .collect()
+    }
+
+    /// Getting Chord composition tones
+    pub fn components(&self) -> Vec<std::sync::Arc<Tuning>> {
+        self.inner
+            .components()
+            .into_iter()
+            .map(|i| {
+                Tuning {
+                    inner: i.into_arc(),
+                }
+                .into_arc()
+            })
+            .collect()
+    }
+
+    pub fn simple(&self) -> Self {
+        Self {
+            inner: (*self.inner).clone().simple().into_arc(),
+        }
+    }
+
+    pub fn function(&self, scale: &crate::Scale) -> crate::ChordFunction {
+        self.inner.function(*scale)
+    }
+
+    #[uniffi::constructor]
+    pub fn from_symbol(symbol: &str) -> Result<Self, crate::MusicError> {
+        Ok(Self {
+            inner: crate::Chord::from_symbol(symbol)?.into_arc(),
+        })
+    }
 }
 
 #[derive(uniffi::Object, Clone)]

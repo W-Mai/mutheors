@@ -32,7 +32,7 @@ pub struct IntervalDegree(pub u8);
 
 /// Interval
 #[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
-#[derive(Debug, Clone, PartialEq, Ord, PartialOrd, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Ord, PartialOrd, Eq, Hash)]
 pub struct Interval {
     quality: IntervalQuality,
     degree: IntervalDegree,
