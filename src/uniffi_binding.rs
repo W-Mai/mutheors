@@ -1,5 +1,3 @@
-use crate::Scale;
-
 trait IntoArc {
     fn into_arc(self) -> std::sync::Arc<Self>;
 }
@@ -89,8 +87,8 @@ impl Chord {
         }
     }
 
-    pub fn function(&self, scale: &crate::Scale) -> crate::ChordFunction {
-        self.inner.function(*scale)
+    pub fn function(&self, scale: &Scale) -> crate::ChordFunction {
+        self.inner.function(*scale.inner)
     }
 
     #[uniffi::constructor]
@@ -104,7 +102,12 @@ impl Chord {
         self.inner
             .in_scales()
             .into_iter()
-            .map(|i| i.into_arc())
+            .map(|i| {
+                Scale {
+                    inner: i.into_arc(),
+                }
+                .into_arc()
+            })
             .collect()
     }
 }
@@ -144,6 +147,96 @@ impl DurationBaseObject {
 }
 
 #[derive(uniffi::Object, Clone)]
+struct Scale {
+    inner: std::sync::Arc<crate::Scale>,
+}
+
+#[uniffi::export]
+impl Scale {
+    #[uniffi::constructor]
+    pub fn new(root: &Tuning, scale_type: crate::ScaleType) -> Result<Self, crate::MusicError> {
+        Ok(Self {
+            inner: crate::Scale::new(*root.inner, scale_type)?.into_arc(),
+        })
+    }
+
+    pub fn scale_type(&self) -> crate::ScaleType {
+        self.inner.scale_type()
+    }
+
+    pub fn root(&self) -> Tuning {
+        Tuning {
+            inner: self.inner.root().into_arc(),
+        }
+    }
+
+    pub fn generate_tunings(
+        &self,
+        octaves: u8,
+    ) -> Result<Vec<std::sync::Arc<Tuning>>, crate::MusicError> {
+        Ok(self
+            .inner
+            .generate_tunings(octaves)?
+            .into_iter()
+            .map(|i| {
+                Tuning {
+                    inner: i.into_arc(),
+                }
+                .into_arc()
+            })
+            .collect())
+    }
+
+    pub fn contains(&self, tuning: &Tuning) -> bool {
+        self.inner.contains(&*tuning.inner)
+    }
+
+    pub fn degree(&self, degree: u8) -> Result<Tuning, crate::MusicError> {
+        Ok(Tuning {
+            inner: self.inner.degree(degree)?.into_arc(),
+        })
+    }
+
+    pub fn interval_count(&self) -> u8 {
+        self.inner.interval_count()
+    }
+
+    pub fn semitone_count(&self) -> u8 {
+        self.inner.semitone_count()
+    }
+
+    pub fn chord(
+        &self,
+        degree: u8,
+        quality: crate::ChordQuality,
+    ) -> Result<Chord, crate::MusicError> {
+        Ok(Chord {
+            inner: self.inner.chord(degree, quality)?.into_arc(),
+        })
+    }
+
+    pub fn degree_chord(&self, degree: u8) -> Result<Chord, crate::MusicError> {
+        Ok(Chord {
+            inner: self.inner.degree_chord(degree)?.into_arc(),
+        })
+    }
+
+    pub fn characteristic_interval(&self) -> Option<std::sync::Arc<crate::Interval>> {
+        self.inner.characteristic_interval().map(|i| i.into_arc())
+    }
+
+    pub fn characteristic_tuning(&self) -> Option<std::sync::Arc<Tuning>> {
+        self.characteristic_interval()
+            .and_then(|i| self.root().add_interval(&i).ok())
+            .map(|i| i.into_arc())
+    }
+
+    pub fn modal_tonic(&self) -> Tuning {
+        self.root()
+    }
+}
+
+#[derive(uniffi::Object, Clone)]
 struct Tuning {
     inner: std::sync::Arc<crate::Tuning>,
 }
@@ -173,8 +266,8 @@ impl Tuning {
         self.inner.frequency()
     }
 
-    pub fn scale(&self, scale_type: crate::ScaleType) -> crate::Scale {
-        crate::Scale::new(*self.inner, scale_type).unwrap()
+    pub fn scale(&self, scale_type: crate::ScaleType) -> Scale {
+        Scale::new(self, scale_type).unwrap()
     }
 
     pub fn common_chord(&self, degree: u8) -> Chord {

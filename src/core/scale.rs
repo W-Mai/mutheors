@@ -155,7 +155,6 @@ impl ScaleType {
 }
 
 /// Scale System
-#[cfg_attr(feature = "bindgen", derive(uniffi::Object))]
 #[derive(Debug, Clone, Copy)]
 pub struct Scale {
     root: Tuning,
