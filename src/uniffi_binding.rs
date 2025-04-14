@@ -307,4 +307,8 @@ impl Tuning {
             inner: (*self.inner).clone().simple().into_arc(),
         }
     }
+    
+    pub fn to_string(&self) -> String {
+        self.inner.to_string()
+    }
 }
