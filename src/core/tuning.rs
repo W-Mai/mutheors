@@ -309,7 +309,11 @@ impl Display for Tuning {
             n if n < 0 => "b".repeat((-n) as usize),
             _ => unreachable!(),
         };
-        write!(f, "{}{}{}", self.class, acc_str, self.octave)
+        if f.alternate() {
+            write!(f, "{}{}{}", self.class, acc_str, self.octave)
+        } else {
+            write!(f, "{}{}", self.class, acc_str)
+        }
     }
 }
 
