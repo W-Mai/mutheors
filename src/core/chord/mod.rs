@@ -331,7 +331,11 @@ impl Chord {
 
 impl Display for Chord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str = format!("{}{}", self.root, self.quality);
+        let str = if f.alternate() {
+            format!("{:#}{}", self.root, self.quality)
+        } else {
+            format!("{}{}", self.root, self.quality)
+        };
         write!(f, "{}", str)
     }
 }
