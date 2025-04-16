@@ -45,9 +45,12 @@ impl Chord {
     }
 
     /// Adding Extended interval
-    pub fn with_extension(&self, interval: &crate::Interval) -> Self {
+    pub fn with_extension(&self, interval: &Interval) -> Self {
         Self {
-            inner: (*self.inner).clone().with_extension(*interval).into_arc(),
+            inner: (*self.inner)
+                .clone()
+                .with_extension(*interval.inner)
+                .into_arc(),
         }
     }
 
@@ -59,11 +62,16 @@ impl Chord {
         }
     }
 
-    pub fn intervals(&self) -> Vec<std::sync::Arc<crate::Interval>> {
+    pub fn intervals(&self) -> Vec<std::sync::Arc<Interval>> {
         self.inner
             .intervals()
             .into_iter()
-            .map(|i| i.into_arc())
+            .map(|i| {
+                Interval {
+                    inner: i.into_arc(),
+                }
+                .into_arc()
+            })
             .collect()
     }
 
@@ -151,6 +159,70 @@ impl DurationBaseObject {
 }
 
 #[derive(uniffi::Object, Clone)]
+struct Interval {
+    inner: std::sync::Arc<crate::Interval>,
+}
+
+#[uniffi::export]
+impl Interval {
+    pub fn semitones(&self) -> i8 {
+        self.inner.semitones()
+    }
+
+    pub fn semitones_mod(&self) -> i8 {
+        self.inner.semitones().rem_euclid(12)
+    }
+
+    #[uniffi::constructor]
+    pub fn from_quality_degree(
+        quality: crate::IntervalQuality,
+        degree: u8,
+    ) -> Result<Self, crate::MusicError> {
+        Ok(Self {
+            inner: crate::Interval::from_quality_degree(quality, degree)?.into_arc(),
+        })
+    }
+
+    #[uniffi::constructor]
+    pub fn from_semitones(semitones: i8) -> Result<Self, crate::MusicError> {
+        Ok(Self {
+            inner: crate::Interval::from_semitones(semitones)?.into_arc(),
+        })
+    }
+
+    #[uniffi::constructor]
+    pub fn between(start: crate::PitchClass, end: crate::PitchClass) -> Self {
+        Self {
+            inner: crate::Interval::between(start, end).into_arc(),
+        }
+    }
+
+    /// Interstitial inversion (e.g. Major 3rd -> minor 6th)
+    pub fn invert(&self) -> Self {
+        let mut self_copy = (*self.inner).clone();
+        self_copy.invert();
+        Self {
+            inner: self_copy.into_arc(),
+        }
+    }
+
+    /// Consonance of the interval
+    pub fn consonance(&self) -> crate::Consonance {
+        self.inner.consonance()
+    }
+
+    /// Get the interval name
+    /// e.g.
+    /// - M3 (major third)
+    /// - m6 (minor sixth)
+    /// - Aug4 (augmented fourth)
+    /// - Dim5 (diminished fifth)
+    pub fn name(&self) -> String {
+        self.inner.name()
+    }
+}
+
+#[derive(uniffi::Object, Clone)]
 struct Scale {
     inner: std::sync::Arc<crate::Scale>,
 }
@@ -225,8 +297,13 @@ impl Scale {
         })
     }
 
-    pub fn characteristic_interval(&self) -> Option<std::sync::Arc<crate::Interval>> {
-        self.inner.characteristic_interval().map(|i| i.into_arc())
+    pub fn characteristic_interval(&self) -> Option<std::sync::Arc<Interval>> {
+        self.inner.characteristic_interval().map(|i| {
+            Interval {
+                inner: i.into_arc(),
+            }
+            .into_arc()
+        })
     }
 
     pub fn characteristic_tuning(&self) -> Option<std::sync::Arc<Tuning>> {
@@ -288,9 +365,12 @@ impl Tuning {
         self.inner.number()
     }
 
-    pub fn add_interval(&self, interval: &crate::Interval) -> Result<Self, crate::MusicError> {
+    pub fn add_interval(&self, interval: &Interval) -> Result<Self, crate::MusicError> {
         Ok(Self {
-            inner: (*self.inner).clone().add_interval(interval)?.into_arc(),
+            inner: (*self.inner)
+                .clone()
+                .add_interval(&interval.inner)?
+                .into_arc(),
         })
     }
 
