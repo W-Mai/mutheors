@@ -6,18 +6,26 @@ use std::ops::{Div, Mul};
 use std::str::FromStr;
 
 #[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
-#[derive(Copy, Clone, Debug)]
-// #[repr(u8)]
-#[derive(PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub enum PitchClass {
-    None = 0,
-    C = 1,
-    D = 3,
-    E = 5,
-    F = 6,
-    G = 8,
-    A = 10,
-    B = 12,
+    None,
+    C,
+    Cs,
+    Db,
+    D,
+    Ds,
+    Eb,
+    E,
+    F,
+    Fs,
+    Gb,
+    G,
+    Gs,
+    Ab,
+    A,
+    As,
+    Bb,
+    B,
 }
 
 impl PitchClass {
@@ -46,6 +54,36 @@ impl PitchClass {
             .degree_chord(degree)
             .unwrap()
     }
+
+    /// Semitones
+    pub fn semitones(&self) -> i8 {
+        match &self {
+            &PitchClass::C => 1,
+            &PitchClass::Cs => 2,
+            &PitchClass::Db => 2,
+            &PitchClass::D => 3,
+            &PitchClass::Ds => 4,
+            &PitchClass::Eb => 4,
+            &PitchClass::E => 5,
+            &PitchClass::F => 6,
+            &PitchClass::Fs => 7,
+            &PitchClass::Gb => 7,
+            &PitchClass::G => 8,
+            &PitchClass::Gs => 9,
+            &PitchClass::Ab => 9,
+            &PitchClass::A => 10,
+            &PitchClass::As => 11,
+            &PitchClass::Bb => 12,
+            &PitchClass::B => 12,
+            &PitchClass::None => 0,
+        }
+    }
+}
+
+impl From<PitchClass> for i8 {
+    fn from(value: PitchClass) -> Self {
+        value.semitones()
+    }
 }
 
 impl From<PitchClass> for Tuning {
@@ -62,14 +100,24 @@ impl From<PitchClass> for Tuning {
 impl Display for PitchClass {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            PitchClass::None => " ",
             PitchClass::C => "C",
+            PitchClass::Cs => "C#",
+            PitchClass::Db => "Db",
             PitchClass::D => "D",
+            PitchClass::Ds => "D#",
+            PitchClass::Eb => "Eb",
             PitchClass::E => "E",
             PitchClass::F => "F",
+            PitchClass::Fs => "F#",
+            PitchClass::Gs => "G#",
+            PitchClass::Gb => "Gb",
             PitchClass::G => "G",
+            PitchClass::Ab => "Ab",
             PitchClass::A => "A",
+            PitchClass::As => "A#",
+            PitchClass::Bb => "Bb",
             PitchClass::B => "B",
+            PitchClass::None => "X",
         }
         .to_string();
         write!(f, "{}", str)
@@ -160,7 +208,9 @@ impl Tuning {
     pub fn frequency(&self) -> f32 {
         self.freq.unwrap_or_else(|| {
             440.0
-                * 2f32.powf((((self.octave + 1) * 12 + self.class as i8 - 1) as f32 - 69.0) / 12.0)
+                * 2f32.powf(
+                    (((self.octave + 1) * 12 + self.class.semitones() - 1) as f32 - 69.0) / 12.0,
+                )
         })
     }
 
@@ -173,15 +223,11 @@ impl Tuning {
     }
 
     pub fn class_semitones(&self) -> i8 {
-        (self.class as i8 + self.accidentals + 11) % 12
+        (self.class.semitones() + self.accidentals + 11) % 12
     }
 
     pub fn number(&self) -> i8 {
-        let base = self.class as i8;
-        if base == 0 {
-            return 0;
-        }
-        let base = base - 1;
+        let base = self.class.semitones();
         let num = (self.octave + 1)
             .saturating_mul(12)
             .saturating_add(base)
@@ -192,7 +238,7 @@ impl Tuning {
 
 impl Tuning {
     pub fn add_interval(&self, interval: &Interval) -> Result<Self, MusicError> {
-        let new_semitones = interval.semitones() + self.class as i8 + self.accidentals;
+        let new_semitones = interval.semitones() + self.class.semitones() + self.accidentals;
         let new_octave = self.octave + (new_semitones + 11) / 12 - 1;
         if !(0..=11).contains(&new_octave) {
             Err(MusicError::InvalidOctave { octave: new_octave })
