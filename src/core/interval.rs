@@ -258,8 +258,8 @@ mod tests {
 
         let tuning = tuning!(C 3);
         let new_tuning = tuning.add_interval(&interval)?;
-        assert_eq!(new_tuning.class, PitchClass::C);
-        assert_eq!(new_tuning.octave, 1);
+        assert_eq!(new_tuning.class(), PitchClass::C);
+        assert_eq!(new_tuning.octave(), 1);
 
         Ok(())
     }

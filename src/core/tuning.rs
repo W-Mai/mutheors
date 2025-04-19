@@ -177,10 +177,10 @@ impl Tuning {
 
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct Tuning {
-    pub class: PitchClass,
+    class: PitchClass,
     pub accidentals: i8,
     pub octave: i8,
-    pub freq: Option<f32>, // 自定义频率
+    freq: Option<f32>, // 自定义频率
 }
 
 impl Tuning {
@@ -212,6 +212,18 @@ impl Tuning {
                     (((self.octave + 1) * 12 + self.class.semitones() - 1) as f32 - 69.0) / 12.0,
                 )
         })
+    }
+    
+    pub fn class(&self) -> PitchClass {
+        self.class
+    }
+    
+    pub fn accidentals(&self) -> i8 {
+        self.accidentals
+    }
+    
+    pub fn octave(&self) -> i8 {
+        self.octave
     }
 
     pub fn scale(&self, scale_type: ScaleType) -> Scale {

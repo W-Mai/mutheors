@@ -196,7 +196,9 @@ impl Scale {
     /// Determining whether a pitch belongs to a scale
     pub fn contains(&self, tuning: &Tuning) -> bool {
         let tunings = self.generate_tunings(1).unwrap();
-        tunings.iter().any(|n| n.class == tuning.class)
+        tunings
+            .iter()
+            .any(|n| n.class().semitones() == tuning.class().semitones())
     }
 
     /// Getting the Scale Degree
