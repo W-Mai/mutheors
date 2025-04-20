@@ -213,15 +213,15 @@ impl Tuning {
                 )
         })
     }
-    
+
     pub fn class(&self) -> PitchClass {
         self.class
     }
-    
+
     pub fn accidentals(&self) -> i8 {
         self.accidentals
     }
-    
+
     pub fn octave(&self) -> i8 {
         self.octave
     }
@@ -409,6 +409,14 @@ mod tests {
         println!("tuning2: {}", tuning2);
         println!("tuning2: {}", tuning3);
         println!("tuning2: {}", tuning4);
+    }
+
+    #[test]
+    fn test_tuning_03() {
+        let pc = PitchClass::C;
+        let tuning1 = (pc.sharp().with_octave(3) * 3).flat();
+        let tuning2 = Tuning::new(PitchClass::C, 6) / 2;
+        assert_eq!(tuning1, tuning2);
     }
 
     #[test]
