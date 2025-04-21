@@ -112,16 +112,19 @@ impl Interval {
     }
 
     /// Interstitial inversion (e.g. Major 3rd -> minor 6th)
-    pub fn invert(&mut self) {
-        self.degree.0 = 9 - self.degree.0 % 7;
-        self.semitones = 12 - self.semitones.abs();
-        self.quality = match self.quality {
-            IntervalQuality::Perfect => IntervalQuality::Perfect,
-            IntervalQuality::Major => IntervalQuality::Minor,
-            IntervalQuality::Minor => IntervalQuality::Major,
-            IntervalQuality::Augmented => IntervalQuality::Diminished,
-            IntervalQuality::Diminished => IntervalQuality::Augmented,
-        };
+    pub fn invert(&self) -> Self {
+        Self {
+            quality: match self.quality {
+                IntervalQuality::Perfect => IntervalQuality::Perfect,
+                IntervalQuality::Major => IntervalQuality::Minor,
+                IntervalQuality::Minor => IntervalQuality::Major,
+                IntervalQuality::Augmented => IntervalQuality::Diminished,
+                IntervalQuality::Diminished => IntervalQuality::Augmented,
+            },
+            degree: IntervalDegree(9 - self.degree.0 % 7),
+            semitones: -self.semitones,
+            is_descending: !self.is_descending,
+        }
     }
 
     /// Consonance of the interval
@@ -244,9 +247,9 @@ mod tests {
 
     #[test]
     fn test_inversion() {
-        let mut interval = Interval::from_semitones(4).unwrap(); // Major 3rd
-        interval.invert();
-        assert_eq!(interval.semitones, 8); // Minor 6th
+        let interval = Interval::from_semitones(4).unwrap(); // Major 3rd
+        let interval = interval.invert();
+        assert_eq!(interval.semitones, -4); // Minor 6th
         assert_eq!(interval.quality, IntervalQuality::Minor);
         assert_eq!(interval.degree.0, 6);
     }

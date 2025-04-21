@@ -1,5 +1,5 @@
 use crate::chord::Chord;
-use crate::{Interval, MusicError, Scale, ScaleType};
+use crate::{Interval, IntervalQuality, MusicError, Scale, ScaleType};
 use std::fmt::Display;
 use std::iter::Peekable;
 use std::ops::{Div, Mul};
@@ -341,8 +341,10 @@ impl Mul<u8> for Tuning {
     type Output = Tuning;
 
     fn mul(self, rhs: u8) -> Self::Output {
-        self.add_interval(&Interval::from_semitones(12 * (rhs - 1) as i8).unwrap())
-            .unwrap()
+        self.add_interval(
+            &Interval::from_quality_degree(IntervalQuality::Perfect, 1 + 7 * (rhs - 1)).unwrap(),
+        )
+        .unwrap()
     }
 }
 
@@ -350,8 +352,12 @@ impl Div<u8> for Tuning {
     type Output = Tuning;
 
     fn div(self, rhs: u8) -> Self::Output {
-        self.add_interval(&Interval::from_semitones(-12 * (rhs - 1) as i8).unwrap())
-            .unwrap()
+        self.add_interval(
+            &Interval::from_quality_degree(IntervalQuality::Perfect, 1 + 7 * (rhs - 1))
+                .unwrap()
+                .invert(),
+        )
+        .unwrap()
     }
 }
 
