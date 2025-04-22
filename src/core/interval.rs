@@ -13,6 +13,22 @@
 use super::errors::MusicError;
 use super::tuning::PitchClass;
 use std::convert::TryFrom;
+use std::ops::{Add, Mul, Neg, Sub};
+
+// Common interval semitone sizes
+pub const UNISON: i8 = 0;
+pub const MINOR_SECOND: i8 = 1;
+pub const MAJOR_SECOND: i8 = 2;
+pub const MINOR_THIRD: i8 = 3;
+pub const MAJOR_THIRD: i8 = 4;
+pub const PERFECT_FOURTH: i8 = 5;
+pub const TRITONE: i8 = 6;
+pub const PERFECT_FIFTH: i8 = 7;
+pub const MINOR_SIXTH: i8 = 8;
+pub const MAJOR_SIXTH: i8 = 9;
+pub const MINOR_SEVENTH: i8 = 10;
+pub const MAJOR_SEVENTH: i8 = 11;
+pub const OCTAVE: i8 = 12;
 
 /// The quality component of an interval, indicating its specific type
 ///
@@ -230,7 +246,7 @@ impl Interval {
     /// * The interval between the two pitch classes
     pub fn between(start: PitchClass, end: PitchClass) -> Self {
         let semitones = end as i8 - start as i8;
-        Self::from_semitones(semitones).unwrap()
+        Self::from_semitones(semitones).unwrap_or_else(|_| Self::unison())
     }
 
     /// Interstitial inversion (e.g. Major 3rd -> minor 6th)
@@ -249,7 +265,7 @@ impl Interval {
         }
     }
 
-    /// Consonance of the interval
+    /// Determine the consonance category of the interval
     pub fn consonance(&self) -> Consonance {
         match (self.degree.0 % 7, self.quality) {
             (0, _) => Consonance::Consonant, // Same quality
@@ -261,6 +277,92 @@ impl Interval {
             }
             _ => Consonance::Dissonant,
         }
+    }
+    
+    /// Check if the interval is a perfect consonance (unison, perfect fifth, perfect octave)
+    pub fn is_perfect_consonance(&self) -> bool {
+        matches!(self.consonance(), Consonance::Consonant) && 
+        matches!(self.quality, IntervalQuality::Perfect) &&
+        matches!(self.degree.0 % 7, 1 | 5 | 0)
+    }
+    
+    /// Check if the interval is an imperfect consonance (major/minor third, major/minor sixth)
+    pub fn is_imperfect_consonance(&self) -> bool {
+        matches!(self.consonance(), Consonance::Imperfect)
+    }
+    
+    /// Check if the interval is a dissonance
+    pub fn is_dissonant(&self) -> bool {
+        matches!(self.consonance(), Consonance::Dissonant)
+    }
+    
+    /// Check if the interval is a perfect interval (unison, fourth, fifth, octave)
+    pub fn is_perfect(&self) -> bool {
+        matches!(self.quality, IntervalQuality::Perfect)
+    }
+    
+    /// Check if the interval is a major interval
+    pub fn is_major(&self) -> bool {
+        matches!(self.quality, IntervalQuality::Major)
+    }
+    
+    /// Check if the interval is a minor interval
+    pub fn is_minor(&self) -> bool {
+        matches!(self.quality, IntervalQuality::Minor)
+    }
+    
+    /// Check if the interval is an augmented interval
+    pub fn is_augmented(&self) -> bool {
+        matches!(self.quality, IntervalQuality::Augmented)
+    }
+    
+    /// Check if the interval is a diminished interval
+    pub fn is_diminished(&self) -> bool {
+        matches!(self.quality, IntervalQuality::Diminished)
+    }
+    
+    /// Check if the interval is a simple interval (within an octave)
+    pub fn is_simple(&self) -> bool {
+        self.semitones.abs() <= OCTAVE
+    }
+    
+    /// Check if the interval is a compound interval (larger than an octave)
+    pub fn is_compound(&self) -> bool {
+        self.semitones.abs() > OCTAVE
+    }
+    
+    /// Get a collection of all perfect consonance intervals within an octave
+    pub fn perfect_consonances() -> Vec<Self> {
+        vec![Self::unison(), Self::perfect_fifth(), Self::octave()]
+    }
+    
+    /// Get a collection of all imperfect consonance intervals within an octave
+    pub fn imperfect_consonances() -> Vec<Self> {
+        vec![
+            Self::minor_third(),
+            Self::major_third(),
+            Self::minor_sixth(),
+            Self::major_sixth(),
+        ]
+    }
+    
+    /// Get a collection of all consonant intervals within an octave
+    pub fn consonant_intervals() -> Vec<Self> {
+        let mut intervals = Self::perfect_consonances();
+        intervals.extend(Self::imperfect_consonances());
+        intervals
+    }
+    
+    /// Get a collection of all dissonant intervals within an octave
+    pub fn dissonant_intervals() -> Vec<Self> {
+        vec![
+            Self::minor_second(),
+            Self::major_second(),
+            Self::perfect_fourth(), // Perfect fourth is sometimes considered dissonant in certain contexts
+            Self::tritone(),
+            Self::minor_seventh(),
+            Self::major_seventh(),
+        ]
     }
 
     /// Get the interval name
