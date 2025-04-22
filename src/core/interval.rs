@@ -403,6 +403,14 @@ impl Interval {
     }
 }
 
+/// Calculate the number of semitones for a given interval quality and degree
+///
+/// # Arguments
+/// * `quality` - The interval quality (Perfect, Major, Minor, Augmented, Diminished)
+/// * `degree` - The degree of the interval (1-8 for simple intervals)
+///
+/// # Returns
+/// * The number of semitones or an error if the combination is invalid
 fn calculate_semitones(quality: IntervalQuality, degree: IntervalDegree) -> Result<u8, MusicError> {
     let degree_num = (degree.0 - 1) % 7 + 1;
     let octaves = (degree.0 - 1) / 7;
