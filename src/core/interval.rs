@@ -1,27 +1,52 @@
-//! Interval calculation system
-//! Provides core functions such as definition, calculation, and conversion of intervals.
+//! # Interval System
+//!
+//! This module provides core functionality for working with musical intervals:
+//! - Interval representation (quality, degree, semitones)
+//! - Interval calculation and conversion
+//! - Interval operations (addition, subtraction, inversion)
+//! - Common interval factories
+//! - Consonance analysis
+//!
+//! Intervals are essential for describing relationships between notes, chord structure,
+//! and scale construction in music theory.
 
 use super::errors::MusicError;
 use super::tuning::PitchClass;
 use std::convert::TryFrom;
 
-/// Interval quality (consonance/dissonance)
+/// The quality component of an interval, indicating its specific type
+///
+/// In music theory, intervals are classified both by their degree (second, third, etc.)
+/// and their quality (perfect, major, minor, etc.).
 #[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub enum IntervalQuality {
-    Perfect,    // Pure intervals (1,4,5,8 degrees)
-    Major,      // Major intervals (2,3,6,7 degrees)
-    Minor,      // Minor intervals (to be used with Major)
-    Augmented,  // Augmented interval
-    Diminished, // Diminished interval
+    /// Perfect intervals (unison, fourth, fifth, octave)
+    Perfect,
+    /// Major intervals (seconds, thirds, sixths, sevenths)
+    Major,
+    /// Minor intervals (one semitone smaller than major)
+    Minor,
+    /// Augmented intervals (one semitone larger than perfect or major)
+    Augmented,
+    /// Diminished intervals (one semitone smaller than perfect or minor)
+    Diminished,
 }
 
-/// Consonance of an interval
+/// Consonance category of an interval, representing its harmonic quality
+///
+/// In music theory, intervals are classified based on how "pleasing" they sound:
+/// - Consonant intervals sound stable and resolved
+/// - Imperfect consonances have a mild tension but still sound harmonious
+/// - Dissonant intervals create tension and instability
 #[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Consonance {
+    /// Perfect consonances (unison, fifth, octave) - highly stable
     Consonant,
+    /// Imperfect consonances (thirds, sixths) - moderately stable
     Imperfect,
+    /// Dissonances (seconds, sevenths, tritone) - unstable
     Dissonant,
 }
 
@@ -59,6 +84,14 @@ impl Interval {
 }
 
 impl Interval {
+    /// Create an interval from a quality and degree combination
+    ///
+    /// # Arguments
+    /// * `quality` - The interval quality (Perfect, Major, Minor, Augmented, Diminished)
+    /// * `degree` - The degree of the interval
+    ///
+    /// # Returns
+    /// * The interval or an error if the combination is invalid
     pub fn from_quality_degree(quality: IntervalQuality, degree: u8) -> Result<Self, MusicError> {
         let degree = IntervalDegree::new(degree)?;
         let semitones = calculate_semitones(quality, degree)?;
@@ -106,6 +139,14 @@ impl Interval {
         })
     }
 
+    /// Calculate the interval between two pitch classes
+    ///
+    /// # Arguments
+    /// * `start` - The starting pitch class
+    /// * `end` - The ending pitch class
+    ///
+    /// # Returns
+    /// * The interval between the two pitch classes
     pub fn between(start: PitchClass, end: PitchClass) -> Self {
         let semitones = end as i8 - start as i8;
         Self::from_semitones(semitones).unwrap()
