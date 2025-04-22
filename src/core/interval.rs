@@ -248,20 +248,39 @@ impl Interval {
         let semitones = end as i8 - start as i8;
         Self::from_semitones(semitones).unwrap_or_else(|_| Self::unison())
     }
-
-    /// Interstitial inversion (e.g. Major 3rd -> minor 6th)
+    
+    /// Perform an interstitial inversion of the interval
+    /// For example,
+    /// - Major 3rd -> minor 6th
+    /// - Perfect 5th -> Perfect 4th
+    /// - Augmented 4th -> Diminished 5th
     pub fn invert(&self) -> Self {
+        let inverted_quality = match self.quality {
+            IntervalQuality::Perfect => IntervalQuality::Perfect,
+            IntervalQuality::Major => IntervalQuality::Minor,
+            IntervalQuality::Minor => IntervalQuality::Major,
+            IntervalQuality::Augmented => IntervalQuality::Diminished,
+            IntervalQuality::Diminished => IntervalQuality::Augmented,
+        };
+        
+        // The complementary degree: 9 - original (mod 7)
+        let new_degree = 9 - (self.degree.0 % 7);
+        
         Self {
-            quality: match self.quality {
-                IntervalQuality::Perfect => IntervalQuality::Perfect,
-                IntervalQuality::Major => IntervalQuality::Minor,
-                IntervalQuality::Minor => IntervalQuality::Major,
-                IntervalQuality::Augmented => IntervalQuality::Diminished,
-                IntervalQuality::Diminished => IntervalQuality::Augmented,
-            },
-            degree: IntervalDegree(9 - self.degree.0 % 7),
+            quality: inverted_quality,
+            degree: IntervalDegree(new_degree),
             semitones: -self.semitones,
             is_descending: !self.is_descending,
+        }
+    }
+    
+    /// Create a new interval with the same properties but in the opposite direction
+    /// For example, an ascending Major 3rd becomes a descending Major 3rd
+    pub fn negate(&self) -> Self {
+        Self {
+            semitones: -self.semitones,
+            is_descending: !self.is_descending,
+            ..*self
         }
     }
 
