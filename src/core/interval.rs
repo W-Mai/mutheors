@@ -103,6 +103,87 @@ impl Interval {
             is_descending: false,
         })
     }
+    
+    /// Create a perfect unison (0 semitones)
+    pub fn unison() -> Self {
+        Self::from_quality_degree(IntervalQuality::Perfect, 1).unwrap()
+    }
+    
+    /// Create a minor second (1 semitone)
+    pub fn minor_second() -> Self {
+        Self::from_quality_degree(IntervalQuality::Minor, 2).unwrap()
+    }
+    
+    /// Create a major second (2 semitones)
+    pub fn major_second() -> Self {
+        Self::from_quality_degree(IntervalQuality::Major, 2).unwrap()
+    }
+    
+    /// Create a minor third (3 semitones)
+    pub fn minor_third() -> Self {
+        Self::from_quality_degree(IntervalQuality::Minor, 3).unwrap()
+    }
+    
+    /// Create a major third (4 semitones)
+    pub fn major_third() -> Self {
+        Self::from_quality_degree(IntervalQuality::Major, 3).unwrap()
+    }
+    
+    /// Create a perfect fourth (5 semitones)
+    pub fn perfect_fourth() -> Self {
+        Self::from_quality_degree(IntervalQuality::Perfect, 4).unwrap()
+    }
+    
+    /// Create a tritone as augmented fourth (6 semitones)
+    pub fn augmented_fourth() -> Self {
+        Self::from_quality_degree(IntervalQuality::Augmented, 4).unwrap()
+    }
+    
+    /// Create a tritone as diminished fifth (6 semitones)
+    pub fn diminished_fifth() -> Self {
+        Self::from_quality_degree(IntervalQuality::Diminished, 5).unwrap()
+    }
+    
+    /// Create a perfect fifth (7 semitones)
+    pub fn perfect_fifth() -> Self {
+        Self::from_quality_degree(IntervalQuality::Perfect, 5).unwrap()
+    }
+    
+    /// Create a minor sixth (8 semitones)
+    pub fn minor_sixth() -> Self {
+        Self::from_quality_degree(IntervalQuality::Minor, 6).unwrap()
+    }
+    
+    /// Create a major sixth (9 semitones)
+    pub fn major_sixth() -> Self {
+        Self::from_quality_degree(IntervalQuality::Major, 6).unwrap()
+    }
+    
+    /// Create a minor seventh (10 semitones)
+    pub fn minor_seventh() -> Self {
+        Self::from_quality_degree(IntervalQuality::Minor, 7).unwrap()
+    }
+    
+    /// Create a major seventh (11 semitones)
+    pub fn major_seventh() -> Self {
+        Self::from_quality_degree(IntervalQuality::Major, 7).unwrap()
+    }
+    
+    /// Create a perfect octave (12 semitones)
+    pub fn octave() -> Self {
+        Self::from_quality_degree(IntervalQuality::Perfect, 8).unwrap()
+    }
+    
+    /// Create a tritone interval (6 semitones)
+    /// Returns the augmented fourth by default
+    pub fn tritone() -> Self {
+        Self::augmented_fourth()
+    }
+    
+    /// Create an interval from a number of semitones, handling errors
+    pub fn from_semitones_unchecked(semitones: i8) -> Self {
+        Self::from_semitones(semitones).unwrap_or_else(|_| Self::unison())
+    }
 
     pub fn from_semitones(semitones: i8) -> Result<Self, MusicError> {
         let abs_semi = semitones.abs() % 12;
