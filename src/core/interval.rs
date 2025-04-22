@@ -440,19 +440,23 @@ fn calculate_semitones(quality: IntervalQuality, degree: IntervalDegree) -> Resu
 impl TryFrom<&str> for Interval {
     type Error = MusicError;
 
-    /// Parse an interval name
-    /// e.g.
-    /// - "M3"
-    /// - "m6"
-    /// - "Aug4"
-    /// - "Dim5"
+    /// Parse an interval name string into an `Interval` object
     ///
-    /// into an `Interval` object.
+    /// # Format examples
+    /// - "P1" - Perfect unison
+    /// - "M3" - Major third
+    /// - "m6" - Minor sixth
+    /// - "Aug4" - Augmented fourth
+    /// - "Dim5" - Diminished fifth
+    ///
+    /// # Returns
+    /// * The interval or an error if the string is invalid
     fn try_from(s: &str) -> Result<Self, Self::Error> {
+        let s = s.trim();
         let mut quality = None;
         let mut degree = None;
 
-        if s.starts_with("P") {
+        if s.starts_with('P') {
             quality = Some(IntervalQuality::Perfect);
             degree = s[1..].parse().ok();
         } else if let Some(remainder) = s.strip_prefix("Aug") {
@@ -461,10 +465,10 @@ impl TryFrom<&str> for Interval {
         } else if let Some(remainder) = s.strip_prefix("Dim") {
             quality = Some(IntervalQuality::Diminished);
             degree = remainder.parse().ok();
-        } else if s.starts_with("M") {
+        } else if s.starts_with('M') {
             quality = Some(IntervalQuality::Major);
             degree = s[1..].parse().ok();
-        } else if s.starts_with("m") {
+        } else if s.starts_with('m') {
             quality = Some(IntervalQuality::Minor);
             degree = s[1..].parse().ok();
         }
