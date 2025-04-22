@@ -414,27 +414,26 @@ impl Interval {
 fn calculate_semitones(quality: IntervalQuality, degree: IntervalDegree) -> Result<u8, MusicError> {
     let degree_num = (degree.0 - 1) % 7 + 1;
     let octaves = (degree.0 - 1) / 7;
-    let base_semitones = match degree_num {
-        1 => 0,  // 1 degree standard interval
-        2 => 2,  // Major 2nd standard interval
-        3 => 4,  // Major 3rd standard interval
-        4 => 5,  // Perfect 4th
-        5 => 7,  // Perfect 5th
-        6 => 9,  // Major 6th
-        7 => 11, // Major 7th
-        _ => unreachable!(),
-    };
+    
+    // Standard semitones for each degree (based on major and perfect intervals)
+    const BASE_SEMITONES: [u8; 8] = [0, 0, 2, 4, 5, 7, 9, 11];
+    let base_semitones = BASE_SEMITONES[degree_num as usize];
 
-    let adjustment = match quality {
-        IntervalQuality::Perfect if [1, 4, 5, 8].contains(&degree_num) => 0,
-        IntervalQuality::Major if [2, 3, 6, 7].contains(&degree_num) => 0,
-        IntervalQuality::Minor if [2, 3, 6, 7].contains(&degree_num) => -1,
-        IntervalQuality::Augmented => 1,
-        IntervalQuality::Diminished if [2, 3, 6, 7].contains(&degree_num) => -2,
-        IntervalQuality::Diminished if [1, 4, 5, 8].contains(&degree_num) => -1,
+    // Determine if this degree can be "perfect" (1, 4, 5, 8)
+    let is_perfect_degree = matches!(degree_num, 1 | 4 | 5 | 8);
+
+    // Calculate adjustment based on quality
+    let adjustment = match (quality, is_perfect_degree) {
+        (IntervalQuality::Perfect, true) => 0,
+        (IntervalQuality::Major, false) => 0,
+        (IntervalQuality::Minor, false) => -1,
+        (IntervalQuality::Augmented, _) => 1,
+        (IntervalQuality::Diminished, true) => -1,
+        (IntervalQuality::Diminished, false) => -2,
         _ => return Err(MusicError::InvalidIntervalQuality),
     };
 
+    // Calculate final semitone count
     Ok(((12 * octaves + base_semitones) as i8 + adjustment) as u8)
 }
 
