@@ -287,11 +287,11 @@ impl Interval {
     /// Determine the consonance category of the interval
     pub fn consonance(&self) -> Consonance {
         match (self.degree.0 % 7, self.quality) {
-            (0, _) => Consonance::Consonant, // Same quality
-            (3, IntervalQuality::Perfect) => Consonance::Consonant, // 4th
-            (4, IntervalQuality::Perfect) => Consonance::Consonant, // 5th
+            (1, _) => Consonance::Consonant, // Same quality
+            (4, IntervalQuality::Perfect) => Consonance::Consonant, // 4th
+            (5, IntervalQuality::Perfect) => Consonance::Consonant, // 5th
             (_, IntervalQuality::Perfect) => Consonance::Consonant,
-            (1 | 2 | 5, q) if matches!(q, IntervalQuality::Major | IntervalQuality::Minor) => {
+            (3 | 6, q) if matches!(q, IntervalQuality::Major | IntervalQuality::Minor) => {
                 Consonance::Imperfect
             }
             _ => Consonance::Dissonant,
@@ -659,5 +659,35 @@ mod tests {
         assert!(Interval::try_from("P9").is_err());
 
         Ok(())
+    }
+
+    #[test]
+    fn test_interval_consonance() {
+        // Perfect consonance
+        assert_eq!(Interval::unison().consonance(), Consonance::Consonant);
+        assert_eq!(
+            Interval::perfect_fifth().consonance(),
+            Consonance::Consonant
+        );
+        assert_eq!(Interval::octave().consonance(), Consonance::Consonant);
+
+        // Imperfect consonance
+        assert_eq!(Interval::minor_third().consonance(), Consonance::Imperfect);
+        assert_eq!(Interval::major_third().consonance(), Consonance::Imperfect);
+        assert_eq!(Interval::minor_sixth().consonance(), Consonance::Imperfect);
+        assert_eq!(Interval::major_sixth().consonance(), Consonance::Imperfect);
+
+        // Dissonance
+        assert_eq!(Interval::minor_second().consonance(), Consonance::Dissonant);
+        assert_eq!(Interval::major_second().consonance(), Consonance::Dissonant);
+        assert_eq!(Interval::tritone().consonance(), Consonance::Dissonant);
+        assert_eq!(
+            Interval::minor_seventh().consonance(),
+            Consonance::Dissonant
+        );
+        assert_eq!(
+            Interval::major_seventh().consonance(),
+            Consonance::Dissonant
+        );
     }
 }
