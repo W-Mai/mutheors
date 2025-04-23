@@ -142,7 +142,7 @@ impl<'a> MidiPlayerChannel {
 impl Tuning {
     /// Get MIDI pitch number (A4=69)
     pub fn midi_number(&self) -> Result<u8, MusicError> {
-        let base = self.class as i8;
+        let base = self.class().semitones();
         if base == 0 {
             return Ok(0);
         }
