@@ -426,6 +426,19 @@ mod tests {
     }
 
     #[test]
+    fn test_tuning_04() {
+        let pc = PitchClass::C;
+        let interval_1 = Interval::from_quality_degree(IntervalQuality::Augmented, 4).unwrap();
+        let interval_2 = Interval::from_quality_degree(IntervalQuality::Diminished, 5).unwrap();
+        let tuning_1 = Tuning::new(pc, 4);
+        let tuning_2 = tuning_1.add_interval(&interval_1).unwrap();
+        let tuning_3 = tuning_1.add_interval(&interval_2).unwrap();
+
+        assert_eq!(Tuning::new(PitchClass::Fs, 4), tuning_2);
+        assert_eq!(Tuning::new(PitchClass::Gb, 5), tuning_3);
+    }
+
+    #[test]
     fn test_tuning() {
         let tuning = tuning!(C 4);
         assert_eq!(tuning.class, PitchClass::C);
