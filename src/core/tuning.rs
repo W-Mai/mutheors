@@ -78,6 +78,43 @@ impl PitchClass {
             &PitchClass::None => 0,
         }
     }
+
+    pub fn degree(&self) -> i8 {
+        match &self {
+            &PitchClass::C => 1,
+            &PitchClass::Cs => 1,
+            &PitchClass::Db => 2,
+            &PitchClass::D => 2,
+            &PitchClass::Ds => 2,
+            &PitchClass::Eb => 3,
+            &PitchClass::E => 3,
+            &PitchClass::F => 4,
+            &PitchClass::Fs => 4,
+            &PitchClass::Gb => 5,
+            &PitchClass::G => 5,
+            &PitchClass::Gs => 5,
+            &PitchClass::Ab => 6,
+            &PitchClass::A => 6,
+            &PitchClass::As => 6,
+            &PitchClass::Bb => 7,
+            &PitchClass::B => 7,
+            &PitchClass::None => 0,
+        }
+    }
+
+    pub fn from_degree(degree: i8) -> PitchClass {
+        let degree = degree.rem_euclid(7);
+        match degree {
+            1 => PitchClass::C,
+            2 => PitchClass::D,
+            3 => PitchClass::E,
+            4 => PitchClass::F,
+            5 => PitchClass::G,
+            6 => PitchClass::A,
+            7 => PitchClass::B,
+            _ => PitchClass::None,
+        }
+    }
 }
 
 impl From<PitchClass> for i8 {
