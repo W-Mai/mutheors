@@ -293,52 +293,14 @@ impl Tuning {
             Err(MusicError::InvalidOctave { octave: new_octave })
         } else {
             let semi = (new_semitones + 11) % 12 + 1;
+            let degree = self.class().degree();
+            let new_degree = degree + interval.degree() - 1;
+            let mut tuning: Tuning = PitchClass::from_degree(new_degree).into();
+
             let is_sharp = interval.semitones() > 0;
-            let tuning: Tuning = match semi {
-                1 => PitchClass::C.into(),
-                2 => {
-                    if is_sharp {
-                        PitchClass::C.sharp()
-                    } else {
-                        PitchClass::D.flat()
-                    }
-                }
-                3 => PitchClass::D.into(),
-                4 => {
-                    if is_sharp {
-                        PitchClass::D.sharp()
-                    } else {
-                        PitchClass::E.flat()
-                    }
-                }
-                5 => PitchClass::E.into(),
-                6 => PitchClass::F.into(),
-                7 => {
-                    if is_sharp {
-                        PitchClass::F.sharp()
-                    } else {
-                        PitchClass::G.flat()
-                    }
-                }
-                8 => PitchClass::G.into(),
-                9 => {
-                    if is_sharp {
-                        PitchClass::G.sharp()
-                    } else {
-                        PitchClass::A.flat()
-                    }
-                }
-                10 => PitchClass::A.into(),
-                11 => {
-                    if is_sharp {
-                        PitchClass::A.sharp()
-                    } else {
-                        PitchClass::B.flat()
-                    }
-                }
-                12 => PitchClass::B.into(),
-                _ => unreachable!(),
-            };
+            if is_sharp {
+                tuning = tuning.sharp();
+            }
 
             Ok(Self {
                 octave: new_octave,
