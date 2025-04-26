@@ -97,6 +97,10 @@ impl Interval {
     pub fn semitones_mod(&self) -> i8 {
         self.semitones.rem_euclid(12)
     }
+    
+    pub fn degree(&self) -> i8 {
+        self.degree.0 as i8
+    }
 }
 
 impl Interval {
