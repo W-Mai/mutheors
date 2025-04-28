@@ -29,27 +29,54 @@ pub enum PitchClass {
 }
 
 impl PitchClass {
-    pub fn sharp(self) -> Tuning {
-        Tuning {
-            class: self,
-            accidentals: 1,
-            octave: 0,
-            freq: None,
+    pub fn sharp(&self) -> Self {
+        match &self {
+            PitchClass::None => PitchClass::None,
+            PitchClass::C => PitchClass::Cs,
+            PitchClass::Cs => PitchClass::D,
+            PitchClass::Db => PitchClass::D,
+            PitchClass::D => PitchClass::Ds,
+            PitchClass::Ds => PitchClass::E,
+            PitchClass::Eb => PitchClass::E,
+            PitchClass::E => PitchClass::F,
+            PitchClass::F => PitchClass::Fs,
+            PitchClass::Fs => PitchClass::G,
+            PitchClass::Gb => PitchClass::G,
+            PitchClass::G => PitchClass::Gs,
+            PitchClass::Gs => PitchClass::A,
+            PitchClass::Ab => PitchClass::A,
+            PitchClass::A => PitchClass::As,
+            PitchClass::As => PitchClass::B,
+            PitchClass::Bb => PitchClass::B,
+            PitchClass::B => PitchClass::C,
         }
     }
 
-    pub fn flat(self) -> Tuning {
-        Tuning {
-            class: self,
-            accidentals: -1,
-            octave: 0,
-            freq: None,
+    pub fn flat(&self) -> Self {
+        match &self {
+            PitchClass::None => PitchClass::None,
+            PitchClass::C => PitchClass::B,
+            PitchClass::Cs => PitchClass::C,
+            PitchClass::Db => PitchClass::C,
+            PitchClass::D => PitchClass::Db,
+            PitchClass::Ds => PitchClass::D,
+            PitchClass::Eb => PitchClass::D,
+            PitchClass::E => PitchClass::Eb,
+            PitchClass::F => PitchClass::E,
+            PitchClass::Fs => PitchClass::F,
+            PitchClass::Gb => PitchClass::F,
+            PitchClass::G => PitchClass::Gb,
+            PitchClass::Gs => PitchClass::G,
+            PitchClass::Ab => PitchClass::G,
+            PitchClass::A => PitchClass::Ab,
+            PitchClass::As => PitchClass::A,
+            PitchClass::Bb => PitchClass::A,
+            PitchClass::B => PitchClass::Bb,
         }
     }
 
     pub fn common_chord(&self, degree: u8, octave: i8) -> Chord {
-        Tuning::from(*self)
-            .with_octave(octave)
+        Tuning::new(*self, octave)
             .scale(ScaleType::Major)
             .degree_chord(degree)
             .unwrap()
@@ -125,12 +152,7 @@ impl From<PitchClass> for i8 {
 
 impl From<PitchClass> for Tuning {
     fn from(pc: PitchClass) -> Self {
-        Tuning {
-            class: pc,
-            accidentals: 0,
-            octave: 0,
-            freq: None,
-        }
+        Tuning::new(pc, 0)
     }
 }
 
@@ -184,17 +206,19 @@ impl Tuning {
             }
         }
 
-        let mut root = Tuning::from(match root.as_str() {
-            "C" => PitchClass::C,
-            "D" => PitchClass::D,
-            "E" => PitchClass::E,
-            "F" => PitchClass::F,
-            "G" => PitchClass::G,
-            "A" => PitchClass::A,
-            "B" => PitchClass::B,
-            _ => unreachable!("{}", MusicError::InvalidPitch),
-        })
-        .with_octave(4);
+        let mut root = Tuning::new(
+            match root.as_str() {
+                "C" => PitchClass::C,
+                "D" => PitchClass::D,
+                "E" => PitchClass::E,
+                "F" => PitchClass::F,
+                "G" => PitchClass::G,
+                "A" => PitchClass::A,
+                "B" => PitchClass::B,
+                _ => unreachable!("{}", MusicError::InvalidPitch),
+            },
+            4,
+        );
 
         while let Some(&c) = chars.peek() {
             if c == '#' {
@@ -295,17 +319,16 @@ impl Tuning {
             let semi = (new_semitones + 11) % 12 + 1;
             let degree = self.class().degree();
             let new_degree = degree + interval.degree() - 1;
-            let mut tuning: Tuning = PitchClass::from_degree(new_degree).into();
+            let pitch_class = PitchClass::from_degree(new_degree);
+
+            let mut tuning = Tuning::new(pitch_class, new_octave);
 
             let is_sharp = interval.semitones() > 0;
             if is_sharp {
                 tuning = tuning.sharp();
             }
 
-            Ok(Self {
-                octave: new_octave,
-                ..tuning
-            })
+            Ok(tuning)
         }
     }
 
@@ -325,10 +348,7 @@ impl Tuning {
 
     pub fn simple(self) -> Self {
         let accidentals = self.accidentals;
-        let new_tuning = Self {
-            accidentals: 0,
-            ..self
-        };
+        let new_tuning = Tuning::new(self.class, self.octave);
 
         new_tuning
             .add_interval(&Interval::from_semitones(accidentals).unwrap())
@@ -387,8 +407,7 @@ mod tests {
 
     #[test]
     fn test_tuning_01() {
-        let pc = PitchClass::C;
-        let tuning1 = pc.sharp().with_octave(3) * 2;
+        let tuning1 = Tuning::new(PitchClass::C.sharp(), 3) * 2;
         let tuning2 = Tuning::new(PitchClass::C, 4).sharp();
         assert_eq!(tuning1, tuning2);
     }
@@ -396,7 +415,7 @@ mod tests {
     #[test]
     fn test_tuning_02() {
         let pc = PitchClass::C;
-        let tuning = pc.sharp().with_octave(3);
+        let tuning = Tuning::new(pc.sharp(), 3);
         let tuning1 = tuning
             .add_interval(&Interval::from_semitones(1).unwrap())
             .unwrap();
@@ -419,7 +438,7 @@ mod tests {
     #[test]
     fn test_tuning_03() {
         let pc = PitchClass::C;
-        let tuning1 = (pc.sharp().with_octave(3) * 3).flat();
+        let tuning1 = (Tuning::new(pc.sharp(), 3) * 3).flat();
         let tuning2 = Tuning::new(PitchClass::C, 6) / 2;
         assert_eq!(tuning1, tuning2);
     }
@@ -447,7 +466,7 @@ mod tests {
 
     #[test]
     fn test_tuning_2() {
-        let pitch = PitchClass::E.flat().with_octave(3);
+        let pitch = Tuning::new(PitchClass::E.flat(), 3);
         for i in 1..=6 {
             let c = pitch.common_chord(i);
             println!("{}", c);
