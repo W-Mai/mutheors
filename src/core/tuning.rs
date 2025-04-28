@@ -319,14 +319,15 @@ impl Tuning {
             let semi = (new_semitones + 11) % 12 + 1;
             let degree = self.class().degree();
             let new_degree = degree + interval.degree() - 1;
-            let pitch_class = PitchClass::from_degree(new_degree);
-
-            let mut tuning = Tuning::new(pitch_class, new_octave);
+            let mut pitch_class = PitchClass::from_degree(new_degree);
 
             let is_sharp = interval.semitones() > 0;
+
             if is_sharp {
-                tuning = tuning.sharp();
+                pitch_class = pitch_class.sharp();
             }
+
+            let tuning = Tuning::new(pitch_class, new_octave);
 
             Ok(tuning)
         }
