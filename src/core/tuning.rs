@@ -351,10 +351,9 @@ impl Tuning {
             let new_degree = ori_degree + interval.degree() - 1;
             let pitch_class = PitchClass::from_degree(new_degree);
             let diff = pitch_class.semitones() - ori_degree_pc.semitones()
-                + 1
                 + (new_octave - self.octave) * 12;
 
-            let diff = new_semitones - diff;
+            let diff = interval.semitones() + self.accidentals() - diff;
 
             let (pitch_class, accidental) = pitch_class.add_accidentals(diff);
 
