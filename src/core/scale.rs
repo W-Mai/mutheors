@@ -634,7 +634,7 @@ mod tests {
                 Tuning::new(PitchClass::C, 5),
                 Tuning::new(PitchClass::D, 5),
                 Tuning::new(PitchClass::E, 5),
-                Tuning::new(PitchClass::F, 5).sharp(),
+                Tuning::new(PitchClass::F.sharp(), 5),
                 Tuning::new(PitchClass::G, 5),
             ]
         );
@@ -648,7 +648,7 @@ mod tests {
         assert!(scale.contains(&Tuning::new(PitchClass::D, 5).sharp()));
         assert_eq!(
             scale.characteristic_tuning(),
-            Some(Tuning::new(PitchClass::D, 5).sharp())
+            Some(Tuning::new(PitchClass::E.flat(), 5))
         );
     }
 
