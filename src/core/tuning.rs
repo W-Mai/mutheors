@@ -206,33 +206,43 @@ impl Tuning {
             }
         }
 
-        let mut root = Tuning::new(
-            match root.as_str() {
-                "C" => PitchClass::C,
-                "D" => PitchClass::D,
-                "E" => PitchClass::E,
-                "F" => PitchClass::F,
-                "G" => PitchClass::G,
-                "A" => PitchClass::A,
-                "B" => PitchClass::B,
-                _ => unreachable!("{}", MusicError::InvalidPitch),
-            },
-            4,
-        );
+        let mut root = match root.as_str() {
+            "C" => PitchClass::C,
+            "D" => PitchClass::D,
+            "E" => PitchClass::E,
+            "F" => PitchClass::F,
+            "G" => PitchClass::G,
+            "A" => PitchClass::A,
+            "B" => PitchClass::B,
+            _ => unreachable!("{}", MusicError::InvalidPitch),
+        };
 
+        let mut accidentals: i8 = 0;
         while let Some(&c) = chars.peek() {
             if c == '#' {
-                root = root.sharp();
+                accidentals += 1;
                 chars.next();
             } else if c == 'b' {
-                root = root.flat();
+                accidentals -= 1;
                 chars.next();
             } else {
                 break;
             }
         }
 
-        Ok(root)
+        if accidentals.abs() > 0 {
+            if accidentals.is_positive() {
+                root = root.sharp();
+            } else {
+                root = root.flat();
+            }
+            accidentals -= accidentals.signum();
+        }
+
+        let mut tuning = Tuning::new(root, 4);
+        tuning.accidentals = accidentals;
+
+        Ok(tuning)
     }
 }
 
