@@ -331,9 +331,12 @@ impl Tuning {
 
     pub fn number(&self) -> i8 {
         let base = self.class.semitones();
+        if base == 0 {
+            return 0;
+        }
         let num = (self.octave + 1)
             .saturating_mul(12)
-            .saturating_add(base)
+            .saturating_add(base - 1)
             .saturating_add(self.accidentals);
         num
     }
@@ -348,12 +351,14 @@ impl Tuning {
         } else {
             let ori_degree = self.class().degree();
             let ori_degree_pc = PitchClass::from_degree(ori_degree);
+            let ori_semi_diff =
+                self.class().semitones() - PitchClass::from_degree(ori_degree).semitones();
             let new_degree = ori_degree + interval.degree() - 1;
             let pitch_class = PitchClass::from_degree(new_degree);
             let diff = pitch_class.semitones() - ori_degree_pc.semitones()
                 + (new_octave - self.octave) * 12;
 
-            let diff = interval.semitones() + self.accidentals() - diff;
+            let diff = interval.semitones() + self.accidentals() + ori_semi_diff - diff;
 
             let (pitch_class, accidental) = pitch_class.add_accidentals(diff);
 
