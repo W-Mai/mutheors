@@ -2,7 +2,7 @@ use crate::chord::Chord;
 use crate::{Interval, IntervalQuality, MusicError, Scale, ScaleType};
 use std::fmt::Display;
 use std::iter::Peekable;
-use std::ops::{Div, Mul};
+use std::ops::{ControlFlow, Div, Mul};
 use std::str::FromStr;
 
 #[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
@@ -328,16 +328,26 @@ impl Tuning {
                 + (new_octave - self.octave) * 12;
 
             let diff = new_semitones - diff + ori_semi_diff;
+            let mut new_diff = diff;
 
-            (0..diff.abs()).for_each(|_| {
-                if diff > 0 {
-                    pitch_class = pitch_class.sharp();
+            (0..diff.abs()).try_for_each(|_| {
+                let new_pitch_class = if diff > 0 {
+                    pitch_class.sharp()
                 } else {
-                    pitch_class = pitch_class.flat();
+                    pitch_class.flat()
+                };
+
+                if new_pitch_class.degree() == pitch_class.degree() {
+                    pitch_class = new_pitch_class;
+                    new_diff -= diff.signum();
+                    ControlFlow::Continue(())
+                } else {
+                    ControlFlow::Break(())
                 }
             });
 
-            let tuning = Tuning::new(pitch_class, new_octave);
+            let mut tuning = Tuning::new(pitch_class, new_octave);
+            tuning.accidentals = new_diff;
 
             Ok(tuning)
         }
@@ -465,6 +475,19 @@ mod tests {
 
         assert_eq!(Tuning::new(PitchClass::Fs, 4), tuning_2);
         assert_eq!(Tuning::new(PitchClass::Gb, 4), tuning_3);
+    }
+
+    #[test]
+    fn test_tuning_05() {
+        let pc = PitchClass::Cs;
+        let interval_1 = Interval::from_quality_degree(IntervalQuality::Augmented, 4).unwrap();
+        let interval_2 = Interval::from_quality_degree(IntervalQuality::Diminished, 5).unwrap();
+        let tuning_1 = Tuning::new(pc, 4);
+        let tuning_2 = tuning_1.add_interval(&interval_1).unwrap();
+        let tuning_3 = tuning_1.add_interval(&interval_2).unwrap();
+
+        assert_eq!(Tuning::new(PitchClass::Fs, 4).sharp(), tuning_2);
+        assert_eq!(Tuning::new(PitchClass::G, 4), tuning_3);
     }
 
     #[test]
