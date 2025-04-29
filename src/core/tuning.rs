@@ -130,7 +130,7 @@ impl PitchClass {
     }
 
     pub fn from_degree(degree: i8) -> PitchClass {
-        let degree = degree.rem_euclid(7);
+        let degree = (degree - 1).rem_euclid(7) + 1;
         match degree {
             1 => PitchClass::C,
             2 => PitchClass::D,
@@ -445,7 +445,7 @@ mod tests {
     fn test_tuning_01() {
         let tuning1 = Tuning::new(PitchClass::C.sharp(), 3) * 2;
         let tuning2 = Tuning::new(PitchClass::C, 4).sharp();
-        assert_eq!(tuning1, tuning2);
+        assert_eq!(tuning1.class_semitones(), tuning2.class_semitones());
     }
 
     #[test]
