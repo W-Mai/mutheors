@@ -327,7 +327,7 @@ impl Tuning {
                 + 1
                 + (new_octave - self.octave) * 12;
 
-            let diff = new_semitones - diff + ori_semi_diff;
+            let diff = new_semitones - diff;
             let mut new_diff = diff;
 
             (0..diff.abs()).try_for_each(|_| {
