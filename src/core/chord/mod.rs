@@ -346,6 +346,25 @@ mod tests {
     use crate::*;
 
     #[test]
+    fn test_chord() {
+        let tuning = tuning!(# D 4);
+        let scale = tuning.scale(ScaleType::Major);
+        assert_eq!(scale.degree_chord(1).unwrap().root(), tuning!(# D 4));
+        assert_eq!(scale.degree_chord(2).unwrap().root(), tuning!(# E 4));
+        assert_eq!(
+            scale.degree_chord(3).unwrap().root(),
+            tuning!(# F 4).sharp()
+        );
+        assert_eq!(scale.degree_chord(4).unwrap().root(), tuning!(# G 4));
+        assert_eq!(scale.degree_chord(5).unwrap().root(), tuning!(# A 4));
+        assert_eq!(scale.degree_chord(6).unwrap().root(), tuning!(# B 4));
+        assert_eq!(
+            scale.degree_chord(7).unwrap().root(),
+            tuning!(# C 5).sharp()
+        );
+    }
+
+    #[test]
     fn test_major_triad() {
         let c_major = Chord::new(Tuning::new(PitchClass::C, 4), ChordQuality::Major).unwrap();
         assert_eq!(
