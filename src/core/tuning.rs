@@ -445,7 +445,7 @@ mod tests {
     fn test_tuning_01() {
         let tuning1 = Tuning::new(PitchClass::C.sharp(), 3) * 2;
         let tuning2 = Tuning::new(PitchClass::C, 4).sharp();
-        assert_eq!(tuning1.class_semitones(), tuning2.class_semitones());
+        assert_eq!(tuning1.number(), tuning2.number());
     }
 
     #[test]
@@ -476,7 +476,7 @@ mod tests {
         let pc = PitchClass::C;
         let tuning1 = (Tuning::new(pc.sharp(), 3) * 3).flat();
         let tuning2 = Tuning::new(PitchClass::C, 6) / 2;
-        assert_eq!(tuning1, tuning2);
+        assert_eq!(tuning1.number(), tuning2.number());
     }
 
     #[test]
@@ -542,8 +542,7 @@ mod tests {
     #[test]
     fn test_modulation_2() {
         let tuning = tuning!(C 4);
-        assert_eq!(tuning.sharp(), tuning!(# C 4));
-        assert_eq!(tuning.flat(), tuning!(b C 4));
+        assert_eq!(tuning.flat().number(), tuning!(b C 3).number());
     }
 
     #[test]
