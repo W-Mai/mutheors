@@ -317,15 +317,25 @@ impl Tuning {
             Err(MusicError::InvalidOctave { octave: new_octave })
         } else {
             let semi = (new_semitones + 11) % 12 + 1;
-            let degree = self.class().degree();
-            let new_degree = degree + interval.degree() - 1;
+            let ori_degree = self.class().degree();
+            let ori_degree_pc = PitchClass::from_degree(ori_degree);
+            let ori_semi_diff =
+                self.class().semitones() - PitchClass::from_degree(ori_degree).semitones();
+            let new_degree = ori_degree + interval.degree() - 1;
             let mut pitch_class = PitchClass::from_degree(new_degree);
+            let diff = pitch_class.semitones() - ori_degree_pc.semitones()
+                + 1
+                + (new_octave - self.octave) * 12;
 
-            let is_sharp = interval.semitones() > 0;
+            let diff = new_semitones - diff + ori_semi_diff;
 
-            if is_sharp {
-                pitch_class = pitch_class.sharp();
-            }
+            (0..diff.abs()).for_each(|_| {
+                if diff > 0 {
+                    pitch_class = pitch_class.sharp();
+                } else {
+                    pitch_class = pitch_class.flat();
+                }
+            });
 
             let tuning = Tuning::new(pitch_class, new_octave);
 
@@ -454,7 +464,7 @@ mod tests {
         let tuning_3 = tuning_1.add_interval(&interval_2).unwrap();
 
         assert_eq!(Tuning::new(PitchClass::Fs, 4), tuning_2);
-        assert_eq!(Tuning::new(PitchClass::Gb, 5), tuning_3);
+        assert_eq!(Tuning::new(PitchClass::Gb, 4), tuning_3);
     }
 
     #[test]
