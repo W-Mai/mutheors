@@ -346,11 +346,8 @@ impl Tuning {
         if !(0..=11).contains(&new_octave) {
             Err(MusicError::InvalidOctave { octave: new_octave })
         } else {
-            let semi = (new_semitones + 11) % 12 + 1;
             let ori_degree = self.class().degree();
             let ori_degree_pc = PitchClass::from_degree(ori_degree);
-            let ori_semi_diff =
-                self.class().semitones() - PitchClass::from_degree(ori_degree).semitones();
             let new_degree = ori_degree + interval.degree() - 1;
             let pitch_class = PitchClass::from_degree(new_degree);
             let diff = pitch_class.semitones() - ori_degree_pc.semitones()
@@ -488,7 +485,7 @@ mod tests {
         let tuning_2 = tuning_1.add_interval(&interval_1).unwrap();
         let tuning_3 = tuning_1.add_interval(&interval_2).unwrap();
 
-        // assert_eq!(Tuning::new(PitchClass::Fs, 4), tuning_2);
+        assert_eq!(Tuning::new(PitchClass::Fs, 4), tuning_2);
         assert_eq!(Tuning::new(PitchClass::Gb, 4), tuning_3);
     }
 
