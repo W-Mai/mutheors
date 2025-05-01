@@ -199,8 +199,7 @@ impl Interval {
 
     /// Interstitial inversion (e.g. Major 3rd -> minor 6th)
     pub fn invert(&self) -> Self {
-        let mut self_copy = (*self.inner).clone();
-        self_copy.invert();
+        let self_copy = (*self.inner).clone().invert();
         Self {
             inner: self_copy.into_arc(),
         }
