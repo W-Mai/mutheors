@@ -444,7 +444,7 @@ mod tests {
                     .iter()
                     .map(|t| { t.with_octave(4) })
                     .enumerate()
-                    .find(|x| { x.1 == r })
+                    .find(|x| { x.1.class_semitones() == r.class_semitones() })
                     .unwrap()
                     .0
                     + 1
