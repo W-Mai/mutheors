@@ -717,4 +717,10 @@ mod tests {
             Chord::new(tuning!(B 4), ChordQuality::Diminished).ok()
         );
     }
+    
+    #[test]
+    fn test_scale_4() {
+        let s = Scale::new(tuning!(b E 4), ScaleType::Major).unwrap();
+        assert_eq!(s(6), tuning!(C 5));
+    }
 }
