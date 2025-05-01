@@ -358,9 +358,12 @@ impl Tuning {
             let diff = pitch_class.semitones() - ori_degree_pc.semitones()
                 + (new_octave - self.octave) * 12;
 
-            let diff = interval.semitones() + self.accidentals() + ori_semi_diff - diff;
+            let diff =
+                (interval.semitones() + self.accidentals() + ori_semi_diff - diff).rem_euclid(12);
 
             let (pitch_class, accidental) = pitch_class.add_accidentals(diff);
+
+            let new_octave = self.octave + (new_semitones + 11 - accidental) / 12 - 1;
 
             let mut tuning = Tuning::new(pitch_class, new_octave);
             tuning.accidentals = accidental;
@@ -504,6 +507,16 @@ mod tests {
 
         assert_eq!(Tuning::new(PitchClass::Fs, 4).sharp(), tuning_2);
         assert_eq!(Tuning::new(PitchClass::G, 4), tuning_3);
+    }
+
+    #[test]
+    fn test_tuning_06() {
+        let pc = PitchClass::As;
+        let interval_1 = Interval::from_quality_degree(IntervalQuality::Major, 2).unwrap();
+        let tuning_1 = Tuning::new(pc, 4);
+        let tuning_2 = tuning_1.add_interval(&interval_1).unwrap();
+
+        assert_eq!(Tuning::new(PitchClass::B, 4).sharp(), tuning_2);
     }
 
     #[test]
