@@ -345,7 +345,7 @@ impl Tuning {
 impl Tuning {
     pub fn add_interval(&self, interval: &Interval) -> Result<Self, MusicError> {
         let new_semitones = interval.semitones() + self.class.semitones() + self.accidentals;
-        let estimated_octave = self.octave + (new_semitones + 11) / 12 - 1;
+        let mut estimated_octave = self.octave + (new_semitones + 11) / 12 - 1;
 
         if !(0..=11).contains(&estimated_octave) {
             return Err(MusicError::InvalidOctave {
@@ -354,21 +354,23 @@ impl Tuning {
         }
 
         let ori_degree = self.class().degree();
-        let ori_degree_pc = PitchClass::from_degree(ori_degree);
-        let ori_semi_diff = self.class().semitones() - ori_degree_pc.semitones();
 
         let new_degree = ori_degree + interval.degree() - 1;
         let pitch_class = PitchClass::from_degree(new_degree);
 
-        let pc_semi_diff = (new_semitones
-            - (pitch_class.semitones() + (estimated_octave - self.octave) * 12))
-            .rem_euclid(12);
+        let mut pc_semi_diff =
+            new_semitones - (pitch_class.semitones() + (estimated_octave - self.octave) * 12);
+
+        while pc_semi_diff.abs() > Interval::minor_seventh().semitones() {
+            estimated_octave += pc_semi_diff.signum();
+            pc_semi_diff -= pc_semi_diff.signum() * 12;
+        }
 
         let (pitch_class, accidental) = pitch_class.add_accidentals(pc_semi_diff);
 
-        let final_octave = self.octave + (new_semitones + 11 - accidental) / 12 - 1;
+        // let final_octave = self.octave + (new_semitones + 11 - accidental) / 12 - 1;
 
-        let mut tuning = Tuning::new(pitch_class, final_octave);
+        let mut tuning = Tuning::new(pitch_class, estimated_octave);
         tuning.accidentals = accidental;
 
         Ok(tuning)
