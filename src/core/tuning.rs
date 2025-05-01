@@ -100,7 +100,7 @@ impl PitchClass {
             &PitchClass::Ab => 9,
             &PitchClass::A => 10,
             &PitchClass::As => 11,
-            &PitchClass::Bb => 12,
+            &PitchClass::Bb => 11,
             &PitchClass::B => 12,
             &PitchClass::None => 0,
         }
