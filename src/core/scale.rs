@@ -457,6 +457,27 @@ impl Scale {
             ChordFunction::Unknown
         }
     }
+
+    pub fn function_root(&self, chord_function: ChordFunction) -> Option<Tuning> {
+        match chord_function {
+            ChordFunction::Tonic => self.degree(1).ok(),
+            ChordFunction::Subdominant => self.degree(4).ok(),
+            ChordFunction::Dominant => self.degree(5).ok(),
+            _ => None,
+        }
+    }
+
+    pub fn tonic(&self) -> Tuning {
+        self.function_root(ChordFunction::Tonic).unwrap()
+    }
+
+    pub fn subdominant(&self) -> Tuning {
+        self.function_root(ChordFunction::Subdominant).unwrap()
+    }
+
+    pub fn dominant(&self) -> Tuning {
+        self.function_root(ChordFunction::Dominant).unwrap()
+    }
 }
 
 impl Scale {
