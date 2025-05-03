@@ -269,8 +269,8 @@ impl Tuning {
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct Tuning {
     class: PitchClass,
-    pub accidentals: i8,
-    pub octave: i8,
+    accidentals: i8,
+    octave: i8,
     freq: Option<f32>, // 自定义频率
 }
 
@@ -284,14 +284,21 @@ impl Tuning {
         }
     }
 
-    pub fn with_octave(self, octave: i8) -> Self {
-        Self { octave, ..self }
+    pub fn with_octave(&self, octave: i8) -> Self {
+        Self { octave, ..*self }
     }
 
-    pub fn with_freq(self, freq: f32) -> Self {
+    pub fn with_freq(&self, freq: f32) -> Self {
         Self {
             freq: Some(freq),
-            ..self
+            ..*self
+        }
+    }
+
+    pub fn with_accidentals(&self, accidentals: i8) -> Self {
+        Self {
+            accidentals,
+            ..*self
         }
     }
 

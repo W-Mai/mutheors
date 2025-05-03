@@ -147,10 +147,10 @@ impl Tuning {
             return Ok(0);
         }
         let base = base - 1;
-        let num = (self.octave + 1)
+        let num = (self.octave() + 1)
             .saturating_mul(12)
             .saturating_add(base)
-            .saturating_add(self.accidentals);
+            .saturating_add(self.accidentals());
         num.try_into().map_err(|_| MusicError::InvalidPitch)
     }
 }

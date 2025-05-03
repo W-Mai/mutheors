@@ -231,7 +231,8 @@ impl Chord {
             }
         }
 
-        notes.last_mut().unwrap().octave += 1;
+        let last = notes.last_mut().unwrap();
+        *last = last.with_octave(last.octave() + 1);
     }
 
     // Applying the rules of vocal arrangement
@@ -247,22 +248,22 @@ impl Chord {
     /// Close arrangement algorithm
     fn close_voicing(&self, notes: &mut Vec<Tuning>) {
         // Ensure that the notes are within an octave
-        let base_octave = notes[0].octave;
+        let base_octave = notes[0].octave();
         for note in notes.iter_mut().skip(1) {
-            while note.octave > base_octave + 1 {
-                note.octave -= 1;
+            while note.octave() > base_octave + 1 {
+                *note = note.with_octave(note.octave() - 1);
             }
         }
     }
 
     /// Open arrangement algorithm
     fn open_voicing(&self, notes: &mut Vec<Tuning>) {
-        let mut current_octave = notes[0].octave;
+        let mut current_octave = notes[0].octave();
         for (i, note) in notes.iter_mut().enumerate().skip(1) {
             if i % 2 == 0 {
                 current_octave += 1;
             }
-            note.octave = current_octave;
+            *note = note.with_octave(current_octave);
         }
     }
 }
