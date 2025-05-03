@@ -172,21 +172,8 @@ impl Chord {
     // - Subdominant
     // - Dominant
     // TODO: Add more functions
-    pub fn function(&self, scale: Scale) -> ChordFunction {
-        let self_copy = self.clone().root().with_octave(0);
-        let t = scale.degree(1).unwrap().with_octave(0);
-        let s = scale.degree(4).unwrap().with_octave(0);
-        let d = scale.degree(5).unwrap().with_octave(0);
-
-        if self_copy == t {
-            ChordFunction::Tonic
-        } else if self_copy == s {
-            ChordFunction::Subdominant
-        } else if self_copy == d {
-            ChordFunction::Dominant
-        } else {
-            ChordFunction::Unknown
-        }
+    pub fn function(&self, scale: &Scale) -> ChordFunction {
+        scale.function(&self)
     }
 
     // Parsing from chord symbols (e.g. " Cmaj7")
@@ -422,15 +409,15 @@ mod tests {
         let scale = Scale::new(tuning!(C 4), ScaleType::Major).unwrap();
         let chord = Chord::new(tuning!(C 4), ChordQuality::Major).unwrap();
 
-        assert_eq!(chord.function(scale), ChordFunction::Tonic);
+        assert_eq!(chord.function(&scale), ChordFunction::Tonic);
 
         let chord = Chord::new(tuning!(C 3), ChordQuality::Major).unwrap();
-        assert_eq!(chord.function(scale), ChordFunction::Tonic);
+        assert_eq!(chord.function(&scale), ChordFunction::Tonic);
     }
 
     #[test]
     fn test_in_chords() {
-        let c = Chord::from_symbol("C7").unwrap();
+        let c = Chord::from_symbol("C").unwrap();
         let r = c.root();
         let ss = c.in_scales();
 
@@ -439,7 +426,7 @@ mod tests {
                 "{}{:?} {:?} {}",
                 s.root(),
                 s.scale_type(),
-                c.function(*s),
+                c.function(s),
                 s.generate_tunings(0)
                     .unwrap()
                     .iter()

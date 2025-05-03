@@ -96,7 +96,7 @@ impl Chord {
     }
 
     pub fn function(&self, scale: &Scale) -> crate::ChordFunction {
-        self.inner.function(*scale.inner)
+        self.inner.function(&scale.inner)
     }
 
     #[uniffi::constructor]

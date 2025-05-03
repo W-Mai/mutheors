@@ -36,7 +36,7 @@
 
 use crate::interval::Interval;
 use crate::tuning::Tuning;
-use crate::{Chord, ChordQuality, IntervalQuality, MusicError};
+use crate::{Chord, ChordFunction, ChordQuality, IntervalQuality, MusicError};
 use std::ops::{Add, Div, Mul, Sub};
 
 /// Scale type classification
@@ -438,6 +438,27 @@ impl Scale {
     }
 }
 
+/// Function analysis
+/// - Analyze the scale based on the modal tonic
+impl Scale {
+    pub fn function(&self, chord: &Chord) -> ChordFunction {
+        let root = chord.root().with_octave(0);
+        let t = self.degree(1).unwrap().with_octave(0);
+        let s = self.degree(4).unwrap().with_octave(0);
+        let d = self.degree(5).unwrap().with_octave(0);
+
+        if root == t {
+            ChordFunction::Tonic
+        } else if root == s {
+            ChordFunction::Subdominant
+        } else if root == d {
+            ChordFunction::Dominant
+        } else {
+            ChordFunction::Unknown
+        }
+    }
+}
+
 impl Scale {
     pub fn sharp(self) -> Scale {
         Self {
@@ -717,7 +738,7 @@ mod tests {
             Chord::new(tuning!(B 4), ChordQuality::Diminished).ok()
         );
     }
-    
+
     #[test]
     fn test_scale_4() {
         let s = Scale::new(tuning!(b E 4), ScaleType::Major).unwrap();
