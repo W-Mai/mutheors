@@ -7,7 +7,7 @@ mod quality;
 use crate::interval::Interval;
 use crate::pitch_tuning;
 use crate::tuning::Tuning;
-use crate::{tuning, IntervalQuality, MusicError, PitchClass, Scale, ScaleType};
+use crate::{tuning, MusicError, PitchClass, Scale, ScaleType};
 pub use quality::*;
 use std::collections::BTreeSet;
 use std::fmt::Display;
@@ -71,7 +71,7 @@ pub struct Chord {
     chord_type: ChordType,
     inversion: Inversion,
     voicing: Voicing,
-    extensions: Vec<Interval>, // Extended sounds (9th, 11th, etc.)
+    extensions: Vec<Tuning>, // Extended sounds (9th, 11th, etc.)
 }
 
 impl Chord {
@@ -113,9 +113,9 @@ impl Chord {
     }
 
     /// Adding Extended interval
-    pub fn with_extension(&self, interval: Interval) -> Self {
+    pub fn with_extension(&self, tunings: Vec<Tuning>) -> Self {
         let mut s = self.clone();
-        s.extensions.push(interval);
+        s.extensions.extend(tunings);
         s
     }
 
@@ -135,7 +135,9 @@ impl Chord {
 
     pub fn intervals(&self) -> Vec<Interval> {
         let mut intervals = self.quality.intervals().to_vec();
-        intervals.extend(self.extensions.clone());
+        intervals.extend(self.extensions.iter().map(|t| {
+            Interval::from_semitones_unchecked(t.class_semitones() - self.root.class_semitones())
+        }));
         intervals
     }
 
@@ -161,7 +163,7 @@ impl Chord {
             extensions: self
                 .extensions
                 .iter()
-                .map(|i| Interval::from_semitones(i.semitones()).unwrap())
+                .map(|i| i.simple())
                 .collect::<Vec<_>>(),
             ..self
         }
@@ -256,18 +258,21 @@ impl Chord {
 }
 
 impl Chord {
-    pub fn add(self, interval: Interval) -> Self {
+    pub fn add(self, tuning: Tuning) -> Self {
         let mut c = self;
-        c.extensions.push(interval);
+        c.extensions.push(tuning);
         c
     }
 
-    pub fn dom(self, n: u8) -> Self {
-        let mut c = self;
+    // Major dominant
+    pub fn dom(&self, n: u8) -> Self {
+        let root = self.root();
+        let scale = root.scale(ScaleType::Major);
+        scale.interval_count();
+        let mut c = self.clone();
 
         (7..=n).step_by(2).for_each(|i| {
-            c.extensions
-                .push(Interval::from_quality_degree(IntervalQuality::Major, i).unwrap());
+            c.extensions.push(scale(i));
         });
 
         c
