@@ -113,7 +113,7 @@ impl Chord {
     }
 
     /// Adding Extended interval
-    pub fn with_extension(&self, tunings: Vec<Tuning>) -> Self {
+    pub fn with_extension(&self, tunings: &Vec<Tuning>) -> Self {
         let mut s = self.clone();
         s.extensions.extend(tunings);
         s
