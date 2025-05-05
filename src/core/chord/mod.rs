@@ -136,7 +136,7 @@ impl Chord {
     pub fn intervals(&self) -> Vec<Interval> {
         let mut intervals = self.quality.intervals().to_vec();
         intervals.extend(self.extensions.iter().map(|t| {
-            Interval::from_semitones_unchecked(t.class_semitones() - self.root.class_semitones())
+            Interval::from_semitones_unchecked(t.number() - self.root.number())
         }));
         intervals
     }
