@@ -371,6 +371,17 @@ mod tests {
     }
 
     #[test]
+    fn test_chord_01() {
+        let c = Chord::from_symbol("G").unwrap();
+        let c = c.dom(7);
+
+        println!("{:#?}", c.components());
+
+        let c = Chord::analyze_from(&c.components()).unwrap();
+        println!("{:}", c);
+    }
+
+    #[test]
     fn test_dominant_seventh() {
         let g7 = Chord::new(Tuning::new(PitchClass::G, 4), ChordQuality::Dominant7).unwrap();
         assert_eq!(
