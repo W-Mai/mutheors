@@ -350,6 +350,7 @@ impl Tuning {
 }
 
 impl Tuning {
+    /// TODO: handle -interval
     pub fn add_interval(&self, interval: &Interval) -> Result<Self, MusicError> {
         let new_semitones = interval.semitones() + self.class.semitones() + self.accidentals;
         let mut estimated_octave = self.octave + (new_semitones + 11) / 12 - 1;
