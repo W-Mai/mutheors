@@ -55,7 +55,7 @@ impl Chord {
         for root_class in tuning_classes.iter().by_ref() {
             let intervals_sorted = tuning_classes
                 .iter()
-                .skip(1)
+                .filter(|&t| t != root_class)
                 .by_ref()
                 .filter_map(|&t| Interval::from_semitones(t - root_class).ok())
                 .collect::<Vec<_>>();
