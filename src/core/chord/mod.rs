@@ -135,9 +135,11 @@ impl Chord {
 
     pub fn intervals(&self) -> Vec<Interval> {
         let mut intervals = self.quality.intervals().to_vec();
-        intervals.extend(self.extensions.iter().map(|t| {
-            Interval::from_semitones_unchecked(t.number() - self.root.number())
-        }));
+        intervals.extend(
+            self.extensions
+                .iter()
+                .map(|t| Interval::from_semitones_unchecked(t.number() - self.root.number())),
+        );
         intervals
     }
 
@@ -272,7 +274,7 @@ impl Chord {
         let mut c = self.clone();
 
         (7..=n).step_by(2).for_each(|i| {
-            let deg = i - 7 + 5;
+            let deg = i + 4;
             c.extensions.push(scale(deg));
         });
 
@@ -373,10 +375,10 @@ mod tests {
 
     #[test]
     fn test_chord_01() {
-        let c7 = Chord::from_symbol("C7").unwrap();
+        let c7 = Chord::from_symbol("G7").unwrap();
         println!("{:#?}", c7.components());
-        
-        let c = Chord::from_symbol("C").unwrap();
+
+        let c = Chord::from_symbol("G").unwrap();
         let c = c.dom(7);
 
         println!("{:#?}", c.components());
