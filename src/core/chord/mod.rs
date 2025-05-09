@@ -375,16 +375,18 @@ mod tests {
 
     #[test]
     fn test_chord_01() {
-        let c7 = Chord::from_symbol("G7").unwrap();
-        println!("{:#?}", c7.components());
+        let seventh = ["C", "D", "E", "F", "G", "A", "B", "Eb"];
+        for sym in seventh {
+            let c7 = Chord::from_symbol(&(sym.to_owned() + "7")).unwrap();
 
-        let c = Chord::from_symbol("G").unwrap();
-        let c = c.dom(7);
+            let c = Chord::from_symbol(sym).unwrap();
+            let c = c.dom(7);
 
-        println!("{:#?}", c.components());
+            let c = Chord::analyze_from(&c.components()).unwrap();
 
-        let c = Chord::analyze_from(&c.components()).unwrap();
-        println!("{:}", c);
+            assert_eq!(c7, c);
+            println!("Checked: {}", c);
+        }
     }
 
     #[test]
