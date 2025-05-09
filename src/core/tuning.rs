@@ -362,7 +362,7 @@ impl Tuning {
         }
 
         let ori_degree = self.class().degree();
-        let new_degree = ori_degree + interval.degree() - 1;
+        let new_degree = ori_degree + interval.degree() * interval.semitones().signum() - interval.semitones().signum();
         let pitch_class = PitchClass::from_degree(new_degree);
 
         let mut pc_semi_diff =

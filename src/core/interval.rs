@@ -97,7 +97,7 @@ impl Interval {
     pub fn semitones_mod(&self) -> i8 {
         self.semitones.rem_euclid(12)
     }
-    
+
     pub fn degree(&self) -> i8 {
         self.degree.0 as i8
     }
@@ -648,6 +648,17 @@ mod tests {
 
         assert_eq!((M3 * 2).semitones(), 8);
         assert_eq!((P5 * 2).semitones(), 14);
+    }
+
+    #[test]
+    fn test_interval_operations_1() {
+        let c = tuning!(B 4);
+        let c_plus = c.add_interval(&Interval::perfect_fifth()).unwrap();
+        println!("{:?}", c_plus);
+        let c_plus_minus = c_plus.add_interval(&-Interval::perfect_fifth()).unwrap();
+        println!("{:?}", c_plus_minus);
+
+        assert_eq!(c, c_plus_minus);
     }
 
     #[test]

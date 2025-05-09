@@ -267,15 +267,7 @@ impl Chord {
     // Major dominant
     pub fn dom(&self, n: u8) -> Self {
         let root = self.root();
-        let scale_octave = if root.class().degree() < 5 {
-            root.octave() - 1
-        } else {
-            root.octave()
-        };
-        
-        let scale_root = Tuning::new(PitchClass::from_degree(root.class().degree() - 5 + 1), scale_octave);
-
-        // let scale_root = root.add_interval(&-Interval::perfect_fifth()).unwrap();
+        let scale_root = root.add_interval(&-Interval::perfect_fifth()).unwrap();
         let scale = scale_root.scale(ScaleType::Major);
         let mut c = self.clone();
 
