@@ -78,6 +78,9 @@ impl ChordQuality {
             .iter()
             .map(|interval| interval.semitones_mod())
             .collect::<BTreeSet<_>>();
+
+        println!("intercal: {:#?}", intervals);
+        println!("interval set: {:?}", interval_set);
         for quality in ChordQuality::iter() {
             let base_pattern_set = quality
                 .intervals()
@@ -85,6 +88,7 @@ impl ChordQuality {
                 .map(|i| i.semitones_mod())
                 .collect::<BTreeSet<_>>();
 
+            println!("base pattern set {}: {:?}", quality, base_pattern_set);
             if interval_set == base_pattern_set {
                 return Ok(quality);
             }
