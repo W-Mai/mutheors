@@ -75,6 +75,7 @@ impl Chord {
         chords
             .iter()
             .find(|c| c.root() == min_tuning)
+            .or(chords.first())
             .ok_or(MusicError::UnsupportedChord)
             .cloned()
     }
