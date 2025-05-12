@@ -375,7 +375,7 @@ mod tests {
 
     #[test]
     fn test_chord_01() {
-        let seventh = ["G", "A", "B", "Eb"];
+        let seventh = ["C", "D", "E", "F", "G", "A", "B", "Eb"];
         for sym in seventh {
             let c7 = Chord::from_symbol(&(sym.to_owned() + "7")).unwrap();
 
