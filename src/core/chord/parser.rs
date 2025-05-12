@@ -40,6 +40,8 @@ impl Chord {
             return Err(MusicError::InvalidPitch);
         }
 
+        let mut chords = vec![];
+
         let number_set = tunings
             .iter()
             .enumerate()
@@ -61,11 +63,20 @@ impl Chord {
                 .collect::<Vec<_>>();
 
             if let Ok(chord_quality) = ChordQuality::analyze_from(&intervals_sorted) {
-                return Chord::new(min_tuning, chord_quality);
+                let root = tunings
+                    .iter()
+                    .find(|&t| &t.class_semitones() == root_class)
+                    .unwrap()
+                    .clone();
+                chords.push(Chord::new(root, chord_quality)?);
             }
         }
 
-        Err(MusicError::UnsupportedChord {})
+        chords
+            .iter()
+            .find(|c| c.root() == min_tuning)
+            .ok_or(MusicError::UnsupportedChord)
+            .cloned()
     }
 }
 
