@@ -260,9 +260,13 @@ impl Chord {
 }
 
 impl Chord {
-    pub fn add(self, tuning: Tuning) -> Self {
-        let mut c = self;
-        c.extensions.push(tuning);
+    pub fn add(&self, n: u8) -> Self {
+        let root = self.root();
+        let scale = root.scale(ScaleType::Major);
+        let mut c = self.clone();
+
+        c.extensions.push(scale(n));
+
         c
     }
 
