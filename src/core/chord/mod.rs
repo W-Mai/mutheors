@@ -395,13 +395,13 @@ mod tests {
 
     #[test]
     fn test_chord_02() {
+        // They are not equal but have the same components.
         let c = Chord::from_symbol("C").unwrap();
         let c = c.add(7);
+        let c_maj7 = Chord::from_symbol("Cmaj7").unwrap();
 
-        assert_eq!(
-            c.components(),
-            Chord::from_symbol("Cmaj7").unwrap().components()
-        );
+        assert_ne!(c, c_maj7);
+        assert_eq!(c.components(), c_maj7.components());
     }
 
     #[test]
