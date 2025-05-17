@@ -418,6 +418,23 @@ mod tests {
     }
 
     #[test]
+    fn test_chord_03() {
+        let c = Chord::from_symbol("C").unwrap();
+        let c = c.maj(9);
+
+        assert_eq!(
+            c.components(),
+            [
+                tuning!(C 4),
+                tuning!(E 4),
+                tuning!(G 4),
+                tuning!(B 4),
+                tuning!(D 5)
+            ]
+        );
+    }
+
+    #[test]
     fn test_dominant_seventh() {
         let g7 = Chord::new(Tuning::new(PitchClass::G, 4), ChordQuality::Dominant7).unwrap();
         assert_eq!(
