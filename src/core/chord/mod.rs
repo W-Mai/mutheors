@@ -422,6 +422,8 @@ mod tests {
         let c = Chord::from_symbol("C").unwrap();
         let c = c.maj(9);
 
+        //TODO: Parsing Cmaj9 is not supported yet.
+
         assert_eq!(
             c.components(),
             [
