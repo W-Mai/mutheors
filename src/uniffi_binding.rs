@@ -122,6 +122,12 @@ impl Chord {
     pub fn to_string(&self) -> String {
         self.inner.to_string()
     }
+
+    pub fn add(&self, n: u8) -> Self {
+        Self {
+            inner: (*self.inner).clone().add(n).into_arc(),
+        }
+    }
 }
 
 #[derive(uniffi::Object, Clone)]
