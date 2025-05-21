@@ -128,6 +128,12 @@ impl Chord {
             inner: (*self.inner).clone().add(n).into_arc(),
         }
     }
+
+    pub fn dom(&self, n: u8) -> Self {
+        Self {
+            inner: (*self.inner).clone().dom(n).into_arc(),
+        }
+    }
 }
 
 #[derive(uniffi::Object, Clone)]
