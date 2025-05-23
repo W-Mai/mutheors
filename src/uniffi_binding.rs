@@ -140,6 +140,12 @@ impl Chord {
             inner: (*self.inner).clone().maj(n).into_arc(),
         }
     }
+
+    pub fn min(&self, n: u8) -> Self {
+        Self {
+            inner: (*self.inner).clone().min(n).into_arc(),
+        }
+    }
 }
 
 #[derive(uniffi::Object, Clone)]
