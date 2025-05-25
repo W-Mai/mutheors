@@ -435,6 +435,9 @@ mod tests {
         let c = Chord::from_symbol("C").unwrap();
         let c = c.maj(9);
 
+        // Add additional notes for Cmaj9, which includes the 9th degree.
+        let c = c.maj(7);
+
         //TODO: Parsing Cmaj9 is not supported yet.
 
         assert_eq!(
