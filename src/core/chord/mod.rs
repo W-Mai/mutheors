@@ -135,15 +135,14 @@ impl Chord {
 
     pub fn intervals(&self) -> Vec<Interval> {
         let mut intervals = self.quality.intervals().to_vec();
-        let conv_intervals = self.extensions.iter().map_while(|t| {
+        let mut conv_intervals = vec![];
+        self.extensions.iter().for_each(|t| {
             let interval = Interval::from_semitones_unchecked(t.number() - self.root.number());
-            if intervals.contains(&interval) {
-                None
-            } else {
-                Some(interval)
+            if !(intervals.contains(&interval) || conv_intervals.contains(&interval)) {
+                conv_intervals.push(interval)
             }
         });
-        intervals.extend(conv_intervals.collect::<Vec<_>>());
+        intervals.extend(conv_intervals);
         intervals
     }
 
