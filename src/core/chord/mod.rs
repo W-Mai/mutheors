@@ -63,6 +63,12 @@ pub enum Inversion {
     Third,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+enum ExtensionAlter {
+    Add(Tuning),
+    No(Tuning),
+}
+
 /// Complete Chord Description Structure
 #[derive(Debug, Clone, PartialEq)]
 pub struct Chord {
@@ -71,7 +77,7 @@ pub struct Chord {
     chord_type: ChordType,
     inversion: Inversion,
     voicing: Voicing,
-    extensions: Vec<Tuning>, // Extended sounds (9th, 11th, etc.)
+    extensions: Vec<ExtensionAlter>, // Extended sounds (9th, 11th, etc.)
 }
 
 impl Chord {
@@ -313,6 +319,19 @@ impl Chord {
 
         c
     }
+
+    pub fn no(&self, n: u8) -> Self {
+        // let root = self.root();
+        // let scale = root.scale(ScaleType::Major);
+        // let mut c = self.clone();
+        //
+        // (7..=n).step_by(2).for_each(|i| {
+        //     let deg = i + 1;
+        //     c.extensions.push(scale(deg));
+        // });
+        //
+        // c
+    }
 }
 
 impl Chord {
@@ -439,7 +458,9 @@ mod tests {
         let c = c.maj(9);
 
         // Add additional notes for Cmaj9, which includes the 9th degree.
-        let c = c.maj(7);
+        let c = c.add(7);
+        let c = c.add(7);
+        let c = c.add(7);
 
         //TODO: Parsing Cmaj9 is not supported yet.
 
