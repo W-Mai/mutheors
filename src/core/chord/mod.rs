@@ -274,7 +274,17 @@ impl Chord {
         let scale = root.scale(ScaleType::Major);
         let mut c = self.clone();
 
-        c.extensions.push(scale(n));
+        c.extensions.push(ExtensionAlter::Add(scale(n)));
+
+        c
+    }
+
+    pub fn no(&self, n: u8) -> Self {
+        let root = self.root();
+        let scale = root.scale(ScaleType::Major);
+        let mut c = self.clone();
+
+        c.extensions.push(ExtensionAlter::No(scale(n)));
 
         c
     }
@@ -288,7 +298,7 @@ impl Chord {
 
         (7..=n).step_by(2).for_each(|i| {
             let deg = i + 4;
-            c.extensions.push(scale(deg));
+            c.extensions.push(ExtensionAlter::Add(scale(deg)));
         });
 
         c
@@ -301,7 +311,7 @@ impl Chord {
 
         (7..=n).step_by(2).for_each(|i| {
             let deg = i;
-            c.extensions.push(scale(deg));
+            c.extensions.push(ExtensionAlter::Add(scale(deg)));
         });
 
         c
@@ -314,23 +324,10 @@ impl Chord {
 
         (7..=n).step_by(2).for_each(|i| {
             let deg = i;
-            c.extensions.push(scale(deg));
+            c.extensions.push(ExtensionAlter::Add(scale(deg)));
         });
 
         c
-    }
-
-    pub fn no(&self, n: u8) -> Self {
-        // let root = self.root();
-        // let scale = root.scale(ScaleType::Major);
-        // let mut c = self.clone();
-        //
-        // (7..=n).step_by(2).for_each(|i| {
-        //     let deg = i + 1;
-        //     c.extensions.push(scale(deg));
-        // });
-        //
-        // c
     }
 }
 
