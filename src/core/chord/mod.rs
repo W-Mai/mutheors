@@ -11,6 +11,7 @@ use crate::{tuning, MusicError, PitchClass, Scale, ScaleType};
 pub use quality::*;
 use std::collections::BTreeSet;
 use std::fmt::Display;
+use std::ops::Deref;
 use std::str::FromStr;
 
 /// Chord quality classification (basic triad)
@@ -80,6 +81,17 @@ pub struct Chord {
     extensions: Vec<ExtensionAlter>, // Extended sounds (9th, 11th, etc.)
 }
 
+impl Deref for ExtensionAlter {
+    type Target = Tuning;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            ExtensionAlter::Add(t) => t,
+            ExtensionAlter::No(t) => t,
+        }
+    }
+}
+
 impl Chord {
     pub fn quality(&self) -> ChordQuality {
         self.quality
@@ -121,7 +133,7 @@ impl Chord {
     /// Adding Extended interval
     pub fn with_extension(&self, tunings: &[ExtensionAlter]) -> Self {
         let mut s = self.clone();
-        let i= tunings.into_iter();
+        let i = tunings.into_iter();
         s.extensions.extend_from_slice(tunings);
         s
     }
