@@ -92,6 +92,15 @@ impl Deref for ExtensionAlter {
     }
 }
 
+impl ExtensionAlter {
+    pub fn simple(&self) -> Self {
+        match self {
+            ExtensionAlter::Add(t) => ExtensionAlter::Add(t.simple()),
+            ExtensionAlter::No(t) => ExtensionAlter::No(t.simple()),
+        }
+    }
+}
+
 impl Chord {
     pub fn quality(&self) -> ChordQuality {
         self.quality
@@ -133,7 +142,6 @@ impl Chord {
     /// Adding Extended interval
     pub fn with_extension(&self, tunings: &[ExtensionAlter]) -> Self {
         let mut s = self.clone();
-        let i = tunings.into_iter();
         s.extensions.extend_from_slice(tunings);
         s
     }
