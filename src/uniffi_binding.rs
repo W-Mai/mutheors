@@ -44,15 +44,15 @@ impl Chord {
         })
     }
 
-    /// Adding Extended interval
-    pub fn with_extension(&self, tunings: Vec<std::sync::Arc<Tuning>>) -> Self {
-        Self {
-            inner: (*self.inner)
-                .clone()
-                .with_extension(&tunings.into_iter().map(|i| *i.inner).collect::<Vec<_>>())
-                .into_arc(),
-        }
-    }
+    // /// Adding Extended interval
+    // pub fn with_extension(&self, tunings: Vec<std::sync::Arc<Tuning>>) -> Self {
+    //     Self {
+    //         inner: (*self.inner)
+    //             .clone()
+    //             .with_extension(&tunings.into_iter().map(|i| *i.inner).collect::<Vec<_>>())
+    //             .into_arc(),
+    //     }
+    // }
 
     pub fn invert(&self, inversion: &crate::Inversion) -> Self {
         let mut self_copy = (*self.inner).clone();
