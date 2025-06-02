@@ -186,7 +186,7 @@ impl Chord {
         });
         intervals.extend(conv_intervals);
         pop_intervals.into_iter().for_each(|i| {
-            if let Some(pos) = intervals.iter().position(|x| *x == i) {
+            if let Some(pos) = intervals.iter().position(|x| x.degree() == i.degree()) {
                 intervals.remove(pos);
             }
         });
@@ -520,7 +520,9 @@ mod tests {
 
         let c = c.no(7);
 
-        println!("{:?}", c.components())
+        let c_maj = Chord::from_symbol("C").unwrap();
+        
+        assert_eq!(c.components(), c_maj.components());
     }
 
     #[test]
