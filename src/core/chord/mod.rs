@@ -65,7 +65,7 @@ pub enum Inversion {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-enum ExtensionAlter {
+pub enum ExtensionAlter {
     Add(Tuning),
     No(Tuning),
 }
