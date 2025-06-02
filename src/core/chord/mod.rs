@@ -99,6 +99,14 @@ impl ExtensionAlter {
             ExtensionAlter::No(t) => ExtensionAlter::No(t.simple()),
         }
     }
+
+    pub fn is_add(&self) -> bool {
+        matches!(self, ExtensionAlter::Add(_))
+    }
+
+    pub fn is_no(&self) -> bool {
+        matches!(self, ExtensionAlter::No(_))
+    }
 }
 
 impl Chord {
@@ -163,13 +171,25 @@ impl Chord {
     pub fn intervals(&self) -> Vec<Interval> {
         let mut intervals = self.quality.intervals().to_vec();
         let mut conv_intervals = vec![];
+        let mut pop_intervals = vec![];
         self.extensions.iter().for_each(|t| {
             let interval = Interval::from_semitones_unchecked(t.number() - self.root.number());
-            if !(intervals.contains(&interval) || conv_intervals.contains(&interval)) {
-                conv_intervals.push(interval)
+            if !(intervals.contains(&interval) || conv_intervals.contains(&interval)) && t.is_add()
+            {
+                conv_intervals.push(interval);
+                return;
+            }
+
+            if t.is_no() {
+                pop_intervals.push(interval);
             }
         });
         intervals.extend(conv_intervals);
+        pop_intervals.into_iter().for_each(|i| {
+            if let Some(pos) = intervals.iter().position(|x| *x == i) {
+                intervals.remove(pos);
+            }
+        });
         intervals
     }
 
@@ -492,6 +512,15 @@ mod tests {
                 tuning!(D 5)
             ]
         );
+    }
+
+    #[test]
+    fn test_chord_04() {
+        let c = Chord::from_symbol("C7").unwrap();
+
+        let c = c.no(7);
+
+        println!("{:?}", c.components())
     }
 
     #[test]
