@@ -114,6 +114,22 @@ mod tests {
     }
 
     #[test]
+    fn test_chord_analyze_from_02() -> Result<(), MusicError> {
+        let tunings = vec![
+            tuning!(C 4),
+            tuning!(E 4),
+            tuning!(G 4),
+            tuning!(B 4),
+            tuning!(D 5),
+        ];
+
+        let chord = Chord::analyze_from(&tunings)?;
+        println!("Analyzed chord: {}", chord);
+
+        Ok(())
+    }
+
+    #[test]
     fn test_chord_analyze_supported() {
         for quality in ChordQuality::iter() {
             let c = Chord::new(tuning!(C 4), quality).unwrap();
