@@ -62,6 +62,7 @@ impl Chord {
                 .filter_map(|&t| Interval::from_semitones(t - root_class).ok())
                 .collect::<Vec<_>>();
 
+            // BASE Quality
             if let Ok(chord_quality) = ChordQuality::analyze_from(&intervals_sorted) {
                 let root = tunings
                     .iter()
