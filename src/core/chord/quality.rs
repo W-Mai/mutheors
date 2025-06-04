@@ -1,4 +1,4 @@
-use crate::{Interval, IntervalQuality, MusicError};
+use crate::{ExtensionAlter, Interval, IntervalQuality, MusicError};
 use std::collections::BTreeSet;
 use std::fmt::Display;
 use std::str::FromStr;
@@ -73,12 +73,13 @@ impl ChordQuality {
         .into_iter()
     }
 
-    pub fn analyze_from(intervals: &[Interval]) -> Result<Self, MusicError> {
+    pub fn analyze_from(intervals: &[Interval]) -> Result<(Self, Vec<ExtensionAlter>), MusicError> {
         let interval_set = intervals
             .iter()
             .map(|interval| interval.semitones_mod())
             .collect::<BTreeSet<_>>();
 
+        let mut matches = vec![];
         for quality in ChordQuality::iter() {
             let base_pattern_set = quality
                 .intervals()
@@ -87,17 +88,35 @@ impl ChordQuality {
                 .collect::<BTreeSet<_>>();
 
             if interval_set == base_pattern_set {
-                return Ok(quality);
+                return Ok((quality, vec![]));
             }
 
             // TODO: support
             // - [ ] chord inversion
             // - [ ] chord extensions
             // - [ ] chord jazzy extensions
-            // let diff = interval_set.difference(&base_pattern_set);
-            // let inter = interval_set.intersection(&base_pattern_set);
+            let diff = interval_set.difference(&base_pattern_set);
+            let inter = interval_set.intersection(&base_pattern_set);
+
+            matches.push((
+                quality,
+                diff.cloned().collect::<Vec<_>>(),
+                inter.cloned().collect::<Vec<_>>(),
+            ));
         }
-        Err(MusicError::InvalidChordQuality)
+
+        matches.sort_by(|lhs, rhs| {
+            let lhs_diff_len = lhs.1.len();
+            let rhs_diff_len = rhs.1.len();
+            if lhs_diff_len == rhs_diff_len {
+                return lhs.2.len().cmp(&rhs.2.len());
+            }
+            lhs_diff_len.cmp(&rhs_diff_len)
+        });
+
+        let pair = matches.first().ok_or(MusicError::InvalidChordQuality)?;
+
+        Ok((pair.0, vec![]))
     }
 
     pub fn intervals(&self) -> Vec<Interval> {

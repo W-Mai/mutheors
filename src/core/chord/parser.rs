@@ -69,7 +69,7 @@ impl Chord {
                     .find(|&t| &t.class_semitones() == root_class)
                     .unwrap()
                     .clone();
-                chords.push(Chord::new(root, chord_quality)?);
+                chords.push(Chord::new(root, chord_quality.0)?.with_extension(&chord_quality.1));
             }
         }
 
