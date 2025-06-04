@@ -13,7 +13,7 @@
 //! - "Dbdim" for Db diminished
 //! - "Db dim7" for Db diminished 7th
 
-use crate::{Chord, ChordQuality, Interval, MusicError, Tuning};
+use crate::{Chord, ChordQuality, ExtensionAlter, Interval, MusicError, Tuning};
 use std::collections::BTreeSet;
 use std::str::FromStr;
 
@@ -69,7 +69,15 @@ impl Chord {
                     .find(|&t| &t.class_semitones() == root_class)
                     .unwrap()
                     .clone();
-                chords.push(Chord::new(root, chord_quality.0)?.with_extension(&chord_quality.1));
+                chords.push(
+                    Chord::new(root, chord_quality.0)?.with_extension(
+                        &chord_quality
+                            .1
+                            .iter()
+                            .map(|v| ExtensionAlter::Add(root.add_interval(v).unwrap()))
+                            .collect::<Vec<_>>(),
+                    ),
+                );
             }
         }
 
@@ -125,7 +133,10 @@ mod tests {
         ];
 
         let chord = Chord::analyze_from(&tunings)?;
-        println!("Analyzed chord: {}", chord);
+        println!(
+            "Analyzed chord: {}, remains: {:#?}",
+            chord, chord.extensions
+        );
 
         Ok(())
     }

@@ -1,4 +1,4 @@
-use crate::{ExtensionAlter, Interval, IntervalQuality, MusicError};
+use crate::{Interval, IntervalQuality, MusicError};
 use std::collections::BTreeSet;
 use std::fmt::Display;
 use std::str::FromStr;
@@ -73,10 +73,10 @@ impl ChordQuality {
         .into_iter()
     }
 
-    pub fn analyze_from(intervals: &[Interval]) -> Result<(Self, Vec<ExtensionAlter>), MusicError> {
+    pub fn analyze_from(intervals: &[Interval]) -> Result<(Self, Vec<Interval>), MusicError> {
         let interval_set = intervals
             .iter()
-            .map(|interval| interval.semitones_mod())
+            .map(|interval| (interval.semitones_mod(), interval.clone()))
             .collect::<BTreeSet<_>>();
 
         let mut matches = vec![];
@@ -84,7 +84,7 @@ impl ChordQuality {
             let base_pattern_set = quality
                 .intervals()
                 .iter()
-                .map(|i| i.semitones_mod())
+                .map(|i| (i.semitones_mod(), i.clone()))
                 .collect::<BTreeSet<_>>();
 
             if interval_set == base_pattern_set {
@@ -116,7 +116,7 @@ impl ChordQuality {
 
         let pair = matches.first().ok_or(MusicError::InvalidChordQuality)?;
 
-        Ok((pair.0, vec![]))
+        Ok((pair.0, pair.1.iter().map(|v| v.1).collect()))
     }
 
     pub fn intervals(&self) -> Vec<Interval> {
