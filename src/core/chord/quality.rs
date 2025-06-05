@@ -1,5 +1,5 @@
 use crate::{Interval, IntervalQuality, MusicError};
-use std::collections::BTreeSet;
+use std::collections::BTreeMap;
 use std::fmt::Display;
 use std::str::FromStr;
 
@@ -74,51 +74,68 @@ impl ChordQuality {
     }
 
     pub fn analyze_from(intervals: &[Interval]) -> Result<(Self, Vec<Interval>), MusicError> {
-        let interval_set = intervals
+        let interval_map = intervals
             .iter()
             .map(|interval| (interval.semitones_mod(), interval.clone()))
-            .collect::<BTreeSet<_>>();
+            .collect::<BTreeMap<_, _>>();
 
         let mut matches = vec![];
         for quality in ChordQuality::iter() {
-            let base_pattern_set = quality
+            let base_pattern_map = quality
                 .intervals()
                 .iter()
                 .map(|i| (i.semitones_mod(), i.clone()))
-                .collect::<BTreeSet<_>>();
+                .collect::<BTreeMap<_, _>>();
 
-            if interval_set == base_pattern_set {
+            if interval_map == base_pattern_map {
                 return Ok((quality, vec![]));
             }
 
-            // TODO: support
-            // - [ ] chord inversion
-            // - [ ] chord extensions
-            // - [ ] chord jazzy extensions
-            let diff = interval_set.difference(&base_pattern_set);
-            let inter = interval_set.intersection(&base_pattern_set);
+            let diff_keys = interval_map
+                .keys()
+                .filter(|k| !base_pattern_map.contains_key(k))
+                .cloned()
+                .collect::<Vec<_>>();
 
-            matches.push((
-                quality,
-                diff.cloned().collect::<Vec<_>>(),
-                inter.cloned().collect::<Vec<_>>(),
-            ));
+            let diff = diff_keys
+                .into_iter()
+                .filter_map(|k| interval_map.get(&k).map(|v| (k, v.clone())))
+                .collect::<BTreeMap<_, _>>();
+
+            let inter_keys = interval_map
+                .keys()
+                .filter(|k| base_pattern_map.contains_key(k))
+                .cloned()
+                .collect::<Vec<_>>();
+
+            let inter = inter_keys
+                .into_iter()
+                .filter_map(|k| interval_map.get(&k).map(|v| (k, v.clone())))
+                .collect::<BTreeMap<_, _>>();
+
+            matches.push((quality, diff, inter));
         }
 
         matches.sort_by(|lhs, rhs| {
             let lhs_diff_len = lhs.1.len();
             let rhs_diff_len = rhs.1.len();
             if lhs_diff_len == rhs_diff_len {
-                return lhs.2.len().cmp(&rhs.2.len());
+                lhs.2.len().cmp(&rhs.2.len())
+            } else {
+                lhs_diff_len.cmp(&rhs_diff_len)
             }
-            lhs_diff_len.cmp(&rhs_diff_len)
         });
 
         let pair = matches.first().ok_or(MusicError::InvalidChordQuality)?;
 
-        Ok((pair.0, pair.1.iter().map(|v| v.1).collect()))
+        Ok((
+            pair.0,
+            BTreeMap::from_iter(pair.1.iter().map(|(k, v)| (*k, v.clone())))
+                .values()
+                .cloned()
+                .collect(),
+        ))
     }
-
     pub fn intervals(&self) -> Vec<Interval> {
         match self {
             ChordQuality::Major => vec![
