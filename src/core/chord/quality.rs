@@ -91,25 +91,15 @@ impl ChordQuality {
                 return Ok((quality, vec![]));
             }
 
-            let diff_keys = interval_map
+            let diff = interval_map
                 .keys()
                 .filter(|k| !base_pattern_map.contains_key(k))
-                .cloned()
-                .collect::<Vec<_>>();
-
-            let diff = diff_keys
-                .into_iter()
                 .filter_map(|k| interval_map.get(&k).map(|v| (k, v.clone())))
                 .collect::<BTreeMap<_, _>>();
 
-            let inter_keys = interval_map
+            let inter = interval_map
                 .keys()
                 .filter(|k| base_pattern_map.contains_key(k))
-                .cloned()
-                .collect::<Vec<_>>();
-
-            let inter = inter_keys
-                .into_iter()
                 .filter_map(|k| interval_map.get(&k).map(|v| (k, v.clone())))
                 .collect::<BTreeMap<_, _>>();
 
