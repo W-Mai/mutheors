@@ -87,7 +87,7 @@ impl ChordQuality {
                 .map(|i| (i.semitones_mod(), i.clone()))
                 .collect::<BTreeMap<_, _>>();
 
-            if interval_map == base_pattern_map {
+            if interval_map.keys().eq(base_pattern_map.keys()) {
                 return Ok((quality, vec![]));
             }
 
