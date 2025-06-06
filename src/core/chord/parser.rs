@@ -138,6 +138,8 @@ mod tests {
             chord, chord.extensions
         );
 
+        assert_eq!(chord.extensions[0], ExtensionAlter::Add(tuning!(D 5)));
+
         Ok(())
     }
 
