@@ -705,4 +705,16 @@ mod tests {
             Consonance::Dissonant
         );
     }
+
+    #[test]
+    fn test_interval_calc() {
+        let t1 = tuning!(C 4);
+        let t2 = tuning!(D 5);
+
+        let diff = Interval::from_semitones(t2.class_semitones() - t1.class_semitones()).unwrap();
+
+        let t3 = t1.add_interval(&diff).unwrap();
+
+        assert_eq!(t2, t3);
+    }
 }
