@@ -711,7 +711,7 @@ mod tests {
         let t1 = tuning!(C 4);
         let t2 = tuning!(D 5);
 
-        let diff = Interval::from_semitones(t2.class_semitones() - t1.class_semitones()).unwrap();
+        let diff = Interval::from_semitones(t2.number() - t1.number()).unwrap();
 
         let t3 = t1.add_interval(&diff).unwrap();
 

@@ -51,7 +51,7 @@ impl Chord {
         let min_tuning = tunings[min_tuning.1];
         let tuning_classes = tunings
             .iter()
-            .map(|&t| t.class_semitones())
+            .map(|&t| t.number())
             .collect::<BTreeSet<_>>();
 
         for root_class in tuning_classes.iter().by_ref() {
@@ -66,7 +66,7 @@ impl Chord {
             if let Ok(chord_quality) = ChordQuality::analyze_from(&intervals_sorted) {
                 let root = tunings
                     .iter()
-                    .find(|&t| &t.class_semitones() == root_class)
+                    .find(|&t| &t.number() == root_class)
                     .unwrap()
                     .clone();
                 chords.push(
