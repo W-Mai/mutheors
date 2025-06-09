@@ -49,10 +49,7 @@ impl Chord {
             .collect::<BTreeSet<_>>();
         let min_tuning = number_set.iter().min().ok_or(MusicError::InvalidPitch)?;
         let min_tuning = tunings[min_tuning.1];
-        let tuning_classes = tunings
-            .iter()
-            .map(|&t| t.number())
-            .collect::<BTreeSet<_>>();
+        let tuning_classes = tunings.iter().map(|&t| t.number()).collect::<BTreeSet<_>>();
 
         for root_class in tuning_classes.iter().by_ref() {
             let intervals_sorted = tuning_classes
@@ -130,6 +127,7 @@ mod tests {
             tuning!(G 4),
             tuning!(B 4),
             tuning!(D 5),
+            tuning!(F 5),
         ];
 
         let chord = Chord::analyze_from(&tunings)?;
