@@ -422,7 +422,18 @@ impl Display for Chord {
         } else {
             format!("{}{}", self.root, self.quality)
         };
-        write!(f, "{}", str)
+        write!(f, "{}", str)?;
+
+        // TODO: Add extensions support
+        for ext in &self.extensions {
+            let deg = ext.class().degree();
+
+            match ext {
+                ExtensionAlter::Add(_) => write!(f, "({})", deg)?,
+                ExtensionAlter::No(_) => write!(f, "(no {})", deg)?,
+            }
+        }
+        Ok(())
     }
 }
 
@@ -521,7 +532,7 @@ mod tests {
         let c = c.no(7);
 
         let c_maj = Chord::from_symbol("C").unwrap();
-        
+
         assert_eq!(c.components(), c_maj.components());
     }
 
