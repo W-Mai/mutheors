@@ -426,7 +426,10 @@ impl Display for Chord {
 
         // TODO: Add extensions support
         for ext in &self.extensions {
-            let deg = ext.class().degree();
+            let diff = ext.number() - self.root.number();
+
+            let interval = Interval::from_semitones_unchecked(diff);
+            let deg = interval.degree();
 
             match ext {
                 ExtensionAlter::Add(_) => write!(f, "({})", deg)?,
