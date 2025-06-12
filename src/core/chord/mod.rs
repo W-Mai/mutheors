@@ -427,10 +427,13 @@ impl Display for Chord {
         // TODO: Add extensions support
         for ext in &self.extensions {
             let diff = ext.number() - self.root.number();
-
             let interval = Interval::from_semitones_unchecked(diff);
             let deg = interval.degree();
-            let acc = ext.simple().accidentals();
+            let s = self.root().scale(ScaleType::Major);
+            let new_deg = s(deg as u8);
+            let new_number = new_deg.number();
+            let acc = ext.number() - new_number;
+
             let acc_str = match acc {
                 v if v == 0 => "",
                 v if v > 0 => "#",
