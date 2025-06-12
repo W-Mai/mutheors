@@ -127,7 +127,7 @@ mod tests {
             tuning!(G 4),
             tuning!(B 4),
             tuning!(D 5),
-            tuning!(F 5),
+            tuning!(# F 5),
         ];
 
         let chord = Chord::analyze_from(&tunings)?;

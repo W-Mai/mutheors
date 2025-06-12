@@ -430,10 +430,17 @@ impl Display for Chord {
 
             let interval = Interval::from_semitones_unchecked(diff);
             let deg = interval.degree();
+            let acc = ext.simple().accidentals();
+            let acc_str = match acc {
+                v if v == 0 => "",
+                v if v > 0 => "#",
+                v if v < 0 => "b",
+                _ => "",
+            };
 
             match ext {
-                ExtensionAlter::Add(_) => write!(f, "({})", deg)?,
-                ExtensionAlter::No(_) => write!(f, "(no {})", deg)?,
+                ExtensionAlter::Add(_) => write!(f, "({}{})", acc_str, deg)?,
+                ExtensionAlter::No(_) => write!(f, "(no {}{})", acc_str, deg)?,
             }
         }
         Ok(())
