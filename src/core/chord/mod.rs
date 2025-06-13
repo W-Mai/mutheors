@@ -436,8 +436,8 @@ impl Display for Chord {
 
             let acc_str = match acc {
                 v if v == 0 => "",
-                v if v > 0 => "#",
-                v if v < 0 => "b",
+                v if v > 0 => &"#".repeat(v as usize),
+                v if v < 0 => &"b".repeat(v.abs() as usize),
                 _ => "",
             };
 
