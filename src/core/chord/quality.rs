@@ -73,6 +73,12 @@ impl ChordQuality {
         .into_iter()
     }
 
+    /// TODO: support
+    /// - [ ] chord inversion
+    /// - [ ] chord extensions
+    ///     - [X] Add
+    ///     - [ ] No
+    /// - [ ] chord jazzy extensions
     pub fn analyze_from(intervals: &[Interval]) -> Result<(Self, Vec<Interval>), MusicError> {
         let interval_map = intervals
             .iter()
