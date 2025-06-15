@@ -9,7 +9,7 @@ use crate::pitch_tuning;
 use crate::tuning::Tuning;
 use crate::{tuning, MusicError, PitchClass, Scale, ScaleType};
 pub use quality::*;
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 use std::fmt::Display;
 use std::ops::Deref;
 use std::str::FromStr;
@@ -424,6 +424,7 @@ impl Display for Chord {
         };
         write!(f, "{}", str)?;
 
+        let mut degree_alter = HashMap::new();
         // TODO: Add extensions support
         for ext in &self.extensions {
             let diff = ext.number() - self.root.number();
@@ -434,6 +435,10 @@ impl Display for Chord {
             let new_number = new_deg.number();
             let acc = ext.number() - new_number;
 
+            degree_alter.insert(deg, (ext, acc));
+        }
+
+        for (deg, (ext, acc)) in degree_alter {
             let acc_str = match acc {
                 v if v == 0 => "",
                 v if v > 0 => &"#".repeat(v as usize),
@@ -446,6 +451,7 @@ impl Display for Chord {
                 ExtensionAlter::No(_) => write!(f, "(no {}{})", acc_str, deg)?,
             }
         }
+
         Ok(())
     }
 }
@@ -525,6 +531,8 @@ mod tests {
         let c = c.add(7);
 
         //TODO: Parsing Cmaj9 is not supported yet.
+
+        println!("{}", c);
 
         assert_eq!(
             c.components(),
