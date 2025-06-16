@@ -438,6 +438,8 @@ impl Display for Chord {
             degree_alter.insert(deg, (ext, acc));
         }
 
+        let mut degree_alter = degree_alter.into_iter().collect::<Vec<_>>();
+        degree_alter.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
         for (deg, (ext, acc)) in degree_alter {
             let acc_str = match acc {
                 v if v == 0 => "",
