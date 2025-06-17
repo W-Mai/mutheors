@@ -333,13 +333,11 @@ impl Chord {
     // Major dominant
     pub fn dom(&self, n: u8) -> Self {
         let root = self.root();
-        let scale_root = root.add_interval(&-Interval::perfect_fifth()).unwrap();
-        let scale = scale_root.scale(ScaleType::Major);
         let mut c = self.clone();
 
         (7..=n).step_by(2).for_each(|i| {
             let deg = i + 4;
-            c.extensions.push(ExtensionAlter::Add(scale(deg)));
+            c.extensions.push(ExtensionAlter::Add(root.dom(deg)));
         });
 
         c

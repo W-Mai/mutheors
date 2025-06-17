@@ -362,7 +362,8 @@ impl Tuning {
         }
 
         let ori_degree = self.class().degree();
-        let new_degree = ori_degree + interval.degree() * interval.semitones().signum() - interval.semitones().signum();
+        let new_degree = ori_degree + interval.degree() * interval.semitones().signum()
+            - interval.semitones().signum();
         let pitch_class = PitchClass::from_degree(new_degree);
 
         let mut pc_semi_diff =
@@ -402,6 +403,16 @@ impl Tuning {
         new_tuning
             .add_interval(&Interval::from_semitones(accidentals).unwrap())
             .unwrap()
+    }
+}
+
+impl Tuning {
+    pub fn dom(&self, n: u8) -> Self {
+        let scale_root = self.add_interval(&-Interval::perfect_fifth()).unwrap();
+        let scale = scale_root.scale(ScaleType::Major);
+
+        let deg = n + 4;
+        scale(deg)
     }
 }
 
