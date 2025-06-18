@@ -345,12 +345,11 @@ impl Chord {
 
     pub fn maj(&self, n: u8) -> Self {
         let root = self.root();
-        let scale = root.scale(ScaleType::Major);
         let mut c = self.clone();
 
         (7..=n).step_by(2).for_each(|i| {
             let deg = i;
-            c.extensions.push(ExtensionAlter::Add(scale(deg)));
+            c.extensions.push(ExtensionAlter::Add(root.maj(deg)));
         });
 
         c

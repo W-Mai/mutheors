@@ -1,5 +1,5 @@
 use crate::chord::Chord;
-use crate::{Interval, IntervalQuality, MusicError, Scale, ScaleType};
+use crate::{ExtensionAlter, Interval, IntervalQuality, MusicError, Scale, ScaleType};
 use std::fmt::Display;
 use std::iter::Peekable;
 use std::ops::{ControlFlow, Div, Mul};
@@ -413,6 +413,13 @@ impl Tuning {
 
         let deg = n + 4;
         scale(deg)
+    }
+
+    pub fn maj(&self, n: u8) -> Self {
+        let scale = self.scale(ScaleType::Major);
+        let mut c = self.clone();
+
+        scale(n)
     }
 }
 
