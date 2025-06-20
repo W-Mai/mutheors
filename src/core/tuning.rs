@@ -417,7 +417,6 @@ impl Tuning {
 
     pub fn maj(&self, n: u8) -> Self {
         let scale = self.scale(ScaleType::Major);
-        let mut c = self.clone();
 
         scale(n)
     }
