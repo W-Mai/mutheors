@@ -336,8 +336,7 @@ impl Chord {
         let mut c = self.clone();
 
         (7..=n).step_by(2).for_each(|i| {
-            let deg = i + 4;
-            c.extensions.push(ExtensionAlter::Add(root.dom(deg)));
+            c.extensions.push(ExtensionAlter::Add(root.dom(i)));
         });
 
         c
@@ -348,8 +347,7 @@ impl Chord {
         let mut c = self.clone();
 
         (7..=n).step_by(2).for_each(|i| {
-            let deg = i;
-            c.extensions.push(ExtensionAlter::Add(root.maj(deg)));
+            c.extensions.push(ExtensionAlter::Add(root.maj(i)));
         });
 
         c
@@ -360,8 +358,7 @@ impl Chord {
         let mut c = self.clone();
 
         (7..=n).step_by(2).for_each(|i| {
-            let deg = i;
-            c.extensions.push(ExtensionAlter::Add(root.min(deg)));
+            c.extensions.push(ExtensionAlter::Add(root.min(i)));
         });
 
         c
