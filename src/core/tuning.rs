@@ -407,12 +407,11 @@ impl Tuning {
 }
 
 impl Tuning {
-    pub fn dom(&self, n: u8) -> Self {
+    pub fn dom(&self, n: u8) -> Vec<Self> {
         let scale_root = self.add_interval(&-Interval::perfect_fifth()).unwrap();
         let scale = scale_root.scale(ScaleType::Major);
 
-        let deg = n + 4;
-        scale(deg)
+        (7..=n).step_by(2).map(|i| scale(i + 4)).collect()
     }
 
     pub fn maj(&self, n: u8) -> Self {
