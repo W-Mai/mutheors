@@ -355,9 +355,8 @@ impl Chord {
         let root = self.root();
         let mut c = self.clone();
 
-        (7..=n).step_by(2).for_each(|i| {
-            c.extensions.push(ExtensionAlter::Add(root.min(i)));
-        });
+        c.extensions
+            .extend(root.min(n).into_iter().map(|t| ExtensionAlter::Add(t)));
 
         c
     }

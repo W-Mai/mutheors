@@ -420,10 +420,10 @@ impl Tuning {
         (7..=n).step_by(2).map(|i| scale(i)).collect()
     }
 
-    pub fn min(&self, n: u8) -> Self {
+    pub fn min(&self, n: u8) -> Vec<Self> {
         let scale = self.scale(ScaleType::NaturalMinor);
 
-        scale(n)
+        (7..=n).step_by(2).map(|i| scale(i)).collect()
     }
 }
 
