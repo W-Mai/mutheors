@@ -154,6 +154,14 @@ impl Chord {
         s
     }
 
+    pub fn push(&mut self, ext: ExtensionAlter) {
+        self.extensions.push(ext);
+    }
+
+    pub fn extend(&mut self, ext: &[ExtensionAlter]) {
+        self.extensions.extend_from_slice(ext)
+    }
+
     /// Chord inversion
     /// - Root position
     /// - First inversion
