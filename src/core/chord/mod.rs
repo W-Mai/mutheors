@@ -158,8 +158,8 @@ impl Chord {
         self.extensions.push(ext);
     }
 
-    pub fn extend(&mut self, ext: &[ExtensionAlter]) {
-        self.extensions.extend_from_slice(ext)
+    pub fn extend(&mut self, ext: impl IntoIterator<Item = ExtensionAlter>) {
+        self.extensions.extend(ext)
     }
 
     /// Chord inversion
@@ -323,7 +323,7 @@ impl Chord {
         let scale = root.scale(ScaleType::Major);
         let mut c = self.clone();
 
-        c.extensions.push(ExtensionAlter::Add(scale(n)));
+        c.push(ExtensionAlter::Add(scale(n)));
 
         c
     }
@@ -333,7 +333,7 @@ impl Chord {
         let scale = root.scale(ScaleType::Major);
         let mut c = self.clone();
 
-        c.extensions.push(ExtensionAlter::No(scale(n)));
+        c.push(ExtensionAlter::No(scale(n)));
 
         c
     }
@@ -343,8 +343,7 @@ impl Chord {
         let root = self.root();
         let mut c = self.clone();
 
-        c.extensions
-            .extend(root.dom(n).into_iter().map(|t| ExtensionAlter::Add(t)));
+        c.extend(root.dom(n).into_iter().map(|t| ExtensionAlter::Add(t)));
 
         c
     }
@@ -353,8 +352,7 @@ impl Chord {
         let root = self.root();
         let mut c = self.clone();
 
-        c.extensions
-            .extend(root.maj(n).into_iter().map(|t| ExtensionAlter::Add(t)));
+        c.extend(root.maj(n).into_iter().map(|t| ExtensionAlter::Add(t)));
 
         c
     }
@@ -363,8 +361,7 @@ impl Chord {
         let root = self.root();
         let mut c = self.clone();
 
-        c.extensions
-            .extend(root.min(n).into_iter().map(|t| ExtensionAlter::Add(t)));
+        c.extend(root.min(n).into_iter().map(|t| ExtensionAlter::Add(t)));
 
         c
     }
