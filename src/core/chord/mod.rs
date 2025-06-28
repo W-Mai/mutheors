@@ -11,7 +11,7 @@ use crate::{tuning, MusicError, PitchClass, Scale, ScaleType};
 pub use quality::*;
 use std::collections::{BTreeSet, HashMap};
 use std::fmt::Display;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 /// Chord quality classification (basic triad)
@@ -85,6 +85,15 @@ impl Deref for ExtensionAlter {
     type Target = Tuning;
 
     fn deref(&self) -> &Self::Target {
+        match self {
+            ExtensionAlter::Add(t) => t,
+            ExtensionAlter::No(t) => t,
+        }
+    }
+}
+
+impl DerefMut for ExtensionAlter {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         match self {
             ExtensionAlter::Add(t) => t,
             ExtensionAlter::No(t) => t,
