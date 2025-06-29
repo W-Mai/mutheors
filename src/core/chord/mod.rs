@@ -421,12 +421,6 @@ impl Chord {
 
 impl Display for Chord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str = if f.alternate() {
-            format!("{:#}{}", self.root, self.quality)
-        } else {
-            format!("{}{}", self.root, self.quality)
-        };
-
         let mut degree_alter = HashMap::new();
         // TODO: Add extensions support
         for ext in &self.extensions {
@@ -498,22 +492,31 @@ impl Display for Chord {
 
         let matched = match_extension_chord(&self.root(), &degree_alter);
 
-        match matched.0 {
+        let alter_quality = match matched.0 {
             ExtensionMode::Dom => {
-                write!(f, "{}", matched.1)?;
+                format!("{}", matched.1)
             }
             ExtensionMode::Major => {
-                write!(f, "M{}", matched.1)?;
+                format!("M{}", matched.1)
             }
             ExtensionMode::Minor => {
-                write!(f, "m{}", matched.1)?;
+                format!("m{}", matched.1)
             }
-            ExtensionMode::Unknown => {
-                write!(f, "{}", str)?;
-            }
-        }
+            ExtensionMode::Unknown => Default::default(),
+        };
 
-        println!("{:?}", matched);
+        let quality_str = if alter_quality.is_empty() {
+            self.quality().to_string()
+        } else {
+            alter_quality
+        };
+
+        let str = if f.alternate() {
+            format!("{:#}{}", self.root, quality_str)
+        } else {
+            format!("{}{}", self.root, quality_str)
+        };
+        write!(f, "{}", str)?;
 
         for (deg, (ext, acc)) in degree_alter {
             let acc_str = match acc {
