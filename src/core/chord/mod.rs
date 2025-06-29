@@ -426,7 +426,6 @@ impl Display for Chord {
         } else {
             format!("{}{}", self.root, self.quality)
         };
-        write!(f, "{}", str)?;
 
         let mut degree_alter = HashMap::new();
         // TODO: Add extensions support
@@ -443,7 +442,79 @@ impl Display for Chord {
         }
 
         let mut degree_alter = degree_alter.into_iter().collect::<Vec<_>>();
+
+        #[derive(Debug)]
+        enum ExtensionMode {
+            Dom,
+            Major,
+            Minor,
+
+            Unknown,
+        }
+        fn match_extension_chord(
+            root: &Tuning,
+            degree_alter: &[(i8, (&ExtensionAlter, i8))],
+        ) -> (ExtensionMode, i8) {
+            let add_alters = degree_alter
+                .iter()
+                .filter(|(_, (ext, _))| ext.is_add())
+                .map(|(i, _)| *i)
+                .collect::<Vec<_>>();
+            let max_add = *add_alters.iter().max().unwrap() as u8;
+            let doms = root.dom(max_add);
+            let majs = root.maj(max_add);
+            let mins = root.min(max_add);
+            let mut dom_count = 0;
+            let mut maj_count = 0;
+            let mut min_count = 0;
+            for (_, (ext, _)) in degree_alter {
+                if doms.contains(*ext) {
+                    dom_count += 1;
+                }
+                if majs.contains(*ext) {
+                    maj_count += 1;
+                }
+                if mins.contains(*ext) {
+                    min_count += 1;
+                }
+            }
+            let max_count = dom_count.max(maj_count).max(min_count);
+            let max_degree = max_count + 7;
+            (
+                if dom_count == max_count {
+                    ExtensionMode::Dom
+                } else if maj_count == max_count {
+                    ExtensionMode::Major
+                } else if min_count == max_count {
+                    ExtensionMode::Minor
+                } else {
+                    ExtensionMode::Unknown
+                },
+                max_degree,
+            )
+        }
+
         degree_alter.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
+
+        let matched = match_extension_chord(&self.root(), &degree_alter);
+
+        match matched.0 {
+            ExtensionMode::Dom => {
+                write!(f, "{}", matched.1)?;
+            }
+            ExtensionMode::Major => {
+                write!(f, "M{}", matched.1)?;
+            }
+            ExtensionMode::Minor => {
+                write!(f, "m{}", matched.1)?;
+            }
+            ExtensionMode::Unknown => {
+                write!(f, "{}", str)?;
+            }
+        }
+
+        println!("{:?}", matched);
+
         for (deg, (ext, acc)) in degree_alter {
             let acc_str = match acc {
                 v if v == 0 => "",
