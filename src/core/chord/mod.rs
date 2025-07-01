@@ -445,10 +445,10 @@ impl Display for Chord {
 
             Unknown,
         }
-        fn match_extension_chord(
+        fn match_extension_chord<'a>(
             root: &Tuning,
-            degree_alter: &[(i8, (&ExtensionAlter, i8))],
-        ) -> (ExtensionMode, i8) {
+            degree_alter: &[(i8, (&'a ExtensionAlter, i8))],
+        ) -> (ExtensionMode, i8, Vec<(i8, (&'a ExtensionAlter, i8))>) {
             let add_alters = degree_alter
                 .iter()
                 .filter(|(_, (ext, _))| ext.is_add())
@@ -461,15 +461,23 @@ impl Display for Chord {
             let mut dom_count = 0;
             let mut maj_count = 0;
             let mut min_count = 0;
+            let mut remove_list = vec![];
             for (_, (ext, _)) in degree_alter {
+                let mut r = false;
                 if doms.contains(*ext) {
                     dom_count += 1;
+                    r = true;
                 }
                 if majs.contains(*ext) {
                     maj_count += 1;
+                    r = true;
                 }
                 if mins.contains(*ext) {
                     min_count += 1;
+                    r = true;
+                }
+                if r {
+                    remove_list.push(*ext);
                 }
             }
             let max_count = dom_count.max(maj_count).max(min_count);
@@ -485,12 +493,18 @@ impl Display for Chord {
                     ExtensionMode::Unknown
                 },
                 max_degree,
+                degree_alter
+                    .iter()
+                    .filter(|(_, (alter, _))| !remove_list.contains(alter))
+                    .cloned()
+                    .collect(),
             )
         }
 
         degree_alter.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
 
         let matched = match_extension_chord(&self.root(), &degree_alter);
+        let degree_alter = matched.2;
 
         let alter_quality = match matched.0 {
             ExtensionMode::Dom => {
