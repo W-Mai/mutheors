@@ -448,13 +448,13 @@ impl Display for Chord {
         fn match_extension_chord<'a>(
             root: &Tuning,
             degree_alter: &[(i8, (&'a ExtensionAlter, i8))],
-        ) -> (ExtensionMode, i8, Vec<(i8, (&'a ExtensionAlter, i8))>) {
+        ) -> Option<(ExtensionMode, i8, Vec<(i8, (&'a ExtensionAlter, i8))>)> {
             let add_alters = degree_alter
                 .iter()
                 .filter(|(_, (ext, _))| ext.is_add())
                 .map(|(i, _)| *i)
                 .collect::<Vec<_>>();
-            let max_add = *add_alters.iter().max().unwrap() as u8;
+            let max_add = *add_alters.iter().max()? as u8;
             let doms = root.dom(max_add);
             let majs = root.maj(max_add);
             let mins = root.min(max_add);
@@ -482,7 +482,7 @@ impl Display for Chord {
             }
             let max_count = dom_count.max(maj_count).max(min_count);
             let max_degree = max_count + 7;
-            (
+            Some((
                 if dom_count == max_count {
                     ExtensionMode::Dom
                 } else if maj_count == max_count {
@@ -498,12 +498,16 @@ impl Display for Chord {
                     .filter(|(_, (alter, _))| !remove_list.contains(alter))
                     .cloned()
                     .collect(),
-            )
+            ))
         }
 
         degree_alter.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
 
-        let matched = match_extension_chord(&self.root(), &degree_alter);
+        let matched = match_extension_chord(&self.root(), &degree_alter).unwrap_or((
+            ExtensionMode::Unknown,
+            0,
+            Vec::new(),
+        ));
         let degree_alter = matched.2;
 
         let alter_quality = match matched.0 {
