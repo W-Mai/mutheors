@@ -481,7 +481,7 @@ impl Display for Chord {
                 }
             }
             let max_count = dom_count.max(maj_count).max(min_count);
-            let max_degree = max_count + 7;
+            let max_degree = max_count * 2 + 7;
             Some((
                 if dom_count == max_count {
                     ExtensionMode::Dom
