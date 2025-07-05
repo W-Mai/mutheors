@@ -455,6 +455,7 @@ impl Display for Chord {
                 .map(|(i, _)| *i)
                 .collect::<Vec<_>>();
             let max_add = *add_alters.iter().max()? as u8;
+            let min_add = *add_alters.iter().min()?;
             let doms = root.dom(max_add);
             let majs = root.maj(max_add);
             let mins = root.min(max_add);
@@ -481,7 +482,7 @@ impl Display for Chord {
                 }
             }
             let max_count = dom_count.max(maj_count).max(min_count);
-            let max_degree = max_count * 2 + 7;
+            let max_degree = max_count * 2 + min_add - 2;
             Some((
                 if dom_count == max_count {
                     ExtensionMode::Dom
