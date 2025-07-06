@@ -658,7 +658,7 @@ mod tests {
 
     #[test]
     fn test_chord_05() {
-        let tunings = [
+        let mut tunings = vec![
             tuning!(G 4),
             tuning!(B 4),
             tuning!(D 5),
@@ -668,7 +668,13 @@ mod tests {
 
         let c = Chord::analyze_from(&tunings).unwrap();
 
-        assert_eq!(c.to_string(), "G9")
+        assert_eq!(c.to_string(), "G9");
+
+        tunings.push(tuning!(C 6));
+
+        let c = Chord::analyze_from(&tunings).unwrap();
+
+        assert_eq!(c.to_string(), "G11");
     }
 
     #[test]
