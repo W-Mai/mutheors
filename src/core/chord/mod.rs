@@ -442,8 +442,6 @@ impl Display for Chord {
             Dom,
             Major,
             Minor,
-
-            Unknown,
         }
         fn match_extension_chord<'a>(
             root: &Tuning,
@@ -491,7 +489,7 @@ impl Display for Chord {
                 } else if min_count == max_count {
                     ExtensionMode::Minor
                 } else {
-                    ExtensionMode::Unknown
+                    return None;
                 },
                 max_degree,
                 degree_alter
@@ -504,24 +502,22 @@ impl Display for Chord {
 
         degree_alter.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
 
-        let matched = match_extension_chord(&self.root(), &degree_alter).unwrap_or((
-            ExtensionMode::Unknown,
-            0,
-            Vec::new(),
-        ));
-        let degree_alter = matched.2;
+        let matched = match_extension_chord(&self.root(), &degree_alter);
 
-        let alter_quality = match matched.0 {
-            ExtensionMode::Dom => {
-                format!("{}", matched.1)
+        let alter_quality = if let Some(ref matched) = matched {
+            match matched.0 {
+                ExtensionMode::Dom => {
+                    format!("{}", matched.1)
+                }
+                ExtensionMode::Major => {
+                    format!("M{}", matched.1)
+                }
+                ExtensionMode::Minor => {
+                    format!("m{}", matched.1)
+                }
             }
-            ExtensionMode::Major => {
-                format!("M{}", matched.1)
-            }
-            ExtensionMode::Minor => {
-                format!("m{}", matched.1)
-            }
-            ExtensionMode::Unknown => Default::default(),
+        } else {
+            Default::default()
         };
 
         let quality_str = if alter_quality.is_empty() {
@@ -537,17 +533,20 @@ impl Display for Chord {
         };
         write!(f, "{}", str)?;
 
-        for (deg, (ext, acc)) in degree_alter {
-            let acc_str = match acc {
-                v if v == 0 => "",
-                v if v > 0 => &"#".repeat(v as usize),
-                v if v < 0 => &"b".repeat(v.abs() as usize),
-                _ => "",
-            };
+        if let Some(matched) = matched {
+            let degree_alter = matched.2;
+            for (deg, (ext, acc)) in degree_alter {
+                let acc_str = match acc {
+                    v if v == 0 => "",
+                    v if v > 0 => &"#".repeat(v as usize),
+                    v if v < 0 => &"b".repeat(v.abs() as usize),
+                    _ => "",
+                };
 
-            match ext {
-                ExtensionAlter::Add(_) => write!(f, "({}{})", acc_str, deg)?,
-                ExtensionAlter::No(_) => write!(f, "(no {}{})", acc_str, deg)?,
+                match ext {
+                    ExtensionAlter::Add(_) => write!(f, "({}{})", acc_str, deg)?,
+                    ExtensionAlter::No(_) => write!(f, "(no {}{})", acc_str, deg)?,
+                }
             }
         }
 
