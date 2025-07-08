@@ -533,9 +533,9 @@ impl Display for Chord {
         };
         write!(f, "{}", str)?;
 
-        if let Some(matched) = matched {
-            let degree_alter = matched.2;
-            for (deg, (ext, acc)) in degree_alter {
+        if let Some(s) = matched.and_then(|(_, _, acc)| {
+            let mut s = String::new();
+            for (deg, (ext, acc)) in acc {
                 let acc_str = match acc {
                     v if v == 0 => "",
                     v if v > 0 => &"#".repeat(v as usize),
@@ -544,12 +544,14 @@ impl Display for Chord {
                 };
 
                 match ext {
-                    ExtensionAlter::Add(_) => write!(f, "({}{})", acc_str, deg)?,
-                    ExtensionAlter::No(_) => write!(f, "(no {}{})", acc_str, deg)?,
+                    ExtensionAlter::Add(_) => s += &format!("({}{})", acc_str, deg),
+                    ExtensionAlter::No(_) => s += &format!("(no {}{})", acc_str, deg),
                 }
             }
-        }
-
+            Some(s)
+        }) {
+            write!(f, "{}", s)?
+        };
         Ok(())
     }
 }
