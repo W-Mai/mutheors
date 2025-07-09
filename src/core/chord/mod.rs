@@ -444,6 +444,7 @@ impl Display for Chord {
             Minor,
         }
         fn match_extension_chord<'a>(
+            quality: ChordQuality,
             root: &Tuning,
             degree_alter: &[(i8, (&'a ExtensionAlter, i8))],
         ) -> Option<(ExtensionMode, i8, Vec<(i8, (&'a ExtensionAlter, i8))>)> {
@@ -502,7 +503,7 @@ impl Display for Chord {
 
         degree_alter.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
 
-        let matched = match_extension_chord(&self.root(), &degree_alter);
+        let matched = match_extension_chord(self.quality(), &self.root(), &degree_alter);
 
         let alter_quality = if let Some(ref matched) = matched {
             match matched.0 {
