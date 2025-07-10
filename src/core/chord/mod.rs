@@ -483,11 +483,17 @@ impl Display for Chord {
             let max_count = dom_count.max(maj_count).max(min_count);
             let max_degree = max_count * 2 + min_add - 2;
             Some((
-                if dom_count == max_count {
+                if dom_count == max_count
+                    && (quality == ChordQuality::Major || quality == ChordQuality::Dominant7)
+                {
                     ExtensionMode::Dom
-                } else if maj_count == max_count {
+                } else if maj_count == max_count
+                    && (quality == ChordQuality::Major || quality == ChordQuality::Major7)
+                {
                     ExtensionMode::Major
-                } else if min_count == max_count {
+                } else if min_count == max_count
+                    && (quality == ChordQuality::Minor || quality == ChordQuality::Minor7)
+                {
                     ExtensionMode::Minor
                 } else {
                     return None;
