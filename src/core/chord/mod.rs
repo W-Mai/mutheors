@@ -558,6 +558,20 @@ impl Display for Chord {
             Some(s)
         }) {
             write!(f, "{}", s)?
+        } else {
+            for (deg, (ext, acc)) in degree_alter {
+                let acc_str = match acc {
+                    v if v == 0 => "",
+                    v if v > 0 => &"#".repeat(v as usize),
+                    v if v < 0 => &"b".repeat(v.abs() as usize),
+                    _ => "",
+                };
+
+                match ext {
+                    ExtensionAlter::Add(_) => write!(f, "({}{})", acc_str, deg)?,
+                    ExtensionAlter::No(_) => write!(f, "(no {}{})", acc_str, deg)?,
+                }
+            }
         };
         Ok(())
     }
