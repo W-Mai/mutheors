@@ -442,6 +442,7 @@ impl Display for Chord {
             Dom,
             Major,
             Minor,
+            MinorMajor,
         }
         fn match_extension_chord<'a>(
             quality: ChordQuality,
@@ -495,6 +496,10 @@ impl Display for Chord {
                     && (quality == ChordQuality::Minor || quality == ChordQuality::Minor7)
                 {
                     ExtensionMode::Minor
+                } else if maj_count == max_count
+                    && (quality == ChordQuality::Minor || quality == ChordQuality::MinorMajor7)
+                {
+                    ExtensionMode::MinorMajor
                 } else {
                     return None;
                 },
@@ -513,15 +518,10 @@ impl Display for Chord {
 
         let alter_quality = if let Some(ref matched) = matched {
             match matched.0 {
-                ExtensionMode::Dom => {
-                    format!("{}", matched.1)
-                }
-                ExtensionMode::Major => {
-                    format!("M{}", matched.1)
-                }
-                ExtensionMode::Minor => {
-                    format!("m{}", matched.1)
-                }
+                ExtensionMode::Dom => format!("{}", matched.1),
+                ExtensionMode::Major => format!("M{}", matched.1),
+                ExtensionMode::Minor => format!("m{}", matched.1),
+                ExtensionMode::MinorMajor => format!("mM{}", matched.1),
             }
         } else {
             Default::default()
