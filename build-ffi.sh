@@ -82,7 +82,7 @@ rustup target add "${TIER2_TARGETS[@]}"
 echo ">>> Cleaning old artifacts"
 
 rm -rf "$OUT_DIR" "$DIST_DIR"
-mkdir -p "$OUT_DIR" "$DIST_DIR"/swift
+mkdir -p "$OUT_DIR" "$OUT_DIR"/swift "$DIST_DIR"
 
 ############################
 # 3. Build targets & Copy
@@ -125,7 +125,7 @@ for i in "${!BUILD_TARGETS[@]}"; do
     LIB_PATH="target/$TARGET_TRIPLE/$BUILD_TYPE/lib$FFI_TARGET.a"
     OUT_LIB="$OUT_DIR/lib$FFI_TARGET"_"$SUFFIX".a
     cp "$LIB_PATH" "$OUT_LIB"
-    FRAMEWORK_ARGS+=(-library "$OUT_LIB" -headers "$DIST_DIR/swift")
+    FRAMEWORK_ARGS+=(-library "$OUT_LIB" -headers "$OUT_DIR/swift")
 done
 
 ############################
@@ -160,22 +160,23 @@ echo "▸ Generating Swift bindings"
 cargo build $RELFLAG --features bindgen
 cargo run --features bindgen --bin uniffi-bindgen -- \
     generate --library "target/$BUILD_TYPE/lib${FFI_TARGET}.a" \
-    --language swift --out-dir "$DIST_DIR/swift"
+    --language swift --out-dir "$OUT_DIR/swift"
 
 # rename modulemap
-mv "$DIST_DIR/swift/${FFI_TARGET}FFI.modulemap" "$DIST_DIR/swift/module.modulemap"
+mv "$OUT_DIR/swift/${FFI_TARGET}FFI.modulemap" "$OUT_DIR/swift/module.modulemap"
+cp "$OUT_DIR/swift/${FFI_TARGET}.swift" "$DIST_DIR/"
 
 ############################
 # 6. Create XCFramework
 ############################
 echo "▸ Creating $FRAMEWORK_NAME.xcframework"
 xcodebuild -create-xcframework \
-    -library "$OUT_DIR/lib${FFI_TARGET}_ios-arm64.a"               -headers "$DIST_DIR/swift" \
-    -library "$OUT_DIR/lib${FFI_TARGET}_ios-sim-universal.a"       -headers "$DIST_DIR/swift" \
-    -library "$OUT_DIR/lib${FFI_TARGET}_macos-universal.a"         -headers "$DIST_DIR/swift" \
-    -library "$OUT_DIR/lib${FFI_TARGET}_maccatalyst-x64.a"         -headers "$DIST_DIR/swift" \
-    -library "$OUT_DIR/lib${FFI_TARGET}_watchos-device-universal.a" -headers "$DIST_DIR/swift" \
-    -library "$OUT_DIR/lib${FFI_TARGET}_watchos-sim-universal.a"   -headers "$DIST_DIR/swift" \
+    -library "$OUT_DIR/lib${FFI_TARGET}_ios-arm64.a"                -headers "$OUT_DIR/swift" \
+    -library "$OUT_DIR/lib${FFI_TARGET}_ios-sim-universal.a"        -headers "$OUT_DIR/swift" \
+    -library "$OUT_DIR/lib${FFI_TARGET}_macos-universal.a"          -headers "$OUT_DIR/swift" \
+    -library "$OUT_DIR/lib${FFI_TARGET}_maccatalyst-x64.a"          -headers "$OUT_DIR/swift" \
+    -library "$OUT_DIR/lib${FFI_TARGET}_watchos-device-universal.a" -headers "$OUT_DIR/swift" \
+    -library "$OUT_DIR/lib${FFI_TARGET}_watchos-sim-universal.a"    -headers "$OUT_DIR/swift" \
     -output "$DIST_DIR/$FRAMEWORK_NAME.xcframework"
 
 echo "✅ Done: $DIST_DIR/$FRAMEWORK_NAME.xcframework"
