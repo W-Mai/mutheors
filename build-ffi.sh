@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# build-mutheors-auto.sh
+# build-ffi.sh
 set -euo pipefail
 
 ############################
@@ -161,6 +161,9 @@ cargo build $RELFLAG --features bindgen
 cargo run --features bindgen --bin uniffi-bindgen -- \
     generate --library "target/$BUILD_TYPE/lib${FFI_TARGET}.a" \
     --language swift --out-dir "$DIST_DIR/swift"
+
+# rename modulemap
+mv "$DIST_DIR/swift/${FFI_TARGET}FFI.modulemap" "$DIST_DIR/swift/module.modulemap"
 
 ############################
 # 6. Create XCFramework
