@@ -131,6 +131,7 @@ done
 ############################
 # 4. Merge fat libraries
 ############################
+
 echo "▸ Merging fat libraries"
 # macOS universal
 lipo -create \
@@ -153,9 +154,11 @@ lipo -create \
     "$OUT_DIR/lib${FFI_TARGET}_ios-arm64-sim.a" \
     "$OUT_DIR/lib${FFI_TARGET}_ios-x64.a" \
     -output "$OUT_DIR/lib${FFI_TARGET}_ios-sim-universal.a"
+
 ############################
 # 5. Generate Swift bindings
 ############################
+
 echo "▸ Generating Swift bindings"
 cargo build $RELFLAG --features bindgen
 cargo run --features bindgen --bin uniffi-bindgen -- \
@@ -169,6 +172,7 @@ cp "$OUT_DIR/swift/${FFI_TARGET}.swift" "$DIST_DIR/"
 ############################
 # 6. Create XCFramework
 ############################
+
 echo "▸ Creating $FRAMEWORK_NAME.xcframework"
 xcodebuild -create-xcframework \
     -library "$OUT_DIR/lib${FFI_TARGET}_ios-arm64.a"                -headers "$OUT_DIR/swift" \
