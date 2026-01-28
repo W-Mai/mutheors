@@ -25,13 +25,38 @@ pub use midi::*;
 
 mod composition;
 mod core;
+mod fret;
 mod tests;
 
 pub use composition::*;
 pub use core::*;
+pub use fret::{
+    BarreCapable,
+    ContinuousPosition,
+    Finger,
+    FingerPosition,
+    Fingering,
+    FingeringEvaluator,
+    FingeringGenerator,
+    // Core traits
+    Fretboard,
+    // Errors
+    FretboardError,
+    FretboardResult,
+    KeyLayout,
+    KeyboardConfig,
+    KeyboardPosition,
+    PlayingTechnique,
+    SkillLevel,
+    StringedInstrumentConfig,
+    // Types
+    StringedPosition,
+    VoiceLeadingOptimizer,
+};
 pub use tests::*;
 
 #[cfg(feature = "bindgen")]
 mod uniffi_binding;
+
 #[cfg(feature = "bindgen")]
 uniffi::setup_scaffolding!();

@@ -9,7 +9,7 @@ impl Track {
     pub fn new() -> Self {
         Track { measures: vec![] }
     }
-    
+
     pub fn push(&mut self, measure: Measure) {
         self.measures.push(measure);
     }
