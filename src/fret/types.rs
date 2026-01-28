@@ -572,11 +572,14 @@ mod tests {
 
         let barre_fingering = Fingering::new(positions, barre_technique, 0.7);
 
-        assert_eq!(barre_fingering.technique, PlayingTechnique::Barre {
-            start_string: 0,
-            end_string: 5,
-            fret: 3,
-        });
+        assert_eq!(
+            barre_fingering.technique,
+            PlayingTechnique::Barre {
+                start_string: 0,
+                end_string: 5,
+                fret: 3,
+            }
+        );
         assert_eq!(barre_fingering.finger_count(), 6);
         assert!(barre_fingering.uses_finger(Finger::Index));
         assert!(barre_fingering.uses_finger(Finger::Ring));
@@ -588,7 +591,11 @@ mod tests {
         // Test all special techniques (Requirements 6.4)
         let techniques = vec![
             PlayingTechnique::Standard,
-            PlayingTechnique::Barre { start_string: 0, end_string: 2, fret: 5 },
+            PlayingTechnique::Barre {
+                start_string: 0,
+                end_string: 2,
+                fret: 5,
+            },
             PlayingTechnique::Hammer,
             PlayingTechnique::Pull,
             PlayingTechnique::Slide,
@@ -599,11 +606,12 @@ mod tests {
             // Verify each technique has a meaningful display representation
             let display_str = technique.to_string();
             assert!(!display_str.is_empty());
-            
+
             // Create a fingering with this technique
-            let positions = vec![
-                FingerPosition::pressed(StringedPosition::new(0, 2), Finger::Index),
-            ];
+            let positions = vec![FingerPosition::pressed(
+                StringedPosition::new(0, 2),
+                Finger::Index,
+            )];
             let fingering = Fingering::new(positions, technique.clone(), 0.5);
             assert_eq!(fingering.technique, technique);
         }
@@ -613,7 +621,7 @@ mod tests {
     fn test_finger_pressure_modeling() {
         // Test pressure modeling in finger positions (Requirements 4.5)
         let position = StringedPosition::new(1, 3);
-        
+
         // Test different pressure levels
         let light_pressure = FingerPosition::new(position.clone(), Some(Finger::Index), 0.3);
         let medium_pressure = FingerPosition::new(position.clone(), Some(Finger::Index), 0.6);

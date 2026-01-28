@@ -14,12 +14,16 @@ pub mod presets;
 pub mod stringed;
 pub mod traits;
 pub mod types;
+pub mod voice_leading;
 
 // Re-export specific items to avoid naming conflicts
 pub use errors::{FretboardError, FretboardResult};
-pub use fingering::{ChordFingeringConfig, ChordFingeringGenerator};
+pub use fingering::{
+    ChordFingeringConfig, ChordFingeringGenerator, DifficultyEvaluator, DifficultyWeights,
+};
 pub use keyboard::KeyboardFretboard;
 pub use presets::InstrumentPresets;
 pub use stringed::StringedFretboard;
 pub use traits::*;
 pub use types::*;
+pub use voice_leading::{SequenceAnalysis, VoiceLeadingOptimizer};

@@ -2622,7 +2622,205 @@ mod tests {
             }
         }
 
-        /// **Property 9: Barre Chord Recognition**
+        /// **Property 10: Skill Level Adaptation**
+        /// **Validates: Requirements 4.7, 5.6**
+        ///
+        /// For any chord and skill level combination, beginner-optimized fingerings should
+        /// prefer simpler positions (lower frets, open strings) compared to advanced fingerings.
+        #[test]
+        fn prop_skill_level_adaptation(
+            config in arb_stringed_fretboard_config(),
+            chord in arb_chord(),
+        ) {
+            // Create fretboard from generated config
+            let fretboard = match StringedFretboard::new(config.clone()) {
+                Ok(fb) => fb,
+                Err(_) => return Ok(()), // Skip invalid configurations
+            };
+
+            // Extract chord notes for validation
+            let chord_notes = chord.components();
+            prop_assume!(!chord_notes.is_empty());
+
+            // Check if any chord notes can be played on this fretboard
+            let mut playable_notes = 0;
+            for note in &chord_notes {
+                let positions = fretboard.positions_for_tuning(note);
+                if !positions.is_empty() {
+                    playable_notes += 1;
+                }
+            }
+            prop_assume!(playable_notes >= 2); // Need at least 2 playable notes
+
+            // Test different skill levels
+            let skill_levels = [SkillLevel::Beginner, SkillLevel::Intermediate, SkillLevel::Advanced, SkillLevel::Expert];
+            let mut skill_results = Vec::new();
+
+            for skill_level in skill_levels {
+                let generator_config = ChordFingeringConfig::new()
+                    .with_skill_level(skill_level)
+                    .with_fret_range(0, std::cmp::min(config.fret_count, 15))
+                    .with_max_fingerings(20);
+
+                let generator = ChordFingeringGenerator::with_config(generator_config);
+
+                match generator.generate_chord_fingerings(&fretboard, &chord) {
+                    Ok(fingerings) => {
+                        if !fingerings.is_empty() {
+                            skill_results.push((skill_level, fingerings));
+                        }
+                    }
+                    Err(_) => {
+                        // Some skill levels might not be able to play certain chords
+                        continue;
+                    }
+                }
+            }
+
+            // Skip if we don't have enough skill level results to compare
+            prop_assume!(skill_results.len() >= 2);
+
+            // Property 1: Beginner fingerings should have fewer options than advanced
+            let beginner_result = skill_results.iter().find(|(level, _)| *level == SkillLevel::Beginner);
+            let expert_result = skill_results.iter().find(|(level, _)| *level == SkillLevel::Expert);
+
+            if let (Some((_, beginner_fingerings)), Some((_, expert_fingerings))) = (beginner_result, expert_result) {
+                prop_assert!(
+                    beginner_fingerings.len() <= expert_fingerings.len(),
+                    "Beginners should have fewer or equal fingering options than experts: {} vs {}",
+                    beginner_fingerings.len(), expert_fingerings.len()
+                );
+
+                // Property 2: Beginner fingerings should not include barre chords
+                let beginner_barre_count = beginner_fingerings.iter()
+                    .filter(|f| matches!(f.technique, PlayingTechnique::Barre { .. }))
+                    .count();
+
+                prop_assert!(
+                    beginner_barre_count == 0,
+                    "Beginner fingerings should not include barre chords, found: {}",
+                    beginner_barre_count
+                );
+
+                // Property 3: Beginner fingerings should prefer lower frets when possible
+                // Note: Sometimes beginners may be forced to use higher frets due to their limitations
+                let beginner_avg_fret = {
+                    if beginner_fingerings.is_empty() {
+                        0.0
+                    } else {
+                        let mut total_fret = 0.0;
+                        let mut total_positions = 0;
+                        for fingering in beginner_fingerings {
+                            for finger_pos in &fingering.positions {
+                                if finger_pos.position.fret > 0 {
+                                    total_fret += finger_pos.position.fret as f32;
+                                    total_positions += 1;
+                                }
+                            }
+                        }
+                        if total_positions > 0 {
+                            total_fret / total_positions as f32
+                        } else {
+                            0.0
+                        }
+                    }
+                };
+                let expert_avg_fret = {
+                    if expert_fingerings.is_empty() {
+                        0.0
+                    } else {
+                        let mut total_fret = 0.0;
+                        let mut total_positions = 0;
+                        for fingering in expert_fingerings {
+                            for finger_pos in &fingering.positions {
+                                if finger_pos.position.fret > 0 {
+                                    total_fret += finger_pos.position.fret as f32;
+                                    total_positions += 1;
+                                }
+                            }
+                        }
+                        if total_positions > 0 {
+                            total_fret / total_positions as f32
+                        } else {
+                            0.0
+                        }
+                    }
+                };
+
+                // Allow more tolerance - beginners may sometimes need higher frets due to limitations
+                if beginner_avg_fret > 0.0 && expert_avg_fret > 0.0 {
+                    // Check if beginner fingerings are within reasonable range (0-5 frets as per their limit)
+                    prop_assert!(
+                        beginner_avg_fret <= 5.0, // Beginners should stay within their fret limit
+                        "Beginner fingerings should stay within fret limit (0-5): avg {:.1}",
+                        beginner_avg_fret
+                    );
+                    
+                    // If both have similar constraints, prefer the one with lower average
+                    // But allow cases where beginners might need higher frets due to their limitations
+                    if beginner_avg_fret > expert_avg_fret + 3.0 {
+                        // Only fail if the difference is very large (more than 3 frets)
+                        prop_assert!(
+                            false,
+                            "Beginner fingerings are significantly higher than expert: avg {:.1} vs expert {:.1}. \
+                             This suggests the skill level adaptation may need improvement.",
+                            beginner_avg_fret, expert_avg_fret
+                        );
+                    }
+                }
+
+                // Property 4: Beginner fingerings should generally be easier
+                let beginner_avg_difficulty = beginner_fingerings.iter()
+                    .map(|f| f.difficulty)
+                    .sum::<f32>() / beginner_fingerings.len() as f32;
+
+                let expert_avg_difficulty = expert_fingerings.iter()
+                    .map(|f| f.difficulty)
+                    .sum::<f32>() / expert_fingerings.len() as f32;
+
+                // Beginners should have easier fingerings on average (with some tolerance)
+                prop_assert!(
+                    beginner_avg_difficulty <= expert_avg_difficulty + 0.2, // Allow some tolerance
+                    "Beginner fingerings should be easier on average: {:.3} vs expert {:.3}",
+                    beginner_avg_difficulty, expert_avg_difficulty
+                );
+            }
+
+            // Property 5: Skill level progression should show increasing complexity
+            for i in 1..skill_results.len() {
+                let (prev_level, prev_fingerings) = &skill_results[i - 1];
+                let (curr_level, curr_fingerings) = &skill_results[i];
+
+                // Higher skill levels should generally have more or equal fingering options
+                prop_assert!(
+                    curr_fingerings.len() >= prev_fingerings.len() || 
+                    curr_fingerings.len() >= prev_fingerings.len() - 2, // Allow small decreases
+                    "Higher skill level {:?} should have more fingerings than {:?}: {} vs {}",
+                    curr_level, prev_level, curr_fingerings.len(), prev_fingerings.len()
+                );
+            }
+
+            // Property 6: Barre chord usage should increase with skill level
+            for (skill_level, fingerings) in &skill_results {
+                let barre_count = fingerings.iter()
+                    .filter(|f| matches!(f.technique, PlayingTechnique::Barre { .. }))
+                    .count();
+
+                match skill_level {
+                    SkillLevel::Beginner => {
+                        prop_assert!(
+                            barre_count == 0,
+                            "Beginners should not have barre chords, found: {}",
+                            barre_count
+                        );
+                    }
+                    SkillLevel::Intermediate | SkillLevel::Advanced | SkillLevel::Expert => {
+                        // These levels can have barre chords, but it's not required
+                        // (depends on the chord and instrument configuration)
+                    }
+                }
+            }
+        }
         /// **Validates: Requirements 4.5**
         ///
         /// For any chord that can be played with a barre technique, the system should

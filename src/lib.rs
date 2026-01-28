@@ -35,6 +35,8 @@ pub use fret::{
     ChordFingeringConfig,
     ChordFingeringGenerator,
     ContinuousPosition,
+    DifficultyEvaluator,
+    DifficultyWeights,
     Finger,
     FingerPosition,
     Fingering,

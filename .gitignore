@@ -23,3 +23,6 @@ dist
 
 # Kiro configuration and specs
 .kiro/
+
+# Proptest regression files
+proptest-regressions/
