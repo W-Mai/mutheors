@@ -691,12 +691,15 @@ impl ChordFingeringGenerator {
     }
 
     /// Apply skill level specific filtering to positions
-    fn apply_skill_level_filtering(&self, mut positions: Vec<StringedPosition>) -> Vec<StringedPosition> {
+    fn apply_skill_level_filtering(
+        &self,
+        mut positions: Vec<StringedPosition>,
+    ) -> Vec<StringedPosition> {
         match self.config.skill_level {
             SkillLevel::Beginner => {
                 // Beginners: prefer open strings and lower frets (0-5)
                 positions.retain(|pos| pos.fret <= 5);
-                
+
                 // Sort to prioritize open strings and lower frets
                 positions.sort_by(|a, b| {
                     // Open strings first
@@ -706,14 +709,14 @@ impl ChordFingeringGenerator {
                         _ => a.fret.cmp(&b.fret), // Then by fret number
                     }
                 });
-                
+
                 // Limit to first few positions to avoid overwhelming beginners
                 positions.truncate(3);
             }
             SkillLevel::Intermediate => {
                 // Intermediate: allow up to 7th fret, prefer lower positions
                 positions.retain(|pos| pos.fret <= 7);
-                
+
                 // Sort to prefer lower frets but don't limit as strictly
                 positions.sort_by(|a, b| {
                     // Open strings first, then by fret
@@ -723,14 +726,14 @@ impl ChordFingeringGenerator {
                         _ => a.fret.cmp(&b.fret),
                     }
                 });
-                
+
                 // Allow more positions than beginners
                 positions.truncate(5);
             }
             SkillLevel::Advanced => {
                 // Advanced: allow up to 12th fret, no strong preferences
                 positions.retain(|pos| pos.fret <= 12);
-                
+
                 // Sort by fret but allow more variety
                 positions.sort_by_key(|pos| pos.fret);
                 positions.truncate(8);
@@ -859,17 +862,20 @@ impl ChordFingeringGenerator {
 
     /// Calculate average fret position for a fingering (excluding open strings)
     fn calculate_average_fret(&self, fingering: &Fingering<StringedPosition>) -> f32 {
-        let fretted_positions: Vec<_> = fingering.positions
+        let fretted_positions: Vec<_> = fingering
+            .positions
             .iter()
             .filter(|fp| fp.position.fret > 0)
             .collect();
-            
+
         if fretted_positions.is_empty() {
             0.0 // All open strings
         } else {
-            fretted_positions.iter()
+            fretted_positions
+                .iter()
                 .map(|fp| fp.position.fret as f32)
-                .sum::<f32>() / fretted_positions.len() as f32
+                .sum::<f32>()
+                / fretted_positions.len() as f32
         }
     }
 
@@ -878,11 +884,12 @@ impl ChordFingeringGenerator {
         let finger_positions = self.assign_fingers(&positions);
 
         // Determine if this could be a barre chord (considering skill level)
-        let technique = if self.should_generate_barre_fingerings() && self.could_be_barre(&positions) {
-            self.detect_barre_technique(&positions)
-        } else {
-            PlayingTechnique::Standard
-        };
+        let technique =
+            if self.should_generate_barre_fingerings() && self.could_be_barre(&positions) {
+                self.detect_barre_technique(&positions)
+            } else {
+                PlayingTechnique::Standard
+            };
 
         // Create the fingering with initial technique
         let mut fingering = Fingering::new(finger_positions, technique, 0.0);
@@ -895,26 +902,29 @@ impl ChordFingeringGenerator {
     }
 
     /// Apply skill level specific optimization to fingerings
-    fn apply_skill_level_optimization(&self, mut fingerings: Vec<Fingering<StringedPosition>>) -> Vec<Fingering<StringedPosition>> {
+    fn apply_skill_level_optimization(
+        &self,
+        mut fingerings: Vec<Fingering<StringedPosition>>,
+    ) -> Vec<Fingering<StringedPosition>> {
         match self.config.skill_level {
             SkillLevel::Beginner => {
                 // Keep only the easiest fingerings
                 fingerings.retain(|f| f.difficulty <= 0.3);
-                
+
                 // Limit to top 3 easiest fingerings for beginners
                 fingerings.truncate(3);
             }
             SkillLevel::Intermediate => {
                 // Keep moderate difficulty fingerings
                 fingerings.retain(|f| f.difficulty <= 0.6);
-                
+
                 // Allow more fingerings for intermediate players
                 fingerings.truncate(8);
             }
             SkillLevel::Advanced => {
                 // Keep most fingerings, filter out only the most difficult
                 fingerings.retain(|f| f.difficulty <= 0.8);
-                
+
                 // Allow many fingerings for advanced players
                 fingerings.truncate(12);
             }
@@ -2023,65 +2033,101 @@ mod tests {
 
         // Generate fingerings for each skill level
         let beginner_result = beginner_generator.generate_chord_fingerings(&fretboard, &g_major);
-        let intermediate_result = intermediate_generator.generate_chord_fingerings(&fretboard, &g_major);
+        let intermediate_result =
+            intermediate_generator.generate_chord_fingerings(&fretboard, &g_major);
         let advanced_result = advanced_generator.generate_chord_fingerings(&fretboard, &g_major);
         let expert_result = expert_generator.generate_chord_fingerings(&fretboard, &g_major);
 
         // At least one should succeed
-        let results = [&beginner_result, &intermediate_result, &advanced_result, &expert_result];
+        let results = [
+            &beginner_result,
+            &intermediate_result,
+            &advanced_result,
+            &expert_result,
+        ];
         let successful_results: Vec<_> = results.iter().filter(|r| r.is_ok()).collect();
-        assert!(!successful_results.is_empty(), "At least one skill level should generate fingerings");
+        assert!(
+            !successful_results.is_empty(),
+            "At least one skill level should generate fingerings"
+        );
 
         // Test skill level specific characteristics
         if let Ok(beginner_fingerings) = &beginner_result {
             // Beginners should have fewer, easier fingerings
             println!("Beginner fingerings count: {}", beginner_fingerings.len());
-            
+
             for (i, fingering) in beginner_fingerings.iter().enumerate() {
-                println!("Beginner fingering {}: difficulty = {:.3}, technique = {:?}", 
-                    i, fingering.difficulty, fingering.technique);
-                
+                println!(
+                    "Beginner fingering {}: difficulty = {:.3}, technique = {:?}",
+                    i, fingering.difficulty, fingering.technique
+                );
+
                 // Check that no barre chords are generated for beginners
                 assert!(
                     !matches!(fingering.technique, PlayingTechnique::Barre { .. }),
                     "Beginners should not get barre chord fingerings"
                 );
-                
+
                 // Check fret range preference
-                let max_fret = fingering.positions.iter()
+                let max_fret = fingering
+                    .positions
+                    .iter()
                     .map(|fp| fp.position.fret)
                     .max()
                     .unwrap_or(0);
                 println!("  Max fret: {}", max_fret);
-                assert!(max_fret <= 8, "Beginner fingerings should prefer lower frets (got max fret {})", max_fret);
+                assert!(
+                    max_fret <= 8,
+                    "Beginner fingerings should prefer lower frets (got max fret {})",
+                    max_fret
+                );
             }
-            
+
             // Check that the optimization is working - most fingerings should be easy
-            let easy_fingerings = beginner_fingerings.iter().filter(|f| f.difficulty <= 0.3).count();
-            println!("Easy fingerings (≤0.3): {}/{}", easy_fingerings, beginner_fingerings.len());
-            
+            let easy_fingerings = beginner_fingerings
+                .iter()
+                .filter(|f| f.difficulty <= 0.3)
+                .count();
+            println!(
+                "Easy fingerings (≤0.3): {}/{}",
+                easy_fingerings,
+                beginner_fingerings.len()
+            );
+
             // At least half should be easy for beginners
-            assert!(easy_fingerings >= beginner_fingerings.len() / 2, 
-                "At least half of beginner fingerings should be easy");
+            assert!(
+                easy_fingerings >= beginner_fingerings.len() / 2,
+                "At least half of beginner fingerings should be easy"
+            );
         }
 
         if let Ok(expert_fingerings) = &expert_result {
             // Experts should have more variety and potentially more complex fingerings
             for fingering in expert_fingerings {
-                assert!(fingering.difficulty >= 0.0 && fingering.difficulty <= 1.0, 
-                    "Expert fingerings should have valid difficulty range");
+                assert!(
+                    fingering.difficulty >= 0.0 && fingering.difficulty <= 1.0,
+                    "Expert fingerings should have valid difficulty range"
+                );
             }
         }
 
         // Test barre chord generation based on skill level
-        assert!(!beginner_generator.should_generate_barre_fingerings(), 
-            "Beginners should not generate barre fingerings");
-        assert!(intermediate_generator.should_generate_barre_fingerings(), 
-            "Intermediate players should generate barre fingerings");
-        assert!(advanced_generator.should_generate_barre_fingerings(), 
-            "Advanced players should generate barre fingerings");
-        assert!(expert_generator.should_generate_barre_fingerings(), 
-            "Expert players should generate barre fingerings");
+        assert!(
+            !beginner_generator.should_generate_barre_fingerings(),
+            "Beginners should not generate barre fingerings"
+        );
+        assert!(
+            intermediate_generator.should_generate_barre_fingerings(),
+            "Intermediate players should generate barre fingerings"
+        );
+        assert!(
+            advanced_generator.should_generate_barre_fingerings(),
+            "Advanced players should generate barre fingerings"
+        );
+        assert!(
+            expert_generator.should_generate_barre_fingerings(),
+            "Expert players should generate barre fingerings"
+        );
     }
 
     #[test]
@@ -2755,7 +2801,7 @@ mod tests {
                         "Beginner fingerings should stay within fret limit (0-5): avg {:.1}",
                         beginner_avg_fret
                     );
-                    
+
                     // If both have similar constraints, prefer the one with lower average
                     // But allow cases where beginners might need higher frets due to their limitations
                     if beginner_avg_fret > expert_avg_fret + 3.0 {
@@ -2793,7 +2839,7 @@ mod tests {
 
                 // Higher skill levels should generally have more or equal fingering options
                 prop_assert!(
-                    curr_fingerings.len() >= prev_fingerings.len() || 
+                    curr_fingerings.len() >= prev_fingerings.len() ||
                     curr_fingerings.len() >= prev_fingerings.len() - 2, // Allow small decreases
                     "Higher skill level {:?} should have more fingerings than {:?}: {} vs {}",
                     curr_level, prev_level, curr_fingerings.len(), prev_fingerings.len()
@@ -2961,7 +3007,7 @@ mod tests {
                 // We expect at least some success with common barre chords on reasonable instruments
                 // This is a weaker requirement that allows for instrument limitations
                 let success_rate = successful_barre_generations as f32 / total_attempts as f32;
-                
+
                 // Allow for flexibility - even 25% success rate indicates barre capability
                 if success_rate > 0.0 {
                     prop_assert!(
@@ -2978,10 +3024,10 @@ mod tests {
                 // Test can_barre method with valid positions
                 let test_start = StringedPosition::new(0, 3);
                 let test_end = StringedPosition::new(config.strings.len() - 1, 3);
-                
+
                 if fretboard.is_position_valid(&test_start) && fretboard.is_position_valid(&test_end) {
                     let can_barre = generator.can_barre(&fretboard, &test_start, &test_end);
-                    
+
                     // The result should be consistent with the position validity
                     prop_assert!(
                         can_barre == true || can_barre == false, // Just ensure it returns a boolean
@@ -3002,62 +3048,62 @@ mod tests {
         }
     }
 
-impl BarreCapable<StringedFretboard> for ChordFingeringGenerator {
-    fn can_barre(
-        &self,
-        fretboard: &StringedFretboard,
-        start_position: &StringedPosition,
-        end_position: &StringedPosition,
-    ) -> bool {
-        // Check if positions are on the same fret
-        if start_position.fret != end_position.fret {
-            return false;
+    impl BarreCapable<StringedFretboard> for ChordFingeringGenerator {
+        fn can_barre(
+            &self,
+            fretboard: &StringedFretboard,
+            start_position: &StringedPosition,
+            end_position: &StringedPosition,
+        ) -> bool {
+            // Check if positions are on the same fret
+            if start_position.fret != end_position.fret {
+                return false;
+            }
+
+            // Check if positions are valid
+            if !fretboard.is_position_valid(start_position)
+                || !fretboard.is_position_valid(end_position)
+            {
+                return false;
+            }
+
+            // Check if fret is suitable for barre (not open string)
+            if start_position.fret == 0 {
+                return false;
+            }
+
+            // Check string order
+            let min_string = start_position.string.min(end_position.string);
+            let max_string = start_position.string.max(end_position.string);
+
+            // Must span at least 2 strings
+            if max_string == min_string {
+                return false;
+            }
+
+            // Check if barre span is reasonable for skill level
+            let span = max_string - min_string + 1;
+            let max_span = match self.config.skill_level {
+                SkillLevel::Beginner => 4,
+                SkillLevel::Intermediate => 5,
+                SkillLevel::Advanced => 6,
+                SkillLevel::Expert => 6,
+            };
+
+            // For a full guitar (6 strings), allow full span
+            let guitar_string_count = fretboard.string_count();
+            let effective_max_span = max_span.max(guitar_string_count);
+
+            span <= effective_max_span
         }
 
-        // Check if positions are valid
-        if !fretboard.is_position_valid(start_position)
-            || !fretboard.is_position_valid(end_position)
-        {
-            return false;
+        fn generate_barre_fingerings(
+            &self,
+            fretboard: &StringedFretboard,
+            chord: &Chord,
+        ) -> FretboardResult<Vec<Fingering<StringedPosition>>> {
+            // This method is already implemented above in the ChordFingeringGenerator impl
+            self.generate_barre_fingerings(fretboard, chord)
         }
-
-        // Check if fret is suitable for barre (not open string)
-        if start_position.fret == 0 {
-            return false;
-        }
-
-        // Check string order
-        let min_string = start_position.string.min(end_position.string);
-        let max_string = start_position.string.max(end_position.string);
-
-        // Must span at least 2 strings
-        if max_string == min_string {
-            return false;
-        }
-
-        // Check if barre span is reasonable for skill level
-        let span = max_string - min_string + 1;
-        let max_span = match self.config.skill_level {
-            SkillLevel::Beginner => 4,
-            SkillLevel::Intermediate => 5,
-            SkillLevel::Advanced => 6,
-            SkillLevel::Expert => 6,
-        };
-
-        // For a full guitar (6 strings), allow full span
-        let guitar_string_count = fretboard.string_count();
-        let effective_max_span = max_span.max(guitar_string_count);
-
-        span <= effective_max_span
     }
-
-    fn generate_barre_fingerings(
-        &self,
-        fretboard: &StringedFretboard,
-        chord: &Chord,
-    ) -> FretboardResult<Vec<Fingering<StringedPosition>>> {
-        // This method is already implemented above in the ChordFingeringGenerator impl
-        self.generate_barre_fingerings(fretboard, chord)
-    }
-}
 }

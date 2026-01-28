@@ -35,6 +35,7 @@ pub use fret::{
     ChordFingeringConfig,
     ChordFingeringGenerator,
     ContinuousPosition,
+    DiagramConfig,
     DifficultyEvaluator,
     DifficultyWeights,
     Finger,
@@ -44,6 +45,7 @@ pub use fret::{
     FingeringGenerator,
     // Core traits
     Fretboard,
+    FretboardDiagramGenerator,
     // Errors
     FretboardError,
     FretboardResult,
