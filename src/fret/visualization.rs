@@ -35,6 +35,16 @@ pub struct DiagramConfig {
     pub open_char: char,
     /// Character to use for muted strings
     pub mute_char: char,
+    /// Character to use for barre indications
+    pub barre_char: char,
+    /// Character to use for hammer-on indications
+    pub hammer_char: char,
+    /// Character to use for pull-off indications
+    pub pull_char: char,
+    /// Character to use for slide indications
+    pub slide_char: char,
+    /// Character to use for harmonic indications
+    pub harmonic_char: char,
 }
 
 impl Default for DiagramConfig {
@@ -50,6 +60,11 @@ impl Default for DiagramConfig {
             finger_char: '●',
             open_char: 'O',
             mute_char: 'X',
+            barre_char: '═',
+            hammer_char: 'H',
+            pull_char: 'P',
+            slide_char: 'S',
+            harmonic_char: '◊',
         }
     }
 }
@@ -99,6 +114,23 @@ impl DiagramConfig {
         self.finger_char = finger_char;
         self.open_char = open_char;
         self.mute_char = mute_char;
+        self
+    }
+
+    /// Set custom characters for special techniques
+    pub fn with_technique_chars(
+        mut self,
+        barre_char: char,
+        hammer_char: char,
+        pull_char: char,
+        slide_char: char,
+        harmonic_char: char,
+    ) -> Self {
+        self.barre_char = barre_char;
+        self.hammer_char = hammer_char;
+        self.pull_char = pull_char;
+        self.slide_char = slide_char;
+        self.harmonic_char = harmonic_char;
         self
     }
 }
@@ -162,6 +194,26 @@ impl FretboardDiagramGenerator {
         for fret in min_fret..=max_fret {
             diagram.push_str(&self.generate_fret_line(fretboard, fingering, fret, string_count)?);
         }
+
+        // Add barre indication if applicable
+        if let PlayingTechnique::Barre {
+            start_string,
+            end_string,
+            fret,
+        } = &fingering.technique
+        {
+            diagram.push_str(&self.generate_barre_indication(
+                *start_string,
+                *end_string,
+                *fret,
+                min_fret,
+                max_fret,
+                string_count,
+            ));
+        }
+
+        // Add technique annotations
+        diagram.push_str(&self.generate_technique_annotations(fingering));
 
         // Add fret numbers if enabled
         if self.config.show_fret_numbers {
@@ -323,12 +375,24 @@ impl FretboardDiagramGenerator {
             if finger_pos.position == *position {
                 if position.fret == 0 {
                     return self.config.open_char;
-                } else if self.config.show_finger_numbers {
-                    if let Some(finger) = &finger_pos.finger {
-                        return self.finger_to_char(finger);
+                } else {
+                    // Check for special techniques
+                    match &fingering.technique {
+                        PlayingTechnique::Harmonic => return self.config.harmonic_char,
+                        PlayingTechnique::Hammer => return self.config.hammer_char,
+                        PlayingTechnique::Pull => return self.config.pull_char,
+                        PlayingTechnique::Slide => return self.config.slide_char,
+                        _ => {
+                            // Standard fingering or barre - show finger number or standard symbol
+                            if self.config.show_finger_numbers {
+                                if let Some(finger) = &finger_pos.finger {
+                                    return self.finger_to_char(finger);
+                                }
+                            }
+                            return self.config.finger_char;
+                        }
                     }
                 }
-                return self.config.finger_char;
             }
         }
 
@@ -356,7 +420,75 @@ impl FretboardDiagramGenerator {
         }
     }
 
-    /// Generate fret numbers footer
+    /// Generate barre indication line
+    fn generate_barre_indication(
+        &self,
+        start_string: usize,
+        end_string: usize,
+        barre_fret: usize,
+        min_fret: usize,
+        max_fret: usize,
+        string_count: usize,
+    ) -> String {
+        // Only show barre indication if the barre fret is in the displayed range
+        if barre_fret < min_fret || barre_fret > max_fret {
+            return String::new();
+        }
+
+        let mut line = String::new();
+
+        // Add spacing for fret number column if enabled
+        if self.config.show_fret_numbers {
+            line.push_str("   ");
+        }
+
+        // Generate barre line
+        for string_num in 0..string_count {
+            if string_num >= start_string && string_num <= end_string {
+                line.push_str(&format!(
+                    "{}{}{}",
+                    self.config.barre_char, self.config.barre_char, self.config.barre_char
+                ));
+            } else {
+                line.push_str("   ");
+            }
+        }
+        line.push_str(" (Barre)\n");
+
+        line
+    }
+
+    /// Generate technique annotations
+    fn generate_technique_annotations(&self, fingering: &Fingering<StringedPosition>) -> String {
+        let mut annotations = String::new();
+
+        match &fingering.technique {
+            PlayingTechnique::Hammer => {
+                annotations.push_str(&format!(
+                    "Technique: {} (Hammer-on)\n",
+                    self.config.hammer_char
+                ));
+            }
+            PlayingTechnique::Pull => {
+                annotations.push_str(&format!(
+                    "Technique: {} (Pull-off)\n",
+                    self.config.pull_char
+                ));
+            }
+            PlayingTechnique::Slide => {
+                annotations.push_str(&format!("Technique: {} (Slide)\n", self.config.slide_char));
+            }
+            PlayingTechnique::Harmonic => {
+                annotations.push_str(&format!(
+                    "Technique: {} (Harmonic)\n",
+                    self.config.harmonic_char
+                ));
+            }
+            _ => {} // Standard and Barre are handled elsewhere
+        }
+
+        annotations
+    }
     fn generate_fret_numbers(&self, min_fret: usize, max_fret: usize) -> String {
         let mut line = String::new();
 
@@ -586,20 +718,114 @@ mod tests {
     }
 
     #[test]
-    fn test_custom_config() {
-        let config = DiagramConfig::new()
-            .with_fret_numbers(false)
-            .with_string_labels(false)
-            .with_finger_numbers(false)
-            .with_chars('=', ':', '@', 'o', 'x');
+    fn test_special_technique_visualization() {
+        let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+        let generator = FretboardDiagramGenerator::new();
 
-        assert!(!config.show_fret_numbers);
-        assert!(!config.show_string_labels);
-        assert!(!config.show_finger_numbers);
-        assert_eq!(config.fret_char, '=');
-        assert_eq!(config.string_char, ':');
-        assert_eq!(config.finger_char, '@');
-        assert_eq!(config.open_char, 'o');
-        assert_eq!(config.mute_char, 'x');
+        // Test harmonic technique
+        let harmonic_fingering = Fingering::new(
+            vec![FingerPosition::pressed(
+                StringedPosition::new(0, 12),
+                Finger::Index,
+            )],
+            PlayingTechnique::Harmonic,
+            0.2,
+        );
+
+        let diagram = generator.generate_diagram(&fretboard, &harmonic_fingering);
+        assert!(diagram.is_ok());
+        let diagram_text = diagram.unwrap();
+        assert!(diagram_text.contains("Harmonic"));
+        assert!(diagram_text.contains("◊")); // Harmonic symbol
+
+        // Test hammer-on technique
+        let hammer_fingering = Fingering::new(
+            vec![
+                FingerPosition::pressed(StringedPosition::new(0, 2), Finger::Index),
+                FingerPosition::pressed(StringedPosition::new(0, 4), Finger::Ring),
+            ],
+            PlayingTechnique::Hammer,
+            0.4,
+        );
+
+        let diagram = generator.generate_diagram(&fretboard, &hammer_fingering);
+        assert!(diagram.is_ok());
+        let diagram_text = diagram.unwrap();
+        assert!(diagram_text.contains("Hammer-on"));
+        assert!(diagram_text.contains("H")); // Hammer symbol
+
+        // Test slide technique
+        let slide_fingering = Fingering::new(
+            vec![
+                FingerPosition::pressed(StringedPosition::new(0, 3), Finger::Index),
+                FingerPosition::pressed(StringedPosition::new(0, 5), Finger::Index),
+            ],
+            PlayingTechnique::Slide,
+            0.3,
+        );
+
+        let diagram = generator.generate_diagram(&fretboard, &slide_fingering);
+        assert!(diagram.is_ok());
+        let diagram_text = diagram.unwrap();
+        assert!(diagram_text.contains("Slide"));
+        assert!(diagram_text.contains("S")); // Slide symbol
+    }
+
+    #[test]
+    fn test_barre_chord_visualization() {
+        let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+        let generator = FretboardDiagramGenerator::new();
+
+        // Create F major barre chord (1st fret barre)
+        let barre_fingering = Fingering::new(
+            vec![
+                FingerPosition::pressed(StringedPosition::new(0, 1), Finger::Index), // High E fret 1
+                FingerPosition::pressed(StringedPosition::new(1, 1), Finger::Index), // B fret 1
+                FingerPosition::pressed(StringedPosition::new(2, 2), Finger::Middle), // G fret 2
+                FingerPosition::pressed(StringedPosition::new(3, 3), Finger::Ring),  // D fret 3
+                FingerPosition::pressed(StringedPosition::new(4, 3), Finger::Pinky), // A fret 3
+                FingerPosition::pressed(StringedPosition::new(5, 1), Finger::Index), // Low E fret 1
+            ],
+            PlayingTechnique::Barre {
+                start_string: 0,
+                end_string: 5,
+                fret: 1,
+            },
+            0.8,
+        );
+
+        let diagram = generator.generate_diagram(&fretboard, &barre_fingering);
+        assert!(diagram.is_ok());
+
+        let diagram_text = diagram.unwrap();
+        assert!(diagram_text.contains("Barre"));
+        assert!(diagram_text.contains("═")); // Barre symbol
+        assert!(diagram_text.contains("1")); // Finger numbers
+        assert!(diagram_text.contains("2"));
+        assert!(diagram_text.contains("3"));
+        assert!(diagram_text.contains("4"));
+    }
+
+    #[test]
+    fn test_custom_technique_chars() {
+        let custom_config = DiagramConfig::new().with_technique_chars('B', 'h', 'p', 's', 'o');
+
+        let generator = FretboardDiagramGenerator::with_config(custom_config);
+        let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+
+        // Test custom harmonic character
+        let harmonic_fingering = Fingering::new(
+            vec![FingerPosition::pressed(
+                StringedPosition::new(0, 12),
+                Finger::Index,
+            )],
+            PlayingTechnique::Harmonic,
+            0.2,
+        );
+
+        let diagram = generator.generate_diagram(&fretboard, &harmonic_fingering);
+        assert!(diagram.is_ok());
+        let diagram_text = diagram.unwrap();
+        assert!(diagram_text.contains("o")); // Custom harmonic symbol
     }
 }
