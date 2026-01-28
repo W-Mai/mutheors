@@ -34,6 +34,7 @@ pub use fret::{
     BarreCapable,
     ChordFingeringConfig,
     ChordFingeringGenerator,
+    ContinuousFretboard,
     ContinuousPosition,
     DiagramConfig,
     DifficultyEvaluator,

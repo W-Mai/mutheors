@@ -468,6 +468,216 @@ impl InstrumentPresets {
         )
     }
 
+    // Violin Family Presets (Continuous Fretboard Instruments)
+
+    /// Standard violin in standard tuning (G-D-A-E)
+    ///
+    /// # Configuration
+    /// - Tuning: G3-D4-A4-E5 (standard violin tuning)
+    /// - Frets: 0 (continuous fretboard - no frets)
+    /// - Scale Length: 330mm (13" - standard violin scale)
+    /// - Nut Width: 24mm (standard violin nut)
+    /// - String Spacing: 7mm (standard violin string spacing)
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, ContinuousFretboard};
+    ///
+    /// let config = InstrumentPresets::violin_standard();
+    /// let fretboard = ContinuousFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 4);
+    /// ```
+    pub fn violin_standard() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::G, 3), // G string (4th string - lowest)
+            Tuning::new(PitchClass::D, 4), // D string (3rd string)
+            Tuning::new(PitchClass::A, 4), // A string (2nd string)
+            Tuning::new(PitchClass::E, 5), // E string (1st string - highest)
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings,
+            0,     // No frets for continuous instruments
+            330.0, // scale length (mm) - 13" violin scale
+            24.0,  // nut width (mm)
+            7.0,   // string spacing (mm)
+        )
+    }
+
+    /// Standard viola in standard tuning (C-G-D-A)
+    ///
+    /// # Configuration
+    /// - Tuning: C3-G3-D4-A4 (standard viola tuning, perfect fifth below violin)
+    /// - Frets: 0 (continuous fretboard - no frets)
+    /// - Scale Length: 370mm (14.5" - standard viola scale)
+    /// - Nut Width: 26mm (slightly wider than violin)
+    /// - String Spacing: 8mm (slightly wider spacing than violin)
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, ContinuousFretboard};
+    ///
+    /// let config = InstrumentPresets::viola_standard();
+    /// let fretboard = ContinuousFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 4);
+    /// ```
+    pub fn viola_standard() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::C, 3), // C string (4th string - lowest)
+            Tuning::new(PitchClass::G, 3), // G string (3rd string)
+            Tuning::new(PitchClass::D, 4), // D string (2nd string)
+            Tuning::new(PitchClass::A, 4), // A string (1st string - highest)
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings,
+            0,     // No frets for continuous instruments
+            370.0, // scale length (mm) - 14.5" viola scale
+            26.0,  // nut width (mm)
+            8.0,   // string spacing (mm)
+        )
+    }
+
+    /// Standard cello in standard tuning (C-G-D-A)
+    ///
+    /// # Configuration
+    /// - Tuning: C2-G2-D3-A3 (standard cello tuning, one octave below viola)
+    /// - Frets: 0 (continuous fretboard - no frets)
+    /// - Scale Length: 690mm (27.2" - standard cello scale)
+    /// - Nut Width: 45mm (much wider for larger instrument)
+    /// - String Spacing: 12mm (wider spacing for thicker strings)
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, ContinuousFretboard};
+    ///
+    /// let config = InstrumentPresets::cello_standard();
+    /// let fretboard = ContinuousFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 4);
+    /// ```
+    pub fn cello_standard() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::C, 2), // C string (4th string - lowest)
+            Tuning::new(PitchClass::G, 2), // G string (3rd string)
+            Tuning::new(PitchClass::D, 3), // D string (2nd string)
+            Tuning::new(PitchClass::A, 3), // A string (1st string - highest)
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings,
+            0,     // No frets for continuous instruments
+            690.0, // scale length (mm) - 27.2" cello scale
+            45.0,  // nut width (mm)
+            12.0,  // string spacing (mm)
+        )
+    }
+
+    /// Standard double bass in standard tuning (E-A-D-G)
+    ///
+    /// # Configuration
+    /// - Tuning: E1-A1-D2-G2 (standard double bass tuning)
+    /// - Frets: 0 (continuous fretboard - no frets)
+    /// - Scale Length: 1060mm (41.7" - standard 3/4 double bass scale)
+    /// - Nut Width: 55mm (very wide for large instrument)
+    /// - String Spacing: 15mm (wide spacing for very thick strings)
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, ContinuousFretboard};
+    ///
+    /// let config = InstrumentPresets::double_bass_standard();
+    /// let fretboard = ContinuousFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 4);
+    /// ```
+    pub fn double_bass_standard() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::E, 1), // E string (4th string - lowest)
+            Tuning::new(PitchClass::A, 1), // A string (3rd string)
+            Tuning::new(PitchClass::D, 2), // D string (2nd string)
+            Tuning::new(PitchClass::G, 2), // G string (1st string - highest)
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings,
+            0,      // No frets for continuous instruments
+            1060.0, // scale length (mm) - 41.7" 3/4 double bass scale
+            55.0,   // nut width (mm)
+            15.0,   // string spacing (mm)
+        )
+    }
+
+    /// 5-string double bass with high C string (E-A-D-G-C)
+    ///
+    /// # Configuration
+    /// - Tuning: E1-A1-D2-G2-C3 (5-string double bass with high C)
+    /// - Frets: 0 (continuous fretboard - no frets)
+    /// - Scale Length: 1060mm (41.7" - standard 3/4 double bass scale)
+    /// - Nut Width: 65mm (wider for 5 strings)
+    /// - String Spacing: 13mm (slightly tighter for 5 strings)
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, ContinuousFretboard};
+    ///
+    /// let config = InstrumentPresets::double_bass_5_string();
+    /// let fretboard = ContinuousFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 5);
+    /// ```
+    pub fn double_bass_5_string() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::E, 1), // E string (5th string - lowest)
+            Tuning::new(PitchClass::A, 1), // A string (4th string)
+            Tuning::new(PitchClass::D, 2), // D string (3rd string)
+            Tuning::new(PitchClass::G, 2), // G string (2nd string)
+            Tuning::new(PitchClass::C, 3), // C string (1st string - highest)
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings,
+            0,      // No frets for continuous instruments
+            1060.0, // scale length (mm) - 41.7" 3/4 double bass scale
+            65.0,   // nut width (mm)
+            13.0,   // string spacing (mm)
+        )
+    }
+
+    /// Violin with scordatura tuning (alternative tuning)
+    ///
+    /// # Configuration
+    /// - Tuning: G3-D4-A4-D5 (scordatura with high D instead of E)
+    /// - Frets: 0 (continuous fretboard - no frets)
+    /// - Scale Length: 330mm (13" - standard violin scale)
+    /// - Nut Width: 24mm (standard violin nut)
+    /// - String Spacing: 7mm (standard violin string spacing)
+    ///
+    /// This is a common scordatura used in some classical and folk music
+    /// where the E string is tuned down to D for specific musical effects.
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, ContinuousFretboard};
+    ///
+    /// let config = InstrumentPresets::violin_scordatura_high_d();
+    /// let fretboard = ContinuousFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 4);
+    /// ```
+    pub fn violin_scordatura_high_d() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::G, 3), // G string (4th string - lowest)
+            Tuning::new(PitchClass::D, 4), // D string (3rd string)
+            Tuning::new(PitchClass::A, 4), // A string (2nd string)
+            Tuning::new(PitchClass::D, 5), // D string (1st string - scordatura)
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings,
+            0,     // No frets for continuous instruments
+            330.0, // scale length (mm) - 13" violin scale
+            24.0,  // nut width (mm)
+            7.0,   // string spacing (mm)
+        )
+    }
+
     /// Get all available preset names
     ///
     /// # Returns
@@ -480,6 +690,7 @@ impl InstrumentPresets {
     /// let presets = InstrumentPresets::list_presets();
     /// assert!(presets.contains(&"guitar_standard".to_string()));
     /// assert!(presets.contains(&"piano_88_key".to_string()));
+    /// assert!(presets.contains(&"violin_standard".to_string()));
     /// ```
     pub fn list_presets() -> Vec<String> {
         vec![
@@ -492,6 +703,12 @@ impl InstrumentPresets {
             "ukulele_soprano".to_string(),
             "mandolin_standard".to_string(),
             "banjo_5_string".to_string(),
+            "violin_standard".to_string(),
+            "viola_standard".to_string(),
+            "cello_standard".to_string(),
+            "double_bass_standard".to_string(),
+            "double_bass_5_string".to_string(),
+            "violin_scordatura_high_d".to_string(),
             "piano_88_key".to_string(),
             "keyboard_76_key".to_string(),
             "keyboard_61_key".to_string(),
@@ -531,6 +748,12 @@ impl InstrumentPresets {
             "ukulele_soprano" => Some(Self::ukulele_soprano()),
             "mandolin_standard" => Some(Self::mandolin_standard()),
             "banjo_5_string" => Some(Self::banjo_5_string()),
+            "violin_standard" => Some(Self::violin_standard()),
+            "viola_standard" => Some(Self::viola_standard()),
+            "cello_standard" => Some(Self::cello_standard()),
+            "double_bass_standard" => Some(Self::double_bass_standard()),
+            "double_bass_5_string" => Some(Self::double_bass_5_string()),
+            "violin_scordatura_high_d" => Some(Self::violin_scordatura_high_d()),
             _ => None,
         }
     }
@@ -805,6 +1028,7 @@ impl InstrumentPresets {
 mod tests {
     use super::*;
     use crate::StringedFretboard;
+    use crate::fret::ContinuousFretboard;
 
     #[test]
     fn test_guitar_standard_preset() {
@@ -908,6 +1132,142 @@ mod tests {
     }
 
     #[test]
+    fn test_violin_family_presets() {
+        // Violin
+        let violin = InstrumentPresets::violin_standard();
+        assert_eq!(violin.string_count(), 4);
+        assert_eq!(violin.fret_count, 0); // Continuous instrument
+        assert!(violin.validate().is_ok());
+
+        let violin_fretboard = ContinuousFretboard::new(violin).unwrap();
+        assert_eq!(violin_fretboard.string_count(), 4);
+
+        // Test violin tuning (G3-D4-A4-E5)
+        assert_eq!(
+            violin_fretboard.string_tuning(0),
+            Some(Tuning::new(PitchClass::G, 3))
+        );
+        assert_eq!(
+            violin_fretboard.string_tuning(3),
+            Some(Tuning::new(PitchClass::E, 5))
+        );
+
+        // Viola
+        let viola = InstrumentPresets::viola_standard();
+        assert_eq!(viola.string_count(), 4);
+        assert_eq!(viola.fret_count, 0);
+        assert!(viola.validate().is_ok());
+
+        let viola_fretboard = ContinuousFretboard::new(viola).unwrap();
+        assert_eq!(
+            viola_fretboard.string_tuning(0),
+            Some(Tuning::new(PitchClass::C, 3))
+        );
+        assert_eq!(
+            viola_fretboard.string_tuning(3),
+            Some(Tuning::new(PitchClass::A, 4))
+        );
+
+        // Cello
+        let cello = InstrumentPresets::cello_standard();
+        assert_eq!(cello.string_count(), 4);
+        assert_eq!(cello.fret_count, 0);
+        assert!(cello.validate().is_ok());
+
+        let cello_fretboard = ContinuousFretboard::new(cello).unwrap();
+        assert_eq!(
+            cello_fretboard.string_tuning(0),
+            Some(Tuning::new(PitchClass::C, 2))
+        );
+        assert_eq!(
+            cello_fretboard.string_tuning(3),
+            Some(Tuning::new(PitchClass::A, 3))
+        );
+
+        // Double Bass
+        let double_bass = InstrumentPresets::double_bass_standard();
+        assert_eq!(double_bass.string_count(), 4);
+        assert_eq!(double_bass.fret_count, 0);
+        assert!(double_bass.validate().is_ok());
+
+        let double_bass_fretboard = ContinuousFretboard::new(double_bass).unwrap();
+        assert_eq!(
+            double_bass_fretboard.string_tuning(0),
+            Some(Tuning::new(PitchClass::E, 1))
+        );
+        assert_eq!(
+            double_bass_fretboard.string_tuning(3),
+            Some(Tuning::new(PitchClass::G, 2))
+        );
+
+        // 5-string Double Bass
+        let double_bass_5 = InstrumentPresets::double_bass_5_string();
+        assert_eq!(double_bass_5.string_count(), 5);
+        assert_eq!(double_bass_5.fret_count, 0);
+        assert!(double_bass_5.validate().is_ok());
+
+        let double_bass_5_fretboard = ContinuousFretboard::new(double_bass_5).unwrap();
+        assert_eq!(
+            double_bass_5_fretboard.string_tuning(4),
+            Some(Tuning::new(PitchClass::C, 3))
+        );
+    }
+
+    #[test]
+    fn test_scordatura_support() {
+        // Test scordatura (alternative tuning) support
+        let violin_scordatura = InstrumentPresets::violin_scordatura_high_d();
+        assert_eq!(violin_scordatura.string_count(), 4);
+        assert_eq!(violin_scordatura.fret_count, 0);
+        assert!(violin_scordatura.validate().is_ok());
+
+        let scordatura_fretboard = ContinuousFretboard::new(violin_scordatura).unwrap();
+
+        // Test that the high string is tuned to D instead of E
+        assert_eq!(
+            scordatura_fretboard.string_tuning(3),
+            Some(Tuning::new(PitchClass::D, 5))
+        );
+
+        // Other strings should remain standard
+        assert_eq!(
+            scordatura_fretboard.string_tuning(0),
+            Some(Tuning::new(PitchClass::G, 3))
+        );
+        assert_eq!(
+            scordatura_fretboard.string_tuning(1),
+            Some(Tuning::new(PitchClass::D, 4))
+        );
+        assert_eq!(
+            scordatura_fretboard.string_tuning(2),
+            Some(Tuning::new(PitchClass::A, 4))
+        );
+    }
+
+    #[test]
+    fn test_violin_family_physical_dimensions() {
+        let violin = InstrumentPresets::violin_standard();
+        let viola = InstrumentPresets::viola_standard();
+        let cello = InstrumentPresets::cello_standard();
+        let double_bass = InstrumentPresets::double_bass_standard();
+
+        // Scale lengths should increase with instrument size
+        assert!(violin.scale_length < viola.scale_length);
+        assert!(viola.scale_length < cello.scale_length);
+        assert!(cello.scale_length < double_bass.scale_length);
+
+        // Nut widths should increase with instrument size
+        assert!(violin.nut_width < viola.nut_width);
+        assert!(viola.nut_width < cello.nut_width);
+        assert!(cello.nut_width < double_bass.nut_width);
+
+        // String spacing should increase with instrument size
+        assert!(violin.string_spacing < viola.string_spacing);
+        assert!(viola.string_spacing < cello.string_spacing);
+        assert!(cello.string_spacing < double_bass.string_spacing);
+    }
+
+    #[test]
     fn test_other_instruments() {
         // Ukulele
         let ukulele = InstrumentPresets::ukulele_soprano();
@@ -928,11 +1288,15 @@ mod tests {
     #[test]
     fn test_preset_listing() {
         let presets = InstrumentPresets::list_presets();
-        assert!(presets.len() >= 9); // At least the presets we defined
+        assert!(presets.len() >= 15); // At least the presets we defined (including violin family)
 
         assert!(presets.contains(&"guitar_standard".to_string()));
         assert!(presets.contains(&"bass_4_string".to_string()));
         assert!(presets.contains(&"ukulele_soprano".to_string()));
+        assert!(presets.contains(&"violin_standard".to_string()));
+        assert!(presets.contains(&"viola_standard".to_string()));
+        assert!(presets.contains(&"cello_standard".to_string()));
+        assert!(presets.contains(&"double_bass_standard".to_string()));
     }
 
     #[test]
@@ -943,6 +1307,10 @@ mod tests {
 
         let bass = InstrumentPresets::get_preset("bass_4_string").unwrap();
         assert_eq!(bass.string_count(), 4);
+
+        let violin = InstrumentPresets::get_preset("violin_standard").unwrap();
+        assert_eq!(violin.string_count(), 4);
+        assert_eq!(violin.fret_count, 0); // Continuous instrument
 
         // Invalid preset
         let invalid = InstrumentPresets::get_preset("nonexistent");

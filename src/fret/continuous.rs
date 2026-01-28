@@ -503,3 +503,163 @@ mod tests {
         assert!(!positions.is_empty());
     }
 }
+
+#[cfg(test)]
+mod property_tests {
+    use super::*;
+    use crate::fret::presets::InstrumentPresets;
+    use crate::fret::{KeyboardFretboard, StringedFretboard};
+    use crate::fret::types::{StringedPosition, KeyboardPosition};
+    use proptest::prelude::*;
+
+    /// **Property 3: Position Type Support**
+    /// **Validates: Requirements 1.4**
+    ///
+    /// This property test ensures that the system correctly handles the appropriate
+    /// position coordinate system for different instrument types:
+    /// - Discrete positions (StringedPosition) for fretted instruments
+    /// - Continuous positions (ContinuousPosition) for fretless instruments  
+    /// - Keyboard positions (KeyboardPosition) for keyboard instruments
+    proptest! {
+        #[test]
+        fn prop_position_type_support(
+            // Generate random position values for testing
+            string_index in 0usize..6,
+            fret_number in 0usize..24,
+            continuous_position in 0.0f32..1.0,
+            key_index in 0usize..88,
+        ) {
+            // Test StringedFretboard with discrete positions
+            let stringed_config = InstrumentPresets::guitar_standard();
+            let stringed_fretboard = StringedFretboard::new(stringed_config).unwrap();
+            
+            // Create a valid stringed position within the instrument's range
+            let string_idx = string_index % stringed_fretboard.string_count();
+            let fret_num = fret_number % stringed_fretboard.fret_count();
+            let stringed_position = StringedPosition::new(string_idx, fret_num);
+            
+            // Verify that StringedFretboard correctly handles StringedPosition
+            let stringed_tuning = stringed_fretboard.tuning_at_position(&stringed_position);
+            prop_assert!(stringed_tuning.is_some(), 
+                        "StringedFretboard should handle StringedPosition correctly");
+            
+            // Verify position validation works correctly
+            prop_assert!(stringed_fretboard.is_position_valid(&stringed_position),
+                        "Valid StringedPosition should be recognized as valid");
+            
+            // Test ContinuousFretboard with continuous positions
+            let continuous_config = create_violin_config();
+            let continuous_fretboard = ContinuousFretboard::new(continuous_config).unwrap();
+            
+            // Create a valid continuous position within the instrument's range
+            let cont_string_idx = string_index % continuous_fretboard.string_count();
+            let continuous_pos = ContinuousPosition::new(cont_string_idx, continuous_position);
+            
+            // Verify that ContinuousFretboard correctly handles ContinuousPosition
+            let continuous_tuning = continuous_fretboard.tuning_at_position(&continuous_pos);
+            prop_assert!(continuous_tuning.is_some(),
+                        "ContinuousFretboard should handle ContinuousPosition correctly");
+            
+            // Verify position validation works correctly
+            prop_assert!(continuous_fretboard.is_position_valid(&continuous_pos),
+                        "Valid ContinuousPosition should be recognized as valid");
+            
+            // Test KeyboardFretboard with keyboard positions
+            let keyboard_config = InstrumentPresets::piano_88_key();
+            let keyboard_fretboard = KeyboardFretboard::new(keyboard_config).unwrap();
+            
+            // Create a valid keyboard position within the instrument's range
+            let key_idx = key_index % keyboard_fretboard.key_count();
+            let keyboard_position = KeyboardPosition::new(key_idx);
+            
+            // Verify that KeyboardFretboard correctly handles KeyboardPosition
+            let keyboard_tuning = keyboard_fretboard.tuning_at_position(&keyboard_position);
+            prop_assert!(keyboard_tuning.is_some(),
+                        "KeyboardFretboard should handle KeyboardPosition correctly");
+            
+            // Verify position validation works correctly
+            prop_assert!(keyboard_fretboard.is_position_valid(&keyboard_position),
+                        "Valid KeyboardPosition should be recognized as valid");
+        }
+        
+        /// Test that each fretboard type correctly validates its position type
+        #[test]
+        fn prop_position_type_validation(
+            position_value in 0.0f32..1.0,
+            string_or_key_index in 0usize..10,
+        ) {
+            // Test that continuous positions are properly bounded
+            let continuous_config = create_violin_config();
+            let continuous_fretboard = ContinuousFretboard::new(continuous_config).unwrap();
+            
+            let string_idx = string_or_key_index % continuous_fretboard.string_count();
+            let continuous_pos = ContinuousPosition::new(string_idx, position_value);
+            
+            // All positions with valid string index and 0.0-1.0 range should be valid
+            prop_assert!(continuous_fretboard.is_position_valid(&continuous_pos),
+                        "ContinuousPosition with valid range should be valid");
+            
+            // Test boundary conditions
+            let boundary_pos_min = ContinuousPosition::new(string_idx, 0.0);
+            let boundary_pos_max = ContinuousPosition::new(string_idx, 1.0);
+            
+            prop_assert!(continuous_fretboard.is_position_valid(&boundary_pos_min),
+                        "ContinuousPosition at 0.0 should be valid");
+            prop_assert!(continuous_fretboard.is_position_valid(&boundary_pos_max),
+                        "ContinuousPosition at 1.0 should be valid");
+        }
+        
+        /// Test that position-to-tuning calculations are consistent with position type
+        #[test]
+        fn prop_position_tuning_consistency(
+            string_index in 0usize..4,
+            position_value in 0.0f32..0.5, // Use smaller range to ensure valid intervals
+        ) {
+            let continuous_config = create_violin_config();
+            let continuous_fretboard = ContinuousFretboard::new(continuous_config).unwrap();
+            
+            let string_idx = string_index % continuous_fretboard.string_count();
+            
+            // Test that higher positions on the same string produce higher pitches
+            let lower_pos = ContinuousPosition::new(string_idx, position_value);
+            let higher_pos = ContinuousPosition::new(string_idx, position_value + 0.1);
+            
+            let lower_tuning = continuous_fretboard.tuning_at_position(&lower_pos);
+            let higher_tuning = continuous_fretboard.tuning_at_position(&higher_pos);
+            
+            if let (Some(lower), Some(higher)) = (lower_tuning, higher_tuning) {
+                prop_assert!(higher.number() >= lower.number(),
+                           "Higher positions should produce higher or equal pitches");
+            }
+            
+            // Test that open string (position 0.0) matches the string tuning
+            let open_pos = ContinuousPosition::new(string_idx, 0.0);
+            let open_tuning = continuous_fretboard.tuning_at_position(&open_pos);
+            let string_tuning = continuous_fretboard.string_tuning(string_idx);
+            
+            if let (Some(open), Some(string)) = (open_tuning, string_tuning) {
+                prop_assert_eq!(open.class(), string.class(),
+                              "Open position should match string tuning pitch class");
+                prop_assert_eq!(open.octave(), string.octave(),
+                              "Open position should match string tuning octave");
+            }
+        }
+    }
+
+    // Helper function for creating violin configuration (same as in tests module)
+    fn create_violin_config() -> StringedInstrumentConfig {
+        use std::str::FromStr;
+        StringedInstrumentConfig::new(
+            vec![
+                Tuning::from_str("G3").unwrap(), // G string
+                Tuning::from_str("D4").unwrap(), // D string  
+                Tuning::from_str("A4").unwrap(), // A string
+                Tuning::from_str("E5").unwrap(), // E string
+            ],
+            0, // No frets for continuous instruments
+            330.0, // Violin scale length in mm
+            24.0,  // Nut width
+            7.0,   // String spacing
+        )
+    }
+}
