@@ -13,14 +13,14 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct StringedPosition {
     /// String index (0-based, where 0 is typically the lowest/thickest string)
-    pub string: usize,
+    pub string: u32,
     /// Fret number (0 = open string, 1 = first fret, etc.)
-    pub fret: usize,
+    pub fret: u32,
 }
 
 impl StringedPosition {
     /// Create a new stringed position
-    pub fn new(string: usize, fret: usize) -> Self {
+    pub fn new(string: u32, fret: u32) -> Self {
         Self { string, fret }
     }
 
@@ -45,12 +45,12 @@ impl Display for StringedPosition {
 #[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct KeyboardPosition {
     /// Key index (0-based, typically starting from the lowest key)
-    pub key: usize,
+    pub key: u32,
 }
 
 impl KeyboardPosition {
     /// Create a new keyboard position
-    pub fn new(key: usize) -> Self {
+    pub fn new(key: u32) -> Self {
         Self { key }
     }
 }
@@ -66,14 +66,14 @@ impl Display for KeyboardPosition {
 #[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct ContinuousPosition {
     /// String index (0-based)
-    pub string: usize,
+    pub string: u32,
     /// Position along the string (0.0 = nut, 1.0 = bridge)
     pub position: f32,
 }
 
 impl ContinuousPosition {
     /// Create a new continuous position
-    pub fn new(string: usize, position: f32) -> Self {
+    pub fn new(string: u32, position: f32) -> Self {
         Self { string, position }
     }
 
@@ -130,11 +130,11 @@ pub enum PlayingTechnique {
     /// Barre chord technique
     Barre {
         /// Starting string index
-        start_string: usize,
+        start_string: u32,
         /// Ending string index
-        end_string: usize,
+        end_string: u32,
         /// Fret number for the barre
-        fret: usize,
+        fret: u32,
     },
     /// Hammer-on technique
     Hammer,
@@ -326,12 +326,27 @@ impl Display for SkillLevel {
 
 /// Configuration for stringed instruments
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct StringedInstrumentConfig {
     /// Tuning for each string (from lowest to highest)
     pub strings: Vec<Tuning>,
     /// Number of frets available
-    pub fret_count: usize,
+    pub fret_count: u32,
+    /// Scale length in millimeters
+    pub scale_length: f32,
+    /// Nut width in millimeters
+    pub nut_width: f32,
+    /// String spacing in millimeters
+    pub string_spacing: f32,
+}
+
+/// Simplified configuration for UniFFI bindings
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
+pub struct SimpleStringedInstrumentConfig {
+    /// Tuning for each string as strings
+    pub strings: Vec<String>,
+    /// Number of frets available
+    pub fret_count: u32,
     /// Scale length in millimeters
     pub scale_length: f32,
     /// Nut width in millimeters
@@ -344,7 +359,7 @@ impl StringedInstrumentConfig {
     /// Create a new stringed instrument configuration
     pub fn new(
         strings: Vec<Tuning>,
-        fret_count: usize,
+        fret_count: u32,
         scale_length: f32,
         nut_width: f32,
         string_spacing: f32,
@@ -359,8 +374,8 @@ impl StringedInstrumentConfig {
     }
 
     /// Get the number of strings
-    pub fn string_count(&self) -> usize {
-        self.strings.len()
+    pub fn string_count(&self) -> u32 {
+        self.strings.len() as u32
     }
 
     /// Validate the configuration
@@ -402,19 +417,30 @@ pub enum KeyLayout {
 
 /// Configuration for keyboard instruments
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct KeyboardConfig {
     /// Lowest key tuning
     pub lowest_key: Tuning,
     /// Total number of keys
-    pub key_count: usize,
+    pub key_count: u32,
+    /// Keyboard layout type
+    pub key_layout: KeyLayout,
+}
+
+/// Simplified configuration for UniFFI bindings
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
+pub struct SimpleKeyboardConfig {
+    /// Lowest key tuning as string
+    pub lowest_key: String,
+    /// Total number of keys
+    pub key_count: u32,
     /// Keyboard layout type
     pub key_layout: KeyLayout,
 }
 
 impl KeyboardConfig {
     /// Create a new keyboard configuration
-    pub fn new(lowest_key: Tuning, key_count: usize, key_layout: KeyLayout) -> Self {
+    pub fn new(lowest_key: Tuning, key_count: u32, key_layout: KeyLayout) -> Self {
         Self {
             lowest_key,
             key_count,

@@ -524,19 +524,19 @@ impl FingeringEvaluator<StringedFretboard> for DifficultyEvaluator {
 #[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct ChordFingeringConfig {
     /// Maximum fret span allowed in a single fingering
-    pub max_fret_span: usize,
+    pub max_fret_span: u32,
     /// Maximum string span allowed in a single fingering
-    pub max_string_span: usize,
+    pub max_string_span: u32,
     /// Whether to prefer open strings when possible
     pub prefer_open_strings: bool,
     /// Target skill level for fingering generation
     pub skill_level: SkillLevel,
     /// Maximum number of fingerings to generate
-    pub max_fingerings: usize,
+    pub max_fingerings: u32,
     /// Minimum fret position (useful for capo simulation)
-    pub min_fret: usize,
+    pub min_fret: u32,
     /// Maximum fret position to consider
-    pub max_fret: usize,
+    pub max_fret: u32,
 }
 
 impl Default for ChordFingeringConfig {

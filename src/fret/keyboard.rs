@@ -18,15 +18,13 @@ use uniffi;
 /// and other keyboard instruments. It provides efficient key-to-tuning
 /// mapping and supports configurable keyboard sizes and layouts.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct KeyboardFretboard {
     /// Instrument configuration
     config: KeyboardConfig,
     /// Pre-calculated tunings for each key for performance
     key_tunings: Vec<Tuning>,
     /// Cache for position lookups to improve performance
-    /// Note: Using RefCell to allow interior mutability for caching
-    position_cache: RefCell<HashMap<String, Vec<KeyboardPosition>>>,
+    position_cache: HashMap<String, Vec<KeyboardPosition>>,
 }
 
 impl KeyboardFretboard {

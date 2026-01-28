@@ -4,9 +4,6 @@
 //! automatic chord fingering generation, and fingering optimization for multiple
 //! instrument types including guitars, pianos, bass guitars, and violin family instruments.
 
-#[cfg(feature = "bindgen")]
-use uniffi;
-
 pub mod continuous;
 pub mod errors;
 pub mod extensions;

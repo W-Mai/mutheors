@@ -419,3 +419,29 @@ impl Tuning {
         self.inner.to_string()
     }
 }
+
+// Fretboard bindings
+
+#[derive(uniffi::Object)]
+struct SimpleFretboard {
+    inner: crate::fret::stringed::StringedFretboard,
+}
+
+#[uniffi::export]
+impl SimpleFretboard {
+    #[uniffi::constructor]
+    pub fn standard_guitar() -> Result<Self, crate::fret::errors::FretboardError> {
+        let config = crate::fret::presets::InstrumentPresets::guitar_standard();
+        Ok(Self {
+            inner: crate::fret::stringed::StringedFretboard::new(config)?,
+        })
+    }
+
+    pub fn string_count(&self) -> u32 {
+        crate::fret::traits::Fretboard::string_count(&self.inner) as u32
+    }
+
+    pub fn fret_count(&self) -> u32 {
+        crate::fret::traits::Fretboard::fret_count(&self.inner) as u32
+    }
+}

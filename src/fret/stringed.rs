@@ -18,13 +18,11 @@ use uniffi;
 /// and other fretted stringed instruments. It provides efficient position-to-tuning
 /// mapping and supports configurable string counts, fret counts, and tunings.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct StringedFretboard {
     /// Instrument configuration
     config: StringedInstrumentConfig,
     /// Cache for position lookups to improve performance
-    /// Note: Using RefCell to allow interior mutability for caching
-    position_cache: RefCell<HashMap<String, Vec<StringedPosition>>>,
+    position_cache: HashMap<String, Vec<StringedPosition>>,
 }
 
 impl StringedFretboard {
