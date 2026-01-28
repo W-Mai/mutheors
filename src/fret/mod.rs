@@ -9,7 +9,10 @@ use uniffi;
 
 pub mod continuous;
 pub mod errors;
+pub mod extensions;
 pub mod fingering;
+#[cfg(test)]
+mod integration_tests;
 pub mod keyboard;
 pub mod presets;
 pub mod stringed;
@@ -21,6 +24,7 @@ pub mod voice_leading;
 // Re-export specific items to avoid naming conflicts
 pub use continuous::ContinuousFretboard;
 pub use errors::{FretboardError, FretboardResult};
+pub use extensions::{DefaultExtensionRegistry, InstrumentConfigValidator};
 pub use fingering::{
     ChordFingeringConfig, ChordFingeringGenerator, DifficultyEvaluator, DifficultyWeights,
 };
