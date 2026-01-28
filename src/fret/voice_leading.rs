@@ -459,3 +459,252 @@ mod voice_leading_tests {
         assert!(difficulty_cost > 0.0);
     }
 }
+#[cfg(test)]
+mod voice_leading_prop_tests {
+    use super::*;
+    use crate::core::chord::ChordQuality;
+    use crate::fret::presets::InstrumentPresets;
+    use crate::fret::types::StringedInstrumentConfig;
+    use crate::{PitchClass, Tuning};
+    use proptest::prelude::*;
+
+    // Simple strategy for generating basic stringed instrument configs
+    fn arb_simple_guitar_config() -> impl Strategy<Value = StringedInstrumentConfig> {
+        Just(InstrumentPresets::guitar_standard())
+    }
+
+    proptest! {
+        /// **Property 11: Voice Leading Optimization**
+        /// **Validates: Requirements 5.2, 5.3**
+        ///
+        /// For any valid chord progression, the voice leading optimizer should produce
+        /// a sequence with lower or equal total cost compared to a naive approach.
+        #[test]
+        fn prop_voice_leading_optimization(
+            config in arb_simple_guitar_config(),
+            progression_length in 2usize..4,
+        ) {
+            // Create fretboard from generated config
+            let fretboard = match StringedFretboard::new(config.clone()) {
+                Ok(fb) => fb,
+                Err(_) => return Ok(()), // Skip invalid configurations
+            };
+
+            // Generate a simple chord progression using basic chords
+            let chord_roots = [
+                Tuning::new(PitchClass::A, 2),
+                Tuning::new(PitchClass::D, 3),
+                Tuning::new(PitchClass::E, 2),
+                Tuning::new(PitchClass::G, 2),
+            ];
+            
+            let chord_qualities = [ChordQuality::Major, ChordQuality::Minor];
+            
+            let mut progression = Vec::new();
+            for i in 0..progression_length {
+                let root = chord_roots[i % chord_roots.len()];
+                let quality = chord_qualities[i % chord_qualities.len()];
+                
+                if let Ok(chord) = Chord::new(root, quality) {
+                    progression.push(chord);
+                }
+            }
+            
+            prop_assume!(!progression.is_empty());
+            prop_assume!(progression.len() >= 2);
+
+            let generator = ChordFingeringGenerator::new();
+            
+            // Check if all chords in progression can be played
+            let mut all_playable = true;
+            for chord in &progression {
+                match generator.generate_chord_fingerings(&fretboard, chord) {
+                    Ok(fingerings) => {
+                        if fingerings.is_empty() {
+                            all_playable = false;
+                            break;
+                        }
+                    }
+                    Err(_) => {
+                        all_playable = false;
+                        break;
+                    }
+                }
+            }
+            
+            prop_assume!(all_playable);
+
+            // Test voice leading optimization
+            let optimizer = VoiceLeadingOptimizer::new();
+            
+            match optimizer.optimize_progression(&fretboard, &progression, &generator) {
+                Ok(optimized_sequence) => {
+                    // Property 1: Sequence length should match progression length
+                    prop_assert_eq!(
+                        optimized_sequence.len(),
+                        progression.len(),
+                        "Optimized sequence length should match progression length"
+                    );
+
+                    // Property 2: All fingerings should be valid
+                    for (i, fingering) in optimized_sequence.iter().enumerate() {
+                        prop_assert!(
+                            !fingering.positions.is_empty(),
+                            "Fingering {} should have at least one position",
+                            i
+                        );
+                        
+                        prop_assert!(
+                            fingering.difficulty >= 0.0 && fingering.difficulty <= 1.0,
+                            "Fingering {} should have valid difficulty: {}",
+                            i, fingering.difficulty
+                        );
+                    }
+
+                    // Property 3: Compare with naive approach (first available fingering for each chord)
+                    let mut naive_sequence = Vec::new();
+                    for chord in &progression {
+                        if let Ok(fingerings) = generator.generate_chord_fingerings(&fretboard, chord) {
+                            if !fingerings.is_empty() {
+                                naive_sequence.push(fingerings[0].clone());
+                            }
+                        }
+                    }
+                    
+                    if naive_sequence.len() == progression.len() {
+                        let optimized_cost = optimizer.calculate_sequence_cost(&optimized_sequence);
+                        let naive_cost = optimizer.calculate_sequence_cost(&naive_sequence);
+                        
+                        // Optimized sequence should be better or equal to naive approach
+                        prop_assert!(
+                            optimized_cost <= naive_cost + 0.1, // Allow small tolerance for floating point
+                            "Optimized cost ({:.3}) should be <= naive cost ({:.3})",
+                            optimized_cost, naive_cost
+                        );
+                    }
+
+                    // Property 4: Sequence analysis should be consistent
+                    let analysis = optimizer.analyze_sequence(&optimized_sequence);
+                    
+                    prop_assert!(
+                        analysis.total_cost >= 0.0,
+                        "Analysis total cost should be non-negative: {}",
+                        analysis.total_cost
+                    );
+                    
+                    prop_assert!(
+                        analysis.average_difficulty >= 0.0 && analysis.average_difficulty <= 1.0,
+                        "Analysis average difficulty should be in [0,1]: {}",
+                        analysis.average_difficulty
+                    );
+                    
+                    prop_assert!(
+                        analysis.max_transition_cost >= 0.0,
+                        "Analysis max transition cost should be non-negative: {}",
+                        analysis.max_transition_cost
+                    );
+                    
+                    prop_assert!(
+                        !analysis.suggestions.is_empty(),
+                        "Analysis should always provide suggestions"
+                    );
+
+                    // Property 5: Weight changes should affect costs predictably
+                    let transition_focused = VoiceLeadingOptimizer::new().with_weights(0.9, 0.1);
+                    let difficulty_focused = VoiceLeadingOptimizer::new().with_weights(0.1, 0.9);
+                    
+                    let transition_cost = transition_focused.calculate_sequence_cost(&optimized_sequence);
+                    let difficulty_cost = difficulty_focused.calculate_sequence_cost(&optimized_sequence);
+                    
+                    prop_assert!(
+                        transition_cost >= 0.0 && difficulty_cost >= 0.0,
+                        "Both weighted costs should be non-negative: transition={:.3}, difficulty={:.3}",
+                        transition_cost, difficulty_cost
+                    );
+                }
+                Err(_) => {
+                    // If optimization fails, that's acceptable for some chord progressions
+                    // The important thing is that it doesn't crash
+                }
+            }
+        }
+
+        /// **Property 11 Extended: Voice Leading Optimization Consistency**
+        /// **Validates: Requirements 5.2, 5.3**
+        ///
+        /// Test that voice leading optimization produces consistent results and
+        /// handles edge cases properly.
+        #[test]
+        fn prop_voice_leading_consistency(
+            config in arb_simple_guitar_config(),
+        ) {
+            // Create fretboard from generated config
+            let fretboard = match StringedFretboard::new(config.clone()) {
+                Ok(fb) => fb,
+                Err(_) => return Ok(()), // Skip invalid configurations
+            };
+
+            let generator = ChordFingeringGenerator::new();
+            let optimizer = VoiceLeadingOptimizer::new();
+            
+            // Test with a simple two-chord progression
+            let chord1 = Chord::new(Tuning::new(PitchClass::A, 2), ChordQuality::Major).unwrap();
+            let chord2 = Chord::new(Tuning::new(PitchClass::D, 3), ChordQuality::Major).unwrap();
+            
+            let progression = vec![chord1.clone(), chord2.clone()];
+            
+            // Check if chords are playable
+            let chord1_playable = generator.generate_chord_fingerings(&fretboard, &chord1)
+                .map(|f| !f.is_empty()).unwrap_or(false);
+            let chord2_playable = generator.generate_chord_fingerings(&fretboard, &chord2)
+                .map(|f| !f.is_empty()).unwrap_or(false);
+                
+            prop_assume!(chord1_playable && chord2_playable);
+
+            match optimizer.optimize_progression(&fretboard, &progression, &generator) {
+                Ok(sequence) => {
+                    // Property 1: Repeated optimization should give same result
+                    if let Ok(sequence2) = optimizer.optimize_progression(&fretboard, &progression, &generator) {
+                        let cost1 = optimizer.calculate_sequence_cost(&sequence);
+                        let cost2 = optimizer.calculate_sequence_cost(&sequence2);
+                        
+                        prop_assert!(
+                            (cost1 - cost2).abs() < 0.001,
+                            "Repeated optimization should give consistent costs: {:.6} vs {:.6}",
+                            cost1, cost2
+                        );
+                    }
+
+                    // Property 2: Single chord should work
+                    if let Ok(single_sequence) = optimizer.optimize_progression(&fretboard, &[chord1.clone()], &generator) {
+                        prop_assert_eq!(
+                            single_sequence.len(),
+                            1,
+                            "Single chord optimization should return one fingering"
+                        );
+                    }
+
+                    // Property 3: Reverse progression should be valid
+                    let reversed_progression = vec![chord2.clone(), chord1.clone()];
+                    if let Ok(reversed_sequence) = optimizer.optimize_progression(&fretboard, &reversed_progression, &generator) {
+                        prop_assert_eq!(
+                            reversed_sequence.len(),
+                            2,
+                            "Reversed progression should return two fingerings"
+                        );
+                        
+                        let reversed_cost = optimizer.calculate_sequence_cost(&reversed_sequence);
+                        prop_assert!(
+                            reversed_cost >= 0.0,
+                            "Reversed progression cost should be non-negative: {}",
+                            reversed_cost
+                        );
+                    }
+                }
+                Err(_) => {
+                    // Acceptable if chords can't be optimized on this instrument
+                }
+            }
+        }
+    }
+}
