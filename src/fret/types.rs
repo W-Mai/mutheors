@@ -6,8 +6,10 @@ use std::fmt::{Debug, Display};
 #[cfg(feature = "bindgen")]
 use uniffi;
 
+use serde::{Deserialize, Serialize};
+
 /// Position on a stringed instrument (guitar, bass, etc.)
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct StringedPosition {
     /// String index (0-based, where 0 is typically the lowest/thickest string)
@@ -92,7 +94,7 @@ impl Display for ContinuousPosition {
 }
 
 /// Finger designation for fingering patterns
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 pub enum Finger {
     /// Thumb (T)
@@ -120,7 +122,7 @@ impl Display for Finger {
 }
 
 /// Playing technique for a fingering
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "bindgen", derive(uniffi::Enum))]
 pub enum PlayingTechnique {
     /// Standard fingering
@@ -168,7 +170,7 @@ impl Display for PlayingTechnique {
 }
 
 /// A finger position within a fingering pattern
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct FingerPosition<P> {
     /// The position on the fretboard
@@ -218,7 +220,7 @@ impl<P: Display> Display for FingerPosition<P> {
 }
 
 /// Complete fingering pattern for a chord or musical phrase
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
 pub struct Fingering<P> {
     /// All finger positions in this fingering

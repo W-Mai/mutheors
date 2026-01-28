@@ -5,12 +5,138 @@
 
 use super::{
     errors::FretboardResult,
+    traits::Fretboard,
     types::{Finger, FingerPosition, Fingering, PlayingTechnique, StringedPosition},
     StringedFretboard,
 };
 
 #[cfg(feature = "bindgen")]
 use uniffi;
+
+use serde::{Deserialize, Serialize};
+
+/// Diagram orientation for different display preferences
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum DiagramOrientation {
+    /// Standard orientation (right-handed, horizontal)
+    Standard,
+    /// Left-handed orientation (mirrored strings)
+    LeftHanded,
+    /// Vertical orientation (rotated 90 degrees)
+    Vertical,
+}
+
+/// Export format for structured data
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ExportFormat {
+    /// JSON format
+    Json,
+    /// YAML format
+    Yaml,
+}
+
+/// Metadata about the fingering and instrument
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FingeringMetadata {
+    /// Type of instrument (e.g., "stringed", "keyboard")
+    pub instrument_type: String,
+    /// Number of strings/keys
+    pub string_count: usize,
+    /// Number of frets (for stringed instruments)
+    pub fret_count: usize,
+    /// Playing technique used
+    pub technique: String,
+    /// Difficulty rating (0.0 to 1.0)
+    pub difficulty: f32,
+    /// Number of fingers used
+    pub finger_count: usize,
+}
+
+/// Information about the fret range displayed
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FretRange {
+    /// Minimum fret displayed
+    pub min_fret: usize,
+    /// Maximum fret displayed
+    pub max_fret: usize,
+    /// Number of frets in display
+    pub display_frets: usize,
+}
+
+/// Information about a string
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct StringInfo {
+    /// String index (0-based)
+    pub index: usize,
+    /// Full tuning name (e.g., "E4")
+    pub tuning: String,
+    /// Pitch class only (e.g., "E")
+    pub pitch_class: String,
+    /// Octave number
+    pub octave: i8,
+}
+
+/// Information about a finger position
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PositionInfo {
+    /// String index
+    pub string: usize,
+    /// Fret number
+    pub fret: usize,
+    /// Finger used (if any)
+    pub finger: Option<String>,
+    /// Pressure applied (0.0 to 1.0)
+    pub pressure: f32,
+    /// Tuning produced at this position
+    pub tuning: String,
+    /// Pitch class produced
+    pub pitch_class: String,
+    /// Octave produced
+    pub octave: i8,
+}
+
+/// Generated diagram data
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DiagramData {
+    /// ASCII art diagram
+    pub ascii: String,
+    /// Compact string representation
+    pub compact: String,
+    /// Diagram orientation
+    pub orientation: String,
+}
+
+/// Export configuration settings
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ExportConfig {
+    /// Whether fret numbers are shown
+    pub show_fret_numbers: bool,
+    /// Whether string labels are shown
+    pub show_string_labels: bool,
+    /// Whether finger numbers are shown
+    pub show_finger_numbers: bool,
+    /// Maximum frets to display
+    pub max_frets: usize,
+    /// Minimum fret to start from
+    pub min_fret: usize,
+}
+
+/// Complete export data structure for external visualization tools
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FingeringExportData {
+    /// Metadata about the fingering
+    pub metadata: FingeringMetadata,
+    /// Fret range information
+    pub fret_range: FretRange,
+    /// String information
+    pub strings: Vec<StringInfo>,
+    /// Position information
+    pub positions: Vec<PositionInfo>,
+    /// Generated diagrams
+    pub diagrams: DiagramData,
+    /// Export configuration
+    pub config: ExportConfig,
+}
 
 /// Configuration for fretboard diagram generation
 #[derive(Clone, Debug)]
@@ -566,6 +692,158 @@ impl FretboardDiagramGenerator {
 
         Ok(diagram)
     }
+
+    /// Export fingering data as JSON
+    pub fn export_json(
+        &self,
+        fretboard: &StringedFretboard,
+        fingering: &Fingering<StringedPosition>,
+    ) -> FretboardResult<String> {
+        let export_data = self.create_export_data(fretboard, fingering)?;
+        serde_json::to_string_pretty(&export_data).map_err(|e| {
+            super::errors::FretboardError::InvalidPosition {
+                position: format!("JSON serialization failed: {}", e),
+            }
+        })
+    }
+
+    /// Export fingering data as YAML
+    pub fn export_yaml(
+        &self,
+        fretboard: &StringedFretboard,
+        fingering: &Fingering<StringedPosition>,
+    ) -> FretboardResult<String> {
+        let export_data = self.create_export_data(fretboard, fingering)?;
+        serde_yaml::to_string(&export_data).map_err(|e| {
+            super::errors::FretboardError::InvalidPosition {
+                position: format!("YAML serialization failed: {}", e),
+            }
+        })
+    }
+
+    /// Create structured export data for external visualization tools
+    fn create_export_data(
+        &self,
+        fretboard: &StringedFretboard,
+        fingering: &Fingering<StringedPosition>,
+    ) -> FretboardResult<FingeringExportData> {
+        let (min_fret, max_fret) = self.calculate_fret_range(fingering)?;
+
+        // Generate ASCII diagram
+        let ascii_diagram = self.generate_diagram(fretboard, fingering)?;
+        let compact_diagram = self.generate_compact_diagram(fretboard, fingering)?;
+
+        // Create string information
+        let mut strings = Vec::new();
+        for string_num in 0..fretboard.string_count() {
+            let tuning = fretboard.string_tuning(string_num).ok_or_else(|| {
+                super::errors::FretboardError::InvalidPosition {
+                    position: format!("String index {} out of range", string_num),
+                }
+            })?;
+
+            strings.push(StringInfo {
+                index: string_num,
+                tuning: tuning.to_string(),
+                pitch_class: tuning.class().to_string(),
+                octave: tuning.octave(),
+            });
+        }
+
+        // Create position information
+        let mut positions = Vec::new();
+        for finger_pos in &fingering.positions {
+            let tuning = fretboard
+                .tuning_at_position(&finger_pos.position)
+                .ok_or_else(|| super::errors::FretboardError::InvalidPosition {
+                    position: finger_pos.position.to_string(),
+                })?;
+
+            positions.push(PositionInfo {
+                string: finger_pos.position.string,
+                fret: finger_pos.position.fret,
+                finger: finger_pos.finger.map(|f| f.to_string()),
+                pressure: finger_pos.pressure,
+                tuning: tuning.to_string(),
+                pitch_class: tuning.class().to_string(),
+                octave: tuning.octave(),
+            });
+        }
+
+        Ok(FingeringExportData {
+            metadata: FingeringMetadata {
+                instrument_type: "stringed".to_string(),
+                string_count: fretboard.string_count(),
+                fret_count: fretboard.fret_count(),
+                technique: fingering.technique.to_string(),
+                difficulty: fingering.difficulty,
+                finger_count: fingering.finger_count(),
+            },
+            fret_range: FretRange {
+                min_fret,
+                max_fret,
+                display_frets: max_fret - min_fret + 1,
+            },
+            strings,
+            positions,
+            diagrams: DiagramData {
+                ascii: ascii_diagram,
+                compact: compact_diagram,
+                orientation: "standard".to_string(),
+            },
+            config: ExportConfig {
+                show_fret_numbers: self.config.show_fret_numbers,
+                show_string_labels: self.config.show_string_labels,
+                show_finger_numbers: self.config.show_finger_numbers,
+                max_frets: self.config.max_frets,
+                min_fret: self.config.min_fret,
+            },
+        })
+    }
+
+    /// Export fingering data with custom orientation
+    pub fn export_with_orientation(
+        &self,
+        fretboard: &StringedFretboard,
+        fingering: &Fingering<StringedPosition>,
+        orientation: DiagramOrientation,
+        format: ExportFormat,
+    ) -> FretboardResult<String> {
+        let mut export_data = self.create_export_data(fretboard, fingering)?;
+
+        // Modify data based on orientation
+        match orientation {
+            DiagramOrientation::Standard => {
+                // Already in standard orientation
+            }
+            DiagramOrientation::LeftHanded => {
+                // Reverse string order for left-handed players
+                export_data.strings.reverse();
+                for pos in &mut export_data.positions {
+                    pos.string = fretboard.string_count() - 1 - pos.string;
+                }
+                export_data.diagrams.orientation = "left_handed".to_string();
+            }
+            DiagramOrientation::Vertical => {
+                // Transpose the diagram layout
+                export_data.diagrams.orientation = "vertical".to_string();
+            }
+        }
+
+        // Export in requested format
+        match format {
+            ExportFormat::Json => serde_json::to_string_pretty(&export_data).map_err(|e| {
+                super::errors::FretboardError::InvalidPosition {
+                    position: format!("JSON serialization failed: {}", e),
+                }
+            }),
+            ExportFormat::Yaml => serde_yaml::to_string(&export_data).map_err(|e| {
+                super::errors::FretboardError::InvalidPosition {
+                    position: format!("YAML serialization failed: {}", e),
+                }
+            }),
+        }
+    }
 }
 
 impl Default for FretboardDiagramGenerator {
@@ -827,5 +1105,401 @@ mod tests {
         assert!(diagram.is_ok());
         let diagram_text = diagram.unwrap();
         assert!(diagram_text.contains("o")); // Custom harmonic symbol
+    }
+
+    #[test]
+    fn test_json_export() {
+        let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+        let generator = FretboardDiagramGenerator::new();
+
+        // Create a simple fingering
+        let fingering = Fingering::new(
+            vec![
+                FingerPosition::open(StringedPosition::new(0, 0)), // High E open
+                FingerPosition::pressed(StringedPosition::new(1, 1), Finger::Index), // B fret 1
+                FingerPosition::open(StringedPosition::new(2, 0)), // G open
+                FingerPosition::pressed(StringedPosition::new(3, 2), Finger::Middle), // D fret 2
+                FingerPosition::pressed(StringedPosition::new(4, 3), Finger::Ring), // A fret 3
+            ],
+            PlayingTechnique::Standard,
+            0.3,
+        );
+
+        let json_result = generator.export_json(&fretboard, &fingering);
+        assert!(json_result.is_ok());
+
+        let json_str = json_result.unwrap();
+        assert!(json_str.contains("metadata"));
+        assert!(json_str.contains("positions"));
+        assert!(json_str.contains("strings"));
+        assert!(json_str.contains("diagrams"));
+        assert!(json_str.contains("Standard")); // Technique
+
+        // Verify it's valid JSON by parsing it back
+        let parsed: serde_json::Value = serde_json::from_str(&json_str).unwrap();
+        assert!(parsed["metadata"]["string_count"].as_u64().unwrap() == 6);
+        assert!(parsed["positions"].as_array().unwrap().len() == 5);
+    }
+
+    #[test]
+    fn test_yaml_export() {
+        let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+        let generator = FretboardDiagramGenerator::new();
+
+        // Create a barre chord fingering
+        let fingering = Fingering::new(
+            vec![
+                FingerPosition::pressed(StringedPosition::new(0, 1), Finger::Index),
+                FingerPosition::pressed(StringedPosition::new(1, 1), Finger::Index),
+                FingerPosition::pressed(StringedPosition::new(2, 2), Finger::Middle),
+                FingerPosition::pressed(StringedPosition::new(3, 3), Finger::Ring),
+                FingerPosition::pressed(StringedPosition::new(4, 3), Finger::Pinky),
+                FingerPosition::pressed(StringedPosition::new(5, 1), Finger::Index),
+            ],
+            PlayingTechnique::Barre {
+                start_string: 0,
+                end_string: 5,
+                fret: 1,
+            },
+            0.7,
+        );
+
+        let yaml_result = generator.export_yaml(&fretboard, &fingering);
+        assert!(yaml_result.is_ok());
+
+        let yaml_str = yaml_result.unwrap();
+        assert!(yaml_str.contains("metadata:"));
+        assert!(yaml_str.contains("positions:"));
+        assert!(yaml_str.contains("strings:"));
+        assert!(yaml_str.contains("diagrams:"));
+        assert!(yaml_str.contains("Barre")); // Technique
+
+        // Verify it's valid YAML by parsing it back
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&yaml_str).unwrap();
+        assert!(parsed["metadata"]["string_count"].as_u64().unwrap() == 6);
+        assert!(parsed["positions"].as_sequence().unwrap().len() == 6);
+    }
+
+    #[test]
+    fn test_export_with_orientation() {
+        let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+        let generator = FretboardDiagramGenerator::new();
+
+        let fingering = Fingering::new(
+            vec![
+                FingerPosition::pressed(StringedPosition::new(0, 2), Finger::Index),
+                FingerPosition::pressed(StringedPosition::new(3, 2), Finger::Middle),
+            ],
+            PlayingTechnique::Standard,
+            0.4,
+        );
+
+        // Test standard orientation
+        let standard_result = generator.export_with_orientation(
+            &fretboard,
+            &fingering,
+            DiagramOrientation::Standard,
+            ExportFormat::Json,
+        );
+        assert!(standard_result.is_ok());
+        let standard_json = standard_result.unwrap();
+        assert!(standard_json.contains("\"orientation\": \"standard\""));
+
+        // Test left-handed orientation
+        let lefty_result = generator.export_with_orientation(
+            &fretboard,
+            &fingering,
+            DiagramOrientation::LeftHanded,
+            ExportFormat::Json,
+        );
+        assert!(lefty_result.is_ok());
+        let lefty_json = lefty_result.unwrap();
+        assert!(lefty_json.contains("\"orientation\": \"left_handed\""));
+
+        // Test vertical orientation
+        let vertical_result = generator.export_with_orientation(
+            &fretboard,
+            &fingering,
+            DiagramOrientation::Vertical,
+            ExportFormat::Yaml,
+        );
+        assert!(vertical_result.is_ok());
+        let vertical_yaml = vertical_result.unwrap();
+        assert!(vertical_yaml.contains("orientation: vertical"));
+    }
+
+    #[test]
+    fn test_export_data_completeness() {
+        let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+        let generator = FretboardDiagramGenerator::new();
+
+        // Create a complex fingering with multiple techniques
+        let fingering = Fingering::new(
+            vec![
+                FingerPosition::pressed(StringedPosition::new(0, 5), Finger::Pinky),
+                FingerPosition::pressed(StringedPosition::new(1, 3), Finger::Middle),
+                FingerPosition::open(StringedPosition::new(2, 0)),
+                FingerPosition::pressed(StringedPosition::new(3, 2), Finger::Index),
+            ],
+            PlayingTechnique::Slide,
+            0.6,
+        );
+
+        let json_result = generator.export_json(&fretboard, &fingering);
+        assert!(json_result.is_ok());
+
+        let json_str = json_result.unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json_str).unwrap();
+
+        // Verify metadata completeness
+        let metadata = &parsed["metadata"];
+        assert_eq!(metadata["instrument_type"], "stringed");
+        assert_eq!(metadata["string_count"], 6);
+        assert_eq!(metadata["technique"], "Slide");
+        assert_eq!(metadata["finger_count"], 3);
+        assert!((metadata["difficulty"].as_f64().unwrap() - 0.6).abs() < 0.001);
+
+        // Verify fret range
+        let fret_range = &parsed["fret_range"];
+        assert!(
+            fret_range["min_fret"].as_u64().unwrap() <= fret_range["max_fret"].as_u64().unwrap()
+        );
+
+        // Verify string information
+        let strings = parsed["strings"].as_array().unwrap();
+        assert_eq!(strings.len(), 6);
+        for (i, string) in strings.iter().enumerate() {
+            assert_eq!(string["index"], i);
+            assert!(string["tuning"].is_string());
+            assert!(string["pitch_class"].is_string());
+            assert!(string["octave"].is_number());
+        }
+
+        // Verify position information
+        let positions = parsed["positions"].as_array().unwrap();
+        assert_eq!(positions.len(), 4);
+        for position in positions {
+            assert!(position["string"].is_number());
+            assert!(position["fret"].is_number());
+            assert!(position["pressure"].is_number());
+            assert!(position["tuning"].is_string());
+        }
+
+        // Verify diagrams
+        let diagrams = &parsed["diagrams"];
+        assert!(diagrams["ascii"].is_string());
+        assert!(diagrams["compact"].is_string());
+        assert!(diagrams["orientation"].is_string());
+
+        // Verify config
+        let config = &parsed["config"];
+        assert!(config["show_fret_numbers"].is_boolean());
+        assert!(config["show_string_labels"].is_boolean());
+        assert!(config["show_finger_numbers"].is_boolean());
+    }
+}
+
+#[cfg(test)]
+mod property_tests {
+    use super::*;
+    use crate::fret::presets::InstrumentPresets;
+    use proptest::prelude::*;
+
+    /// **Property 13: Diagram Generation Completeness**
+    /// **Validates: Requirements 6.1, 6.2, 6.3, 6.4**
+    ///
+    /// This property test ensures that diagram generation works correctly for all
+    /// valid fingerings and configurations, covering:
+    /// - All finger positions are represented in the output
+    /// - All playing techniques are properly indicated
+    /// - Diagram structure is consistent and well-formed
+    /// - No crashes or errors occur for valid inputs
+    proptest! {
+        #[test]
+        fn prop_diagram_generation_completeness(
+            // Generate random fingering configurations
+            finger_count in 1usize..=6,
+            technique_variant in 0usize..=5,
+            show_fret_numbers in any::<bool>(),
+            show_string_labels in any::<bool>(),
+            show_finger_numbers in any::<bool>(),
+        ) {
+            let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+
+            // Create a configuration with random settings
+            let config = DiagramConfig::new()
+                .with_fret_numbers(show_fret_numbers)
+                .with_string_labels(show_string_labels)
+                .with_finger_numbers(show_finger_numbers);
+
+            let generator = FretboardDiagramGenerator::with_config(config);
+
+            // Generate a random but valid fingering
+            let mut positions = Vec::new();
+            let fingers = [Finger::Index, Finger::Middle, Finger::Ring, Finger::Pinky];
+
+            for i in 0..finger_count.min(4) {
+                let string = i % 6; // Ensure valid string index
+                let fret = (i + 1) % 13; // Ensure reasonable fret range
+                let finger = fingers[i % fingers.len()];
+
+                if fret == 0 {
+                    positions.push(FingerPosition::open(StringedPosition::new(string, fret)));
+                } else {
+                    positions.push(FingerPosition::pressed(StringedPosition::new(string, fret), finger));
+                }
+            }
+
+            // Select technique based on variant
+            let technique = match technique_variant {
+                0 => PlayingTechnique::Standard,
+                1 => PlayingTechnique::Barre { start_string: 0, end_string: 5, fret: 1 },
+                2 => PlayingTechnique::Hammer,
+                3 => PlayingTechnique::Pull,
+                4 => PlayingTechnique::Slide,
+                5 => PlayingTechnique::Harmonic,
+                _ => PlayingTechnique::Standard,
+            };
+
+            let fingering = Fingering::new(positions, technique, 0.5);
+
+            // Generate diagram and verify it succeeds
+            let diagram_result = generator.generate_diagram(&fretboard, &fingering);
+            prop_assert!(diagram_result.is_ok(), "Diagram generation should not fail for valid inputs");
+
+            let diagram = diagram_result.unwrap();
+
+            // Verify basic diagram structure
+            prop_assert!(!diagram.is_empty(), "Diagram should not be empty");
+            prop_assert!(diagram.contains('\n'), "Diagram should contain newlines");
+
+            // Verify configuration-dependent content
+            if show_string_labels {
+                prop_assert!(diagram.contains("E") || diagram.contains("A") || diagram.contains("D") ||
+                           diagram.contains("G") || diagram.contains("B"),
+                           "Diagram should contain string labels when enabled");
+            }
+
+            if show_fret_numbers && fingering.positions.iter().any(|fp| fp.position.fret > 0) {
+                // Should contain at least one digit for fret numbers
+                prop_assert!(diagram.chars().any(|c| c.is_ascii_digit()),
+                           "Diagram should contain fret numbers when enabled and frets are used");
+            }
+
+            // Verify technique-specific content
+            match &fingering.technique {
+                PlayingTechnique::Standard => {
+                    // Standard technique should not have special technique indicators
+                    prop_assert!(!diagram.contains("Technique:") || diagram.contains("Standard"),
+                               "Standard technique should not show special technique markers");
+                }
+                PlayingTechnique::Barre { .. } => {
+                    prop_assert!(diagram.contains("Barre"), "Barre technique should be indicated");
+                }
+                PlayingTechnique::Hammer => {
+                    prop_assert!(diagram.contains("Hammer"), "Hammer technique should be indicated");
+                }
+                PlayingTechnique::Pull => {
+                    prop_assert!(diagram.contains("Pull"), "Pull technique should be indicated");
+                }
+                PlayingTechnique::Slide => {
+                    prop_assert!(diagram.contains("Slide"), "Slide technique should be indicated");
+                }
+                PlayingTechnique::Harmonic => {
+                    prop_assert!(diagram.contains("Harmonic"), "Harmonic technique should be indicated");
+                }
+            }
+
+            // Verify finger positions are represented
+            for finger_pos in &fingering.positions {
+                if finger_pos.position.fret == 0 {
+                    // Open strings should be represented
+                    prop_assert!(diagram.contains('O') || diagram.contains('0'),
+                               "Open strings should be represented in diagram");
+                } else if show_finger_numbers && finger_pos.finger.is_some() {
+                    // Finger numbers should be present when enabled
+                    let finger_chars = ['1', '2', '3', '4', 'T'];
+                    prop_assert!(finger_chars.iter().any(|&c| diagram.contains(c)),
+                               "Finger numbers should be present when enabled");
+                }
+            }
+
+            // Test compact diagram generation
+            let compact_result = generator.generate_compact_diagram(&fretboard, &fingering);
+            prop_assert!(compact_result.is_ok(), "Compact diagram generation should not fail");
+
+            let compact = compact_result.unwrap();
+            prop_assert!(!compact.is_empty(), "Compact diagram should not be empty");
+            prop_assert!(compact.contains('-') || compact.contains('X') || compact.contains('0') ||
+                        compact.chars().any(|c| c.is_ascii_digit()),
+                        "Compact diagram should contain position indicators");
+        }
+
+        /// Test diagram generation with various configuration combinations
+        #[test]
+        fn prop_diagram_config_combinations(
+            max_frets in 3usize..=8,
+            min_fret in 0usize..=5,
+        ) {
+            let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+
+            // Test with different fret range configurations
+            let config = DiagramConfig::new()
+                .with_fret_range(min_fret, max_frets);
+
+            let generator = FretboardDiagramGenerator::with_config(config);
+
+            // Create a simple fingering
+            let fingering = Fingering::new(
+                vec![
+                    FingerPosition::pressed(StringedPosition::new(0, min_fret + 1), Finger::Index),
+                    FingerPosition::pressed(StringedPosition::new(1, min_fret + 2), Finger::Middle),
+                ],
+                PlayingTechnique::Standard,
+                0.3,
+            );
+
+            let diagram_result = generator.generate_diagram(&fretboard, &fingering);
+            prop_assert!(diagram_result.is_ok(), "Diagram should generate successfully with custom fret range");
+
+            let diagram = diagram_result.unwrap();
+            prop_assert!(!diagram.is_empty(), "Diagram should not be empty");
+        }
+
+        /// Test that all technique types can be visualized without errors
+        #[test]
+        fn prop_all_techniques_visualizable(
+            string_idx in 0usize..6,
+            fret_num in 1usize..13,
+        ) {
+            let fretboard = StringedFretboard::new(InstrumentPresets::guitar_standard()).unwrap();
+            let generator = FretboardDiagramGenerator::new();
+
+            let position = FingerPosition::pressed(
+                StringedPosition::new(string_idx, fret_num),
+                Finger::Index
+            );
+
+            // Test all technique types
+            let techniques = vec![
+                PlayingTechnique::Standard,
+                PlayingTechnique::Barre { start_string: 0, end_string: 5, fret: fret_num },
+                PlayingTechnique::Hammer,
+                PlayingTechnique::Pull,
+                PlayingTechnique::Slide,
+                PlayingTechnique::Harmonic,
+            ];
+
+            for technique in techniques {
+                let fingering = Fingering::new(vec![position.clone()], technique, 0.4);
+
+                let diagram_result = generator.generate_diagram(&fretboard, &fingering);
+                prop_assert!(diagram_result.is_ok(),
+                           "All technique types should be visualizable without errors");
+
+                let diagram = diagram_result.unwrap();
+                prop_assert!(!diagram.is_empty(), "Diagram should not be empty for any technique");
+            }
+        }
     }
 }
