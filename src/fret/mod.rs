@@ -11,8 +11,6 @@ pub mod continuous;
 pub mod errors;
 pub mod extensions;
 pub mod fingering;
-#[cfg(test)]
-mod integration_tests;
 pub mod keyboard;
 pub mod presets;
 pub mod stringed;
@@ -20,6 +18,9 @@ pub mod traits;
 pub mod types;
 pub mod visualization;
 pub mod voice_leading;
+
+#[cfg(test)]
+mod integration_tests;
 
 // Re-export specific items to avoid naming conflicts
 pub use continuous::ContinuousFretboard;

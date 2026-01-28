@@ -410,9 +410,10 @@ impl FretboardDiagramGenerator {
 
         for string_num in 0..fretboard.string_count() {
             let tuning = fretboard.string_tuning(string_num).ok_or_else(|| {
-                super::errors::FretboardError::InvalidPosition {
-                    position: format!("String index {} out of range", string_num),
-                }
+                super::errors::FretboardError::invalid_position_with_context(
+                    format!("String index {}", string_num),
+                    "String index out of range"
+                )
             })?;
             header.push_str(&format!(" {} ", tuning.class()));
         }
@@ -701,9 +702,10 @@ impl FretboardDiagramGenerator {
     ) -> FretboardResult<String> {
         let export_data = self.create_export_data(fretboard, fingering)?;
         serde_json::to_string_pretty(&export_data).map_err(|e| {
-            super::errors::FretboardError::InvalidPosition {
-                position: format!("JSON serialization failed: {}", e),
-            }
+            super::errors::FretboardError::invalid_position_with_context(
+                "JSON export",
+                format!("JSON serialization failed: {}", e)
+            )
         })
     }
 
@@ -715,9 +717,10 @@ impl FretboardDiagramGenerator {
     ) -> FretboardResult<String> {
         let export_data = self.create_export_data(fretboard, fingering)?;
         serde_yaml::to_string(&export_data).map_err(|e| {
-            super::errors::FretboardError::InvalidPosition {
-                position: format!("YAML serialization failed: {}", e),
-            }
+            super::errors::FretboardError::invalid_position_with_context(
+                "YAML export",
+                format!("YAML serialization failed: {}", e)
+            )
         })
     }
 
@@ -737,9 +740,10 @@ impl FretboardDiagramGenerator {
         let mut strings = Vec::new();
         for string_num in 0..fretboard.string_count() {
             let tuning = fretboard.string_tuning(string_num).ok_or_else(|| {
-                super::errors::FretboardError::InvalidPosition {
-                    position: format!("String index {} out of range", string_num),
-                }
+                super::errors::FretboardError::invalid_position_with_context(
+                    format!("String index {}", string_num),
+                    "String index out of range for export data"
+                )
             })?;
 
             strings.push(StringInfo {
@@ -755,9 +759,10 @@ impl FretboardDiagramGenerator {
         for finger_pos in &fingering.positions {
             let tuning = fretboard
                 .tuning_at_position(&finger_pos.position)
-                .ok_or_else(|| super::errors::FretboardError::InvalidPosition {
-                    position: finger_pos.position.to_string(),
-                })?;
+                .ok_or_else(|| super::errors::FretboardError::invalid_position_with_context(
+                    finger_pos.position.to_string(),
+                    "Position not found on fretboard"
+                ))?;
 
             positions.push(PositionInfo {
                 string: finger_pos.position.string,
@@ -833,14 +838,16 @@ impl FretboardDiagramGenerator {
         // Export in requested format
         match format {
             ExportFormat::Json => serde_json::to_string_pretty(&export_data).map_err(|e| {
-                super::errors::FretboardError::InvalidPosition {
-                    position: format!("JSON serialization failed: {}", e),
-                }
+                super::errors::FretboardError::invalid_position_with_context(
+                    "JSON export",
+                    format!("JSON serialization failed: {}", e)
+                )
             }),
             ExportFormat::Yaml => serde_yaml::to_string(&export_data).map_err(|e| {
-                super::errors::FretboardError::InvalidPosition {
-                    position: format!("YAML serialization failed: {}", e),
-                }
+                super::errors::FretboardError::invalid_position_with_context(
+                    "YAML export", 
+                    format!("YAML serialization failed: {}", e)
+                )
             }),
         }
     }

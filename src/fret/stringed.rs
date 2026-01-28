@@ -58,7 +58,7 @@ impl StringedFretboard {
         // Validate the configuration
         config
             .validate()
-            .map_err(|msg| FretboardError::InvalidConfiguration { reason: msg })?;
+            .map_err(|msg| FretboardError::invalid_configuration_with_fix(msg))?;
 
         Ok(Self {
             config,
@@ -219,12 +219,10 @@ impl StringedFretboard {
     /// * `Err(FretboardError)` if capo fret is invalid
     pub fn with_capo(&self, capo_fret: usize) -> FretboardResult<Self> {
         if capo_fret > self.config.fret_count {
-            return Err(FretboardError::InvalidPosition {
-                position: format!(
-                    "Capo fret {} exceeds fret count {}",
-                    capo_fret, self.config.fret_count
-                ),
-            });
+            return Err(FretboardError::invalid_position_with_context(
+                format!("Capo fret {} exceeds fret count {}", capo_fret, self.config.fret_count),
+                "Capo position is outside valid range"
+            ));
         }
 
         if capo_fret == 0 {
@@ -235,15 +233,16 @@ impl StringedFretboard {
         let mut new_strings = Vec::new();
         for &base_tuning in &self.config.strings {
             let interval = Interval::from_semitones(capo_fret as i8).map_err(|_| {
-                FretboardError::InvalidConfiguration {
-                    reason: format!("Invalid capo fret: {}", capo_fret),
-                }
+                FretboardError::invalid_configuration_with_fix(
+                    format!("Invalid capo fret: {}", capo_fret)
+                )
             })?;
 
             let new_tuning = base_tuning.add_interval(&interval).map_err(|_| {
-                FretboardError::TuningOutOfRange {
-                    tuning: format!("{:#}", base_tuning),
-                }
+                FretboardError::tuning_out_of_range_with_range(
+                    &base_tuning,
+                    "Check instrument's playable range with capo"
+                )
             })?;
 
             new_strings.push(new_tuning);
@@ -274,13 +273,10 @@ impl StringedFretboard {
 
         for (string_index, new_tuning) in string_tunings {
             if string_index >= new_strings.len() {
-                return Err(FretboardError::InvalidPosition {
-                    position: format!(
-                        "String index {} exceeds string count {}",
-                        string_index,
-                        new_strings.len()
-                    ),
-                });
+                return Err(FretboardError::invalid_position_with_context(
+                    format!("String index {} exceeds string count {}", string_index, new_strings.len()),
+                    "String index is outside valid range"
+                ));
             }
             new_strings[string_index] = new_tuning;
         }

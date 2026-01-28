@@ -31,7 +31,7 @@ impl ContinuousFretboard {
     pub fn new(config: StringedInstrumentConfig) -> FretboardResult<Self> {
         config
             .validate()
-            .map_err(|e| FretboardError::InvalidConfiguration { reason: e })?;
+            .map_err(|e| FretboardError::invalid_configuration_with_fix(e))?;
 
         Ok(Self {
             scale_length: config.scale_length,

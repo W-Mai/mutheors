@@ -558,4 +558,720 @@ mod property_tests {
             }
         }
     }
+
+    /// Property 17: Custom Algorithm Integration
+    /// 
+    /// This property test validates that custom algorithms and evaluation criteria
+    /// integrate correctly with the fretboard system and produce consistent results.
+    /// 
+    /// Properties verified:
+    /// - Custom evaluation criteria produce scores within valid range
+    /// - Plugin system correctly manages and applies custom algorithms
+    /// - Technique handlers work consistently across different configurations
+    /// - Custom algorithms maintain compatibility with existing fingering types
+    #[cfg(test)]
+    mod custom_algorithm_integration_property {
+        use super::*;
+
+        proptest! {
+            #[test]
+            fn property_custom_algorithm_integration(
+                weight in 0.1f32..=1.0f32,
+                prefer_lower_frets in prop::bool::ANY,
+                penalize_stretches in prop::bool::ANY,
+                allow_harmonics in prop::bool::ANY,
+                allow_slides in prop::bool::ANY,
+                allow_bends in prop::bool::ANY,
+                max_stretch in 1usize..=8usize,
+                fret_positions in prop::collection::vec(0usize..=12usize, 1..=6),
+                string_positions in prop::collection::vec(0usize..=5usize, 1..=6),
+            ) {
+                use crate::fret::{Fingering, FingerPosition, StringedPosition, PlayingTechnique, Finger};
+                
+                // Property 1: Custom evaluation criteria should produce valid scores
+                let eval_config = ExampleEvaluationConfig {
+                    weight,
+                    prefer_lower_frets,
+                    penalize_stretches,
+                };
+                let criteria = ExampleEvaluationCriteria::new(eval_config);
+                
+                // Create test fingering from generated positions
+                let positions: Vec<FingerPosition<StringedPosition>> = fret_positions.iter()
+                    .zip(string_positions.iter())
+                    .enumerate()
+                    .map(|(i, (&fret, &string))| {
+                        let finger = match i % 4 {
+                            0 => Some(Finger::Index),
+                            1 => Some(Finger::Middle),
+                            2 => Some(Finger::Ring),
+                            3 => Some(Finger::Pinky),
+                            _ => None,
+                        };
+                        FingerPosition {
+                            position: StringedPosition { string, fret },
+                            finger,
+                            pressure: 1.0,
+                        }
+                    })
+                    .collect();
+                
+                let fingering = Fingering {
+                    positions,
+                    difficulty: 0.5,
+                    technique: PlayingTechnique::Standard,
+                };
+                
+                let score = criteria.evaluate_stringed_fingering(&fingering);
+                prop_assert!(score >= 0.0 && score <= 1.0, 
+                           "Evaluation score {} should be between 0.0 and 1.0", score);
+                prop_assert_eq!(criteria.weight(), weight, "Weight should match configuration");
+                
+                // Property 2: Technique handlers should work consistently
+                let technique_config = TechniqueConfig {
+                    allow_harmonics,
+                    allow_slides,
+                    allow_bends,
+                    max_stretch,
+                };
+                let techniques = StringedInstrumentTechniques::new(technique_config);
+                
+                // Test technique support consistency
+                prop_assert_eq!(techniques.can_apply_technique(&fingering, "harmonic"), allow_harmonics);
+                prop_assert_eq!(techniques.can_apply_technique(&fingering, "slide"), allow_slides);
+                prop_assert_eq!(techniques.can_apply_technique(&fingering, "bend"), allow_bends);
+                prop_assert!(!techniques.can_apply_technique(&fingering, "nonexistent_technique"));
+                
+                // Property 3: Difficulty modifiers should be consistent
+                let harmonic_modifier = techniques.technique_difficulty_modifier("harmonic");
+                let slide_modifier = techniques.technique_difficulty_modifier("slide");
+                let bend_modifier = techniques.technique_difficulty_modifier("bend");
+                let unknown_modifier = techniques.technique_difficulty_modifier("unknown");
+                
+                prop_assert_eq!(harmonic_modifier, 0.8, "Harmonic modifier should be 0.8");
+                prop_assert_eq!(slide_modifier, 1.1, "Slide modifier should be 1.1");
+                prop_assert_eq!(bend_modifier, 1.2, "Bend modifier should be 1.2");
+                prop_assert_eq!(unknown_modifier, 1.0, "Unknown technique modifier should be 1.0");
+                
+                // Property 4: Plugin system should integrate components correctly
+                let mut plugin_system = PluginSystem::new();
+                plugin_system.add_evaluation_criteria(Box::new(criteria.clone()));
+                plugin_system.add_technique_handler(Box::new(techniques.clone()));
+                
+                let evaluated_score = plugin_system.evaluate_fingering(&fingering);
+                prop_assert!(evaluated_score >= 0.0 && evaluated_score <= 1.0,
+                           "Plugin system score {} should be between 0.0 and 1.0", evaluated_score);
+                
+                // Property 5: Supported techniques should match configuration
+                let supported_techniques = plugin_system.get_supported_techniques();
+                if allow_harmonics {
+                    prop_assert!(supported_techniques.contains(&"harmonic".to_string()),
+                               "Should support harmonics when enabled");
+                }
+                if allow_slides {
+                    prop_assert!(supported_techniques.contains(&"slide".to_string()),
+                               "Should support slides when enabled");
+                }
+                if allow_bends {
+                    prop_assert!(supported_techniques.contains(&"bend".to_string()),
+                               "Should support bends when enabled");
+                }
+                
+                // Property 6: Technique application should modify fingerings appropriately
+                if allow_harmonics && !fingering.positions.is_empty() {
+                    let harmonic_result = techniques.apply_technique(&fingering, "harmonic");
+                    prop_assert!(harmonic_result.is_ok(), "Harmonic application should succeed when allowed");
+                    
+                    if let Ok(modified) = harmonic_result {
+                        // Harmonics should use lighter pressure
+                        for pos in &modified.positions {
+                            prop_assert!(pos.pressure <= 1.0, "Pressure should not exceed maximum");
+                            if allow_harmonics {
+                                prop_assert!(pos.pressure < 1.0, "Harmonic should use lighter pressure");
+                            }
+                        }
+                        
+                        // Difficulty should be modified appropriately
+                        let expected_difficulty = fingering.difficulty * harmonic_modifier;
+                        prop_assert!((modified.difficulty - expected_difficulty).abs() < 0.01,
+                                   "Harmonic difficulty should be modified correctly");
+                    }
+                }
+                
+                // Property 7: Plugin system should handle technique queries correctly
+                prop_assert_eq!(plugin_system.supports_technique("harmonic"), allow_harmonics);
+                prop_assert_eq!(plugin_system.supports_technique("slide"), allow_slides);
+                prop_assert_eq!(plugin_system.supports_technique("bend"), allow_bends);
+                prop_assert!(!plugin_system.supports_technique("nonexistent"));
+                
+                // Property 8: Difficulty modifiers should be retrievable through plugin system
+                if allow_harmonics {
+                    let modifier = plugin_system.get_technique_difficulty_modifier("harmonic");
+                    prop_assert_eq!(modifier, 0.8, "Plugin system should return correct harmonic modifier");
+                }
+                if allow_slides {
+                    let modifier = plugin_system.get_technique_difficulty_modifier("slide");
+                    prop_assert_eq!(modifier, 1.1, "Plugin system should return correct slide modifier");
+                }
+                if allow_bends {
+                    let modifier = plugin_system.get_technique_difficulty_modifier("bend");
+                    prop_assert_eq!(modifier, 1.2, "Plugin system should return correct bend modifier");
+                }
+                
+                let unknown_modifier = plugin_system.get_technique_difficulty_modifier("unknown");
+                prop_assert_eq!(unknown_modifier, 1.0, "Unknown technique should return default modifier");
+            }
+        }
+
+        proptest! {
+            #[test]
+            fn property_evaluation_criteria_consistency(
+                weight1 in 0.1f32..=1.0f32,
+                weight2 in 0.1f32..=1.0f32,
+                prefer_lower1 in prop::bool::ANY,
+                prefer_lower2 in prop::bool::ANY,
+                penalize_stretches1 in prop::bool::ANY,
+                penalize_stretches2 in prop::bool::ANY,
+                fret_span in 1usize..=12usize,
+            ) {
+                use crate::fret::{Fingering, FingerPosition, StringedPosition, PlayingTechnique, Finger};
+                
+                // Create two different evaluation criteria
+                let config1 = ExampleEvaluationConfig {
+                    weight: weight1,
+                    prefer_lower_frets: prefer_lower1,
+                    penalize_stretches: penalize_stretches1,
+                };
+                let config2 = ExampleEvaluationConfig {
+                    weight: weight2,
+                    prefer_lower_frets: prefer_lower2,
+                    penalize_stretches: penalize_stretches2,
+                };
+                
+                let criteria1 = ExampleEvaluationCriteria::new(config1);
+                let criteria2 = ExampleEvaluationCriteria::new(config2);
+                
+                // Create test fingering with controlled fret span
+                let positions = vec![
+                    FingerPosition {
+                        position: StringedPosition { string: 0, fret: 2 },
+                        finger: Some(Finger::Index),
+                        pressure: 1.0,
+                    },
+                    FingerPosition {
+                        position: StringedPosition { string: 1, fret: 2 + fret_span },
+                        finger: Some(Finger::Pinky),
+                        pressure: 1.0,
+                    },
+                ];
+                
+                let fingering = Fingering {
+                    positions,
+                    difficulty: 0.5,
+                    technique: PlayingTechnique::Standard,
+                };
+                
+                let score1 = criteria1.evaluate_stringed_fingering(&fingering);
+                let score2 = criteria2.evaluate_stringed_fingering(&fingering);
+                
+                // Property 1: Both scores should be valid
+                prop_assert!(score1 >= 0.0 && score1 <= 1.0, "Score1 should be valid");
+                prop_assert!(score2 >= 0.0 && score2 <= 1.0, "Score2 should be valid");
+                
+                // Property 2: Plugin system should handle multiple criteria correctly
+                let mut plugin_system = PluginSystem::new();
+                plugin_system.add_evaluation_criteria(Box::new(criteria1));
+                plugin_system.add_evaluation_criteria(Box::new(criteria2));
+                
+                let combined_score = plugin_system.evaluate_fingering(&fingering);
+                prop_assert!(combined_score >= 0.0 && combined_score <= 1.0,
+                           "Combined score should be valid");
+                
+                // Property 3: Combined score should be weighted average
+                let expected_combined = (score1 * weight1 + score2 * weight2) / (weight1 + weight2);
+                prop_assert!((combined_score - expected_combined).abs() < 0.01,
+                           "Combined score should be weighted average of individual scores");
+                
+                // Property 4: Empty plugin system should return original difficulty
+                let empty_system = PluginSystem::new();
+                let empty_score = empty_system.evaluate_fingering(&fingering);
+                prop_assert_eq!(empty_score, fingering.difficulty,
+                              "Empty plugin system should return original difficulty");
+            }
+        }
+    }
 }
+/// Custom evaluation criteria implementation for demonstration
+///
+/// This shows how to implement custom evaluation criteria for fingering quality assessment.
+#[derive(Debug, Clone)]
+pub struct ExampleEvaluationCriteria {
+    config: ExampleEvaluationConfig,
+}
+
+#[derive(Debug, Clone)]
+pub struct ExampleEvaluationConfig {
+    pub weight: f32,
+    pub prefer_lower_frets: bool,
+    pub penalize_stretches: bool,
+}
+
+impl ExampleEvaluationCriteria {
+    /// Create new evaluation criteria
+    pub fn new(config: ExampleEvaluationConfig) -> Self {
+        Self { config }
+    }
+    
+    /// Get the criteria name
+    pub fn criteria_name(&self) -> &'static str {
+        "example_evaluation_criteria"
+    }
+    
+    /// Evaluate a fingering for stringed instruments
+    pub fn evaluate_stringed_fingering(&self, fingering: &crate::fret::Fingering<crate::fret::StringedPosition>) -> f32 {
+        let mut score = 1.0;
+        
+        if fingering.positions.is_empty() {
+            return 0.0;
+        }
+        
+        // Prefer lower frets if configured
+        if self.config.prefer_lower_frets {
+            let avg_fret: f32 = fingering.positions.iter()
+                .map(|fp| fp.position.fret as f32)
+                .sum::<f32>() / fingering.positions.len() as f32;
+            
+            // Lower frets get higher scores
+            score *= (12.0 - avg_fret.min(12.0)) / 12.0;
+        }
+        
+        // Penalize large stretches if configured
+        if self.config.penalize_stretches {
+            let frets: Vec<_> = fingering.positions.iter()
+                .map(|fp| fp.position.fret)
+                .collect();
+            
+            if let (Some(&min_fret), Some(&max_fret)) = (frets.iter().min(), frets.iter().max()) {
+                let stretch = max_fret - min_fret;
+                if stretch > 4 {
+                    score *= 0.5; // Penalize large stretches
+                }
+            }
+        }
+        
+        score.clamp(0.0, 1.0)
+    }
+    
+    /// Get the weight of these criteria
+    pub fn weight(&self) -> f32 {
+        self.config.weight
+    }
+}
+
+/// Instrument-specific technique implementation for stringed instruments
+///
+/// This demonstrates how to implement custom playing techniques for specific instruments.
+#[derive(Debug, Clone)]
+pub struct StringedInstrumentTechniques {
+    config: TechniqueConfig,
+}
+
+#[derive(Debug, Clone)]
+pub struct TechniqueConfig {
+    pub allow_harmonics: bool,
+    pub allow_slides: bool,
+    pub allow_bends: bool,
+    pub max_stretch: usize,
+}
+
+impl StringedInstrumentTechniques {
+    /// Create new technique handler
+    pub fn new(config: TechniqueConfig) -> Self {
+        Self { config }
+    }
+    
+    /// Apply a technique to a fingering
+    pub fn apply_technique(
+        &self,
+        fingering: &crate::fret::Fingering<crate::fret::StringedPosition>,
+        technique: &str,
+    ) -> FretboardResult<crate::fret::Fingering<crate::fret::StringedPosition>> {
+        let mut modified_fingering = fingering.clone();
+        
+        match technique {
+            "harmonic" => {
+                if !self.config.allow_harmonics {
+                    return Err(FretboardError::impossible_fingering("Harmonics not allowed"));
+                }
+                
+                // Modify fingering for harmonic technique
+                for finger_pos in &mut modified_fingering.positions {
+                    finger_pos.pressure = 0.3; // Light touch for harmonics
+                }
+                
+                // Harmonics are generally easier
+                modified_fingering.difficulty *= 0.8;
+            }
+            
+            "slide" => {
+                if !self.config.allow_slides {
+                    return Err(FretboardError::impossible_fingering("Slides not allowed"));
+                }
+                
+                // Slides add slight difficulty
+                modified_fingering.difficulty *= 1.1;
+            }
+            
+            "bend" => {
+                if !self.config.allow_bends {
+                    return Err(FretboardError::impossible_fingering("Bends not allowed"));
+                }
+                
+                // Bends add difficulty
+                modified_fingering.difficulty *= 1.2;
+            }
+            
+            _ => {
+                return Err(FretboardError::impossible_fingering(
+                    format!("Unknown technique: {}", technique)
+                ));
+            }
+        }
+        
+        Ok(modified_fingering)
+    }
+    
+    /// Check if a technique can be applied
+    pub fn can_apply_technique(
+        &self,
+        _fingering: &crate::fret::Fingering<crate::fret::StringedPosition>,
+        technique: &str,
+    ) -> bool {
+        match technique {
+            "harmonic" => self.config.allow_harmonics,
+            "slide" => self.config.allow_slides,
+            "bend" => self.config.allow_bends,
+            _ => false,
+        }
+    }
+    
+    /// Get technique difficulty modifier
+    pub fn technique_difficulty_modifier(&self, technique: &str) -> f32 {
+        match technique {
+            "harmonic" => 0.8,  // Easier
+            "slide" => 1.1,     // Slightly harder
+            "bend" => 1.2,      // Harder
+            _ => 1.0,
+        }
+    }
+    
+    /// Validate technique configuration
+    pub fn validate_technique_config(&self, technique: &str) -> bool {
+        match technique {
+            "harmonic" | "slide" | "bend" => true,
+            _ => false,
+        }
+    }
+}
+
+/// Plugin system for integrating custom algorithms and criteria
+///
+/// This provides a unified interface for managing and applying custom extensions.
+pub struct PluginSystem {
+    evaluation_criteria: Vec<Box<dyn EvaluationCriteriaPlugin>>,
+    technique_handlers: Vec<Box<dyn TechniquePlugin>>,
+}
+
+/// Trait for evaluation criteria plugins
+pub trait EvaluationCriteriaPlugin: Send + Sync {
+    fn name(&self) -> &str;
+    fn evaluate_stringed(&self, fingering: &crate::fret::Fingering<crate::fret::StringedPosition>) -> f32;
+    fn weight(&self) -> f32;
+}
+
+/// Trait for technique plugins
+pub trait TechniquePlugin: Send + Sync {
+    fn name(&self) -> &str;
+    fn supported_techniques(&self) -> Vec<&str>;
+    fn can_apply(&self, technique: &str) -> bool;
+    fn difficulty_modifier(&self, technique: &str) -> f32;
+}
+
+impl PluginSystem {
+    /// Create a new plugin system
+    pub fn new() -> Self {
+        Self {
+            evaluation_criteria: Vec::new(),
+            technique_handlers: Vec::new(),
+        }
+    }
+    
+    /// Add an evaluation criteria plugin
+    pub fn add_evaluation_criteria(&mut self, plugin: Box<dyn EvaluationCriteriaPlugin>) {
+        self.evaluation_criteria.push(plugin);
+    }
+    
+    /// Add a technique plugin
+    pub fn add_technique_handler(&mut self, plugin: Box<dyn TechniquePlugin>) {
+        self.technique_handlers.push(plugin);
+    }
+    
+    /// Evaluate a fingering using all registered criteria
+    pub fn evaluate_fingering(&self, fingering: &crate::fret::Fingering<crate::fret::StringedPosition>) -> f32 {
+        if self.evaluation_criteria.is_empty() {
+            return fingering.difficulty;
+        }
+        
+        let total_weight: f32 = self.evaluation_criteria.iter()
+            .map(|criteria| criteria.weight())
+            .sum();
+        
+        if total_weight == 0.0 {
+            return fingering.difficulty;
+        }
+        
+        let weighted_score: f32 = self.evaluation_criteria.iter()
+            .map(|criteria| criteria.evaluate_stringed(fingering) * criteria.weight())
+            .sum();
+        
+        weighted_score / total_weight
+    }
+    
+    /// Get all supported techniques from all plugins
+    pub fn get_supported_techniques(&self) -> Vec<String> {
+        let mut techniques = Vec::new();
+        for handler in &self.technique_handlers {
+            techniques.extend(handler.supported_techniques().iter().map(|&s| s.to_string()));
+        }
+        techniques.sort();
+        techniques.dedup();
+        techniques
+    }
+    
+    /// Check if a technique is supported by any plugin
+    pub fn supports_technique(&self, technique: &str) -> bool {
+        self.technique_handlers.iter()
+            .any(|handler| handler.can_apply(technique))
+    }
+    
+    /// Get difficulty modifier for a technique
+    pub fn get_technique_difficulty_modifier(&self, technique: &str) -> f32 {
+        self.technique_handlers.iter()
+            .find(|handler| handler.can_apply(technique))
+            .map(|handler| handler.difficulty_modifier(technique))
+            .unwrap_or(1.0)
+    }
+}
+
+impl Default for PluginSystem {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Example implementation of EvaluationCriteriaPlugin
+impl EvaluationCriteriaPlugin for ExampleEvaluationCriteria {
+    fn name(&self) -> &str {
+        self.criteria_name()
+    }
+    
+    fn evaluate_stringed(&self, fingering: &crate::fret::Fingering<crate::fret::StringedPosition>) -> f32 {
+        self.evaluate_stringed_fingering(fingering)
+    }
+    
+    fn weight(&self) -> f32 {
+        self.weight()
+    }
+}
+
+/// Example implementation of TechniquePlugin
+impl TechniquePlugin for StringedInstrumentTechniques {
+    fn name(&self) -> &str {
+        "stringed_techniques"
+    }
+    
+    fn supported_techniques(&self) -> Vec<&str> {
+        let mut techniques = Vec::new();
+        if self.config.allow_harmonics {
+            techniques.push("harmonic");
+        }
+        if self.config.allow_slides {
+            techniques.push("slide");
+        }
+        if self.config.allow_bends {
+            techniques.push("bend");
+        }
+        techniques
+    }
+    
+    fn can_apply(&self, technique: &str) -> bool {
+        let dummy_fingering = crate::fret::Fingering::standard(vec![]);
+        self.can_apply_technique(&dummy_fingering, technique)
+    }
+    
+    fn difficulty_modifier(&self, technique: &str) -> f32 {
+        self.technique_difficulty_modifier(technique)
+    }
+}
+    #[test]
+    fn test_custom_evaluation_criteria() {
+        use crate::{Tuning, PitchClass};
+        use crate::fret::{Fingering, FingerPosition, StringedPosition, PlayingTechnique, Finger};
+        
+        let config = ExampleEvaluationConfig {
+            weight: 0.8,
+            prefer_lower_frets: true,
+            penalize_stretches: true,
+        };
+        
+        let criteria = ExampleEvaluationCriteria::new(config);
+        assert_eq!(criteria.criteria_name(), "example_evaluation_criteria");
+        assert_eq!(criteria.weight(), 0.8);
+        
+        // Create a test fingering
+        let fingering = Fingering {
+            positions: vec![
+                FingerPosition {
+                    position: StringedPosition { string: 0, fret: 2 },
+                    finger: Some(Finger::Index),
+                    pressure: 1.0,
+                },
+                FingerPosition {
+                    position: StringedPosition { string: 1, fret: 3 },
+                    finger: Some(Finger::Middle),
+                    pressure: 1.0,
+                },
+            ],
+            difficulty: 0.5,
+            technique: PlayingTechnique::Standard,
+        };
+        
+        let score = criteria.evaluate_stringed_fingering(&fingering);
+        assert!(score >= 0.0 && score <= 1.0, "Score should be between 0 and 1");
+    }
+
+    #[test]
+    fn test_stringed_instrument_techniques() {
+        use crate::fret::{Fingering, FingerPosition, StringedPosition, PlayingTechnique, Finger};
+        
+        let config = TechniqueConfig {
+            allow_harmonics: true,
+            allow_slides: true,
+            allow_bends: false,
+            max_stretch: 4,
+        };
+        
+        let techniques = StringedInstrumentTechniques::new(config);
+        
+        // Test technique support
+        let dummy_fingering = crate::fret::Fingering::standard(vec![]);
+        assert!(techniques.can_apply_technique(&dummy_fingering, "harmonic"));
+        assert!(techniques.can_apply_technique(&dummy_fingering, "slide"));
+        assert!(!techniques.can_apply_technique(&dummy_fingering, "bend"));
+        assert!(!techniques.can_apply_technique(&dummy_fingering, "unknown"));
+        
+        // Test difficulty modifiers
+        assert_eq!(techniques.technique_difficulty_modifier("harmonic"), 0.8);
+        assert_eq!(techniques.technique_difficulty_modifier("slide"), 1.1);
+        assert_eq!(techniques.technique_difficulty_modifier("bend"), 1.2);
+        
+        // Test technique application
+        let fingering = Fingering {
+            positions: vec![
+                FingerPosition {
+                    position: StringedPosition { string: 0, fret: 5 },
+                    finger: Some(Finger::Index),
+                    pressure: 1.0,
+                },
+            ],
+            difficulty: 0.5,
+            technique: PlayingTechnique::Standard,
+        };
+        
+        let harmonic_result = techniques.apply_technique(&fingering, "harmonic");
+        assert!(harmonic_result.is_ok());
+        
+        let modified = harmonic_result.unwrap();
+        assert!(modified.positions[0].pressure < 1.0, "Harmonic should use lighter pressure");
+        assert!(modified.difficulty < fingering.difficulty, "Harmonic should be easier");
+        
+        // Test invalid technique
+        let bend_result = techniques.apply_technique(&fingering, "bend");
+        assert!(bend_result.is_err());
+    }
+
+    #[test]
+    fn test_plugin_system() {
+        use crate::fret::{Fingering, FingerPosition, StringedPosition, PlayingTechnique, Finger};
+        
+        let mut plugin_system = PluginSystem::new();
+        
+        // Add evaluation criteria
+        let criteria_config = ExampleEvaluationConfig {
+            weight: 0.7,
+            prefer_lower_frets: true,
+            penalize_stretches: false,
+        };
+        let criteria = ExampleEvaluationCriteria::new(criteria_config);
+        plugin_system.add_evaluation_criteria(Box::new(criteria));
+        
+        // Add technique handler
+        let technique_config = TechniqueConfig {
+            allow_harmonics: true,
+            allow_slides: true,
+            allow_bends: true,
+            max_stretch: 4,
+        };
+        let techniques = StringedInstrumentTechniques::new(technique_config);
+        plugin_system.add_technique_handler(Box::new(techniques));
+        
+        // Test technique support
+        let supported = plugin_system.get_supported_techniques();
+        assert!(supported.contains(&"harmonic".to_string()));
+        assert!(supported.contains(&"slide".to_string()));
+        assert!(supported.contains(&"bend".to_string()));
+        
+        assert!(plugin_system.supports_technique("harmonic"));
+        assert!(!plugin_system.supports_technique("unknown"));
+        
+        // Test difficulty modifiers
+        assert_eq!(plugin_system.get_technique_difficulty_modifier("harmonic"), 0.8);
+        assert_eq!(plugin_system.get_technique_difficulty_modifier("unknown"), 1.0);
+        
+        // Test fingering evaluation
+        let fingering = Fingering {
+            positions: vec![
+                FingerPosition {
+                    position: StringedPosition { string: 0, fret: 2 },
+                    finger: Some(Finger::Index),
+                    pressure: 1.0,
+                },
+            ],
+            difficulty: 0.6,
+            technique: PlayingTechnique::Standard,
+        };
+        
+        let evaluated_score = plugin_system.evaluate_fingering(&fingering);
+        assert!(evaluated_score >= 0.0 && evaluated_score <= 1.0);
+    }
+
+    #[test]
+    fn test_plugin_system_empty() {
+        use crate::fret::{Fingering, PlayingTechnique};
+        
+        let plugin_system = PluginSystem::new();
+        
+        // Empty system should return original difficulty
+        let fingering = Fingering {
+            positions: vec![],
+            difficulty: 0.5,
+            technique: PlayingTechnique::Standard,
+        };
+        
+        let score = plugin_system.evaluate_fingering(&fingering);
+        assert_eq!(score, 0.5);
+        
+        // Should have no supported techniques
+        assert!(plugin_system.get_supported_techniques().is_empty());
+        assert!(!plugin_system.supports_technique("any"));
+    }

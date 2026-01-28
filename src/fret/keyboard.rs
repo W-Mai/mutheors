@@ -55,7 +55,7 @@ impl KeyboardFretboard {
         // Validate the configuration
         config
             .validate()
-            .map_err(|msg| FretboardError::InvalidConfiguration { reason: msg })?;
+            .map_err(|msg| FretboardError::invalid_configuration_with_fix(msg))?;
 
         // Pre-calculate all key tunings for performance
         let key_tunings = Self::calculate_key_tunings(&config)?;
@@ -111,9 +111,10 @@ impl KeyboardFretboard {
             // Note: Since i8 max is 127, this check is for documentation purposes
             #[allow(clippy::absurd_extreme_comparisons)]
             if midi_number > 127 {
-                return Err(FretboardError::TuningOutOfRange {
-                    tuning: format!("MIDI note {}", midi_number),
-                });
+                return Err(FretboardError::tuning_out_of_range_with_range(
+                    &config.lowest_key,
+                    "MIDI range 0-127"
+                ));
             }
 
             // Convert MIDI number back to Tuning
@@ -156,12 +157,9 @@ impl KeyboardFretboard {
                     }
                 }
 
-                found_tuning.ok_or_else(|| FretboardError::InvalidConfiguration {
-                    reason: format!(
-                        "Could not find valid tuning for MIDI number {} at key {}",
-                        midi_number, key_index
-                    ),
-                })?
+                found_tuning.ok_or_else(|| FretboardError::invalid_configuration_with_fix(
+                    format!("Could not find valid tuning for MIDI number {} at key {}", midi_number, key_index)
+                ))?
             };
 
             // Verify our calculation is correct (this should always pass now)
@@ -356,9 +354,10 @@ impl KeyboardFretboard {
     /// * `Err(FretboardError)` if transposition is invalid
     pub fn transpose(&self, interval: &Interval) -> FretboardResult<Self> {
         let new_lowest_key = self.config.lowest_key.add_interval(interval).map_err(|_| {
-            FretboardError::TuningOutOfRange {
-                tuning: format!("{:#}", self.config.lowest_key),
-            }
+            FretboardError::tuning_out_of_range_with_range(
+                &self.config.lowest_key,
+                "Transposition result outside valid range"
+            )
         })?;
 
         let new_config = KeyboardConfig::new(
@@ -380,9 +379,9 @@ impl KeyboardFretboard {
     /// * `Err(FretboardError)` if the new key count is invalid
     pub fn with_key_count(&self, new_key_count: usize) -> FretboardResult<Self> {
         if new_key_count == 0 {
-            return Err(FretboardError::InvalidConfiguration {
-                reason: "Key count must be at least 1".to_string(),
-            });
+            return Err(FretboardError::invalid_configuration_with_fix(
+                "Key count must be at least 1"
+            ));
         }
 
         let new_config = KeyboardConfig::new(

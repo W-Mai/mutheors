@@ -1223,9 +1223,7 @@ impl FingeringGenerator<StringedFretboard> for ChordFingeringGenerator {
         let chord_notes = self.extract_chord_notes(chord);
 
         if chord_notes.is_empty() {
-            return Err(FretboardError::NoValidFingerings {
-                chord: format!("{}", chord),
-            });
+            return Err(FretboardError::no_valid_fingerings_with_suggestions(chord));
         }
 
         // Step 2: Find all possible positions for each note
@@ -1234,9 +1232,9 @@ impl FingeringGenerator<StringedFretboard> for ChordFingeringGenerator {
         // Check if all notes can be played
         for (note, positions) in &note_positions {
             if positions.is_empty() {
-                return Err(FretboardError::NoValidFingerings {
-                    chord: format!("{} - note {} cannot be played in range", chord, note),
-                });
+                return Err(FretboardError::no_valid_fingerings(
+                    format!("{} - note {} cannot be played in range", chord, note)
+                ));
             }
         }
 
@@ -1271,9 +1269,9 @@ impl FingeringGenerator<StringedFretboard> for ChordFingeringGenerator {
         }
 
         if fingerings.is_empty() {
-            return Err(FretboardError::NoValidFingerings {
-                chord: format!("{} - no physically possible fingerings found", chord),
-            });
+            return Err(FretboardError::no_valid_fingerings(
+                format!("{} - no physically possible fingerings found", chord)
+            ));
         }
 
         // Apply skill level optimization
