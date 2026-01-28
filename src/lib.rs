@@ -32,6 +32,8 @@ pub use composition::*;
 pub use core::*;
 pub use fret::{
     BarreCapable,
+    ChordFingeringConfig,
+    ChordFingeringGenerator,
     ContinuousPosition,
     Finger,
     FingerPosition,
@@ -43,11 +45,15 @@ pub use fret::{
     // Errors
     FretboardError,
     FretboardResult,
+    // Presets
+    InstrumentPresets,
     KeyLayout,
     KeyboardConfig,
+    KeyboardFretboard,
     KeyboardPosition,
     PlayingTechnique,
     SkillLevel,
+    StringedFretboard,
     StringedInstrumentConfig,
     // Types
     StringedPosition,

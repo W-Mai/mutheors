@@ -544,4 +544,86 @@ mod tests {
             KeyboardConfig::new(Tuning::from_str("C4").unwrap(), 0, KeyLayout::Piano);
         assert!(invalid_config.validate().is_err());
     }
+
+    #[test]
+    fn test_barre_technique_support() {
+        // Test barre technique creation and display (Requirements 4.5, 6.4)
+        let barre_technique = PlayingTechnique::Barre {
+            start_string: 0,
+            end_string: 5,
+            fret: 3,
+        };
+
+        // Verify barre technique displays correctly
+        let display_str = barre_technique.to_string();
+        assert!(display_str.contains("Barre"));
+        assert!(display_str.contains("strings 0-5"));
+        assert!(display_str.contains("fret 3"));
+
+        // Test barre fingering creation
+        let positions = vec![
+            FingerPosition::pressed(StringedPosition::new(0, 3), Finger::Index),
+            FingerPosition::pressed(StringedPosition::new(1, 3), Finger::Index),
+            FingerPosition::pressed(StringedPosition::new(2, 3), Finger::Index),
+            FingerPosition::pressed(StringedPosition::new(3, 5), Finger::Ring),
+            FingerPosition::pressed(StringedPosition::new(4, 5), Finger::Pinky),
+            FingerPosition::pressed(StringedPosition::new(5, 3), Finger::Index),
+        ];
+
+        let barre_fingering = Fingering::new(positions, barre_technique, 0.7);
+
+        assert_eq!(barre_fingering.technique, PlayingTechnique::Barre {
+            start_string: 0,
+            end_string: 5,
+            fret: 3,
+        });
+        assert_eq!(barre_fingering.finger_count(), 6);
+        assert!(barre_fingering.uses_finger(Finger::Index));
+        assert!(barre_fingering.uses_finger(Finger::Ring));
+        assert!(barre_fingering.uses_finger(Finger::Pinky));
+    }
+
+    #[test]
+    fn test_special_techniques_support() {
+        // Test all special techniques (Requirements 6.4)
+        let techniques = vec![
+            PlayingTechnique::Standard,
+            PlayingTechnique::Barre { start_string: 0, end_string: 2, fret: 5 },
+            PlayingTechnique::Hammer,
+            PlayingTechnique::Pull,
+            PlayingTechnique::Slide,
+            PlayingTechnique::Harmonic,
+        ];
+
+        for technique in techniques {
+            // Verify each technique has a meaningful display representation
+            let display_str = technique.to_string();
+            assert!(!display_str.is_empty());
+            
+            // Create a fingering with this technique
+            let positions = vec![
+                FingerPosition::pressed(StringedPosition::new(0, 2), Finger::Index),
+            ];
+            let fingering = Fingering::new(positions, technique.clone(), 0.5);
+            assert_eq!(fingering.technique, technique);
+        }
+    }
+
+    #[test]
+    fn test_finger_pressure_modeling() {
+        // Test pressure modeling in finger positions (Requirements 4.5)
+        let position = StringedPosition::new(1, 3);
+        
+        // Test different pressure levels
+        let light_pressure = FingerPosition::new(position.clone(), Some(Finger::Index), 0.3);
+        let medium_pressure = FingerPosition::new(position.clone(), Some(Finger::Index), 0.6);
+        let full_pressure = FingerPosition::pressed(position.clone(), Finger::Index);
+        let open_string = FingerPosition::open(position);
+
+        assert_eq!(light_pressure.pressure, 0.3);
+        assert_eq!(medium_pressure.pressure, 0.6);
+        assert_eq!(full_pressure.pressure, 1.0);
+        assert_eq!(open_string.pressure, 0.0);
+        assert_eq!(open_string.finger, None);
+    }
 }
