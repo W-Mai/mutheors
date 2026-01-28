@@ -7,6 +7,7 @@
 #[cfg(feature = "bindgen")]
 use uniffi;
 
+pub mod continuous;
 pub mod errors;
 pub mod fingering;
 pub mod keyboard;
@@ -18,6 +19,7 @@ pub mod visualization;
 pub mod voice_leading;
 
 // Re-export specific items to avoid naming conflicts
+pub use continuous::ContinuousFretboard;
 pub use errors::{FretboardError, FretboardResult};
 pub use fingering::{
     ChordFingeringConfig, ChordFingeringGenerator, DifficultyEvaluator, DifficultyWeights,

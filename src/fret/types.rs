@@ -369,9 +369,8 @@ impl StringedInstrumentConfig {
             return Err("Must have at least one string".to_string());
         }
 
-        if self.fret_count == 0 {
-            return Err("Must have at least one fret".to_string());
-        }
+        // Note: fret_count can be 0 for continuous instruments (violin family)
+        // No validation needed for fret_count
 
         if self.scale_length <= 0.0 {
             return Err("Scale length must be positive".to_string());
