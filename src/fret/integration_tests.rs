@@ -1507,5 +1507,3 @@ mod composition_integration_tests {
         }
     }
 }
-
-

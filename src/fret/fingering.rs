@@ -1941,7 +1941,7 @@ mod tests {
                         "End string should be greater than start string"
                     );
                     assert!(
-                        *end_string < fretboard.string_count(),
+                        *end_string < fretboard.string_count().try_into().unwrap(),
                         "End string should be within fretboard range"
                     );
                 }
@@ -2285,7 +2285,7 @@ mod tests {
                 .with_max_fret_span(6) // Allow larger spans for more possibilities
                 .with_max_string_span(config.strings.len()) // Use all available strings
                 .with_skill_level(SkillLevel::Expert) // Allow all techniques
-                .with_fret_range(0, std::cmp::min(config.fret_count, 15)) // Reasonable range
+                .with_fret_range(0, std::cmp::min(config.fret_count.try_into().unwrap(), 15)) // Reasonable range
                 .with_max_fingerings(50); // Allow more fingerings for testing
 
             let generator = ChordFingeringGenerator::with_config(generator_config);
@@ -2425,7 +2425,7 @@ mod tests {
                 Err(_) => return Ok(()), // Skip invalid configurations
             };
 
-            let max_fret = std::cmp::min(min_fret + 8, config.fret_count);
+            let max_fret = std::cmp::min(min_fret + 8, config.fret_count.try_into().unwrap());
             prop_assume!(max_fret > min_fret);
 
             let generator_config = ChordFingeringConfig::new()
@@ -2443,7 +2443,7 @@ mod tests {
                 let positions = fretboard.positions_for_tuning(note);
                 let positions_in_range: Vec<_> = positions
                     .into_iter()
-                    .filter(|pos| pos.fret >= min_fret && pos.fret <= max_fret)
+                    .filter(|pos| pos.fret >= min_fret.try_into().unwrap() && pos.fret <= max_fret.try_into().unwrap())
                     .collect();
 
                 if !positions_in_range.is_empty() {
@@ -2460,7 +2460,7 @@ mod tests {
                 for (i, fingering) in fingerings.iter().enumerate() {
                     for (j, finger_pos) in fingering.positions.iter().enumerate() {
                         prop_assert!(
-                            finger_pos.position.fret >= min_fret && finger_pos.position.fret <= max_fret,
+                            finger_pos.position.fret >= min_fret.try_into().unwrap() && finger_pos.position.fret <= max_fret.try_into().unwrap(),
                             "Fingering {} position {} for chord {} violates range constraint [{}, {}]: fret {}",
                             i, j, chord, min_fret, max_fret, finger_pos.position.fret
                         );
@@ -2490,7 +2490,7 @@ mod tests {
                 .with_max_fret_span(6) // Allow larger spans for variety
                 .with_max_string_span(config.strings.len()) // Use all available strings
                 .with_skill_level(SkillLevel::Expert) // Allow all techniques for variety
-                .with_fret_range(0, std::cmp::min(config.fret_count, 12)) // Reasonable range
+                .with_fret_range(0, std::cmp::min(config.fret_count.try_into().unwrap(), 12)) // Reasonable range
                 .with_max_fingerings(50) // Allow many fingerings for testing
                 .with_prefer_open_strings(false); // Don't bias toward open strings
 
@@ -2706,7 +2706,7 @@ mod tests {
             for skill_level in skill_levels {
                 let generator_config = ChordFingeringConfig::new()
                     .with_skill_level(skill_level)
-                    .with_fret_range(0, std::cmp::min(config.fret_count, 15))
+                    .with_fret_range(0, std::cmp::min(config.fret_count.try_into().unwrap(), 15))
                     .with_max_fingerings(20);
 
                 let generator = ChordFingeringGenerator::with_config(generator_config);
@@ -2899,7 +2899,7 @@ mod tests {
                 .with_max_fret_span(6) // Allow larger spans for barre chords
                 .with_max_string_span(config.strings.len()) // Use all available strings
                 .with_skill_level(SkillLevel::Expert) // Allow all techniques including barre
-                .with_fret_range(1, std::cmp::min(config.fret_count, 12)) // Exclude open strings, focus on fretted positions
+                .with_fret_range(1, std::cmp::min(config.fret_count.try_into().unwrap(), 12)) // Exclude open strings, focus on fretted positions
                 .with_max_fingerings(20); // Reasonable number of fingerings
 
             let generator = ChordFingeringGenerator::with_config(generator_config);
@@ -2961,7 +2961,7 @@ mod tests {
                                     );
 
                                     prop_assert!(
-                                        *end_string < config.strings.len(),
+                                        *end_string < config.strings.len().try_into().unwrap(),
                                         "Barre end string ({}) should be within fretboard range ({})",
                                         end_string, config.strings.len()
                                     );
@@ -3024,7 +3024,7 @@ mod tests {
             if config.strings.len() >= 2 {
                 // Test can_barre method with valid positions
                 let test_start = StringedPosition::new(0, 3);
-                let test_end = StringedPosition::new(config.strings.len() - 1, 3);
+                let test_end = StringedPosition::new((config.strings.len() - 1).try_into().unwrap(), 3);
 
                 if fretboard.is_position_valid(&test_start) && fretboard.is_position_valid(&test_end) {
                     let can_barre = generator.can_barre(&fretboard, &test_start, &test_end);
@@ -3037,7 +3037,7 @@ mod tests {
                 }
 
                 // Test invalid barre (different frets)
-                let invalid_end = StringedPosition::new(config.strings.len() - 1, 4);
+                let invalid_end = StringedPosition::new((config.strings.len() - 1).try_into().unwrap(), 4);
                 if fretboard.is_position_valid(&invalid_end) {
                     let invalid_barre = generator.can_barre(&fretboard, &test_start, &invalid_end);
                     prop_assert!(
@@ -3095,7 +3095,7 @@ mod tests {
             let guitar_string_count = fretboard.string_count();
             let effective_max_span = max_span.max(guitar_string_count);
 
-            span <= effective_max_span
+            span <= effective_max_span.try_into().unwrap()
         }
 
         fn generate_barre_fingerings(

@@ -330,7 +330,9 @@ mod tests {
         for string_index in 0..4 {
             let position = ContinuousPosition::new(string_index, 0.0);
             let tuning = fretboard.tuning_at_position(&position).unwrap();
-            let expected_tuning = fretboard.string_tuning(string_index).unwrap();
+            let expected_tuning = fretboard
+                .string_tuning(string_index.try_into().unwrap())
+                .unwrap();
             assert_eq!(tuning.class(), expected_tuning.class());
             assert_eq!(tuning.octave(), expected_tuning.octave());
         }
@@ -538,7 +540,7 @@ mod property_tests {
             // Create a valid stringed position within the instrument's range
             let string_idx = string_index % stringed_fretboard.string_count();
             let fret_num = fret_number % stringed_fretboard.fret_count();
-            let stringed_position = StringedPosition::new(string_idx, fret_num);
+            let stringed_position = StringedPosition::new(string_idx.try_into().unwrap(), fret_num.try_into().unwrap());
 
             // Verify that StringedFretboard correctly handles StringedPosition
             let stringed_tuning = stringed_fretboard.tuning_at_position(&stringed_position);
@@ -555,7 +557,7 @@ mod property_tests {
 
             // Create a valid continuous position within the instrument's range
             let cont_string_idx = string_index % continuous_fretboard.string_count();
-            let continuous_pos = ContinuousPosition::new(cont_string_idx, continuous_position);
+            let continuous_pos = ContinuousPosition::new(cont_string_idx.try_into().unwrap(), continuous_position);
 
             // Verify that ContinuousFretboard correctly handles ContinuousPosition
             let continuous_tuning = continuous_fretboard.tuning_at_position(&continuous_pos);
@@ -572,7 +574,7 @@ mod property_tests {
 
             // Create a valid keyboard position within the instrument's range
             let key_idx = key_index % keyboard_fretboard.key_count();
-            let keyboard_position = KeyboardPosition::new(key_idx);
+            let keyboard_position = KeyboardPosition::new(key_idx.try_into().unwrap());
 
             // Verify that KeyboardFretboard correctly handles KeyboardPosition
             let keyboard_tuning = keyboard_fretboard.tuning_at_position(&keyboard_position);
@@ -595,15 +597,15 @@ mod property_tests {
             let continuous_fretboard = ContinuousFretboard::new(continuous_config).unwrap();
 
             let string_idx = string_or_key_index % continuous_fretboard.string_count();
-            let continuous_pos = ContinuousPosition::new(string_idx, position_value);
+            let continuous_pos = ContinuousPosition::new(string_idx.try_into().unwrap(), position_value);
 
             // All positions with valid string index and 0.0-1.0 range should be valid
             prop_assert!(continuous_fretboard.is_position_valid(&continuous_pos),
                         "ContinuousPosition with valid range should be valid");
 
             // Test boundary conditions
-            let boundary_pos_min = ContinuousPosition::new(string_idx, 0.0);
-            let boundary_pos_max = ContinuousPosition::new(string_idx, 1.0);
+            let boundary_pos_min = ContinuousPosition::new(string_idx.try_into().unwrap(), 0.0);
+            let boundary_pos_max = ContinuousPosition::new(string_idx.try_into().unwrap(), 1.0);
 
             prop_assert!(continuous_fretboard.is_position_valid(&boundary_pos_min),
                         "ContinuousPosition at 0.0 should be valid");
@@ -623,8 +625,8 @@ mod property_tests {
             let string_idx = string_index % continuous_fretboard.string_count();
 
             // Test that higher positions on the same string produce higher pitches
-            let lower_pos = ContinuousPosition::new(string_idx, position_value);
-            let higher_pos = ContinuousPosition::new(string_idx, position_value + 0.1);
+            let lower_pos = ContinuousPosition::new(string_idx.try_into().unwrap(), position_value);
+            let higher_pos = ContinuousPosition::new(string_idx.try_into().unwrap(), position_value + 0.1);
 
             let lower_tuning = continuous_fretboard.tuning_at_position(&lower_pos);
             let higher_tuning = continuous_fretboard.tuning_at_position(&higher_pos);
@@ -635,7 +637,7 @@ mod property_tests {
             }
 
             // Test that open string (position 0.0) matches the string tuning
-            let open_pos = ContinuousPosition::new(string_idx, 0.0);
+            let open_pos = ContinuousPosition::new(string_idx.try_into().unwrap(), 0.0);
             let open_tuning = continuous_fretboard.tuning_at_position(&open_pos);
             let string_tuning = continuous_fretboard.string_tuning(string_idx);
 

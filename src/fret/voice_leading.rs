@@ -10,7 +10,7 @@ use super::{
 use crate::Chord;
 
 /// Voice leading optimizer for chord progressions
-/// 
+///
 /// This optimizer finds the best sequence of fingerings for a chord progression
 /// by minimizing transition costs between adjacent chords.
 #[derive(Clone, Debug)]
@@ -51,7 +51,7 @@ impl VoiceLeadingOptimizer {
     }
 
     /// Optimize fingering sequence for a chord progression using dynamic programming
-    /// 
+    ///
     /// Returns the optimal sequence of fingerings that minimizes the total cost
     /// (combination of transition costs and individual fingering difficulties).
     pub fn optimize_progression(
@@ -111,19 +111,24 @@ impl VoiceLeadingOptimizer {
         // Fill DP table for remaining chords
         for chord_idx in 1..num_chords {
             let mut current_chord_costs = Vec::new();
-            
-            for (curr_fingering_idx, curr_fingering) in chord_fingerings[chord_idx].iter().enumerate() {
+
+            for (_curr_fingering_idx, curr_fingering) in
+                chord_fingerings[chord_idx].iter().enumerate()
+            {
                 let mut best_cost = f32::INFINITY;
                 let mut best_prev_idx = None;
 
                 // Try all fingerings from previous chord
-                for (prev_fingering_idx, prev_fingering) in chord_fingerings[chord_idx - 1].iter().enumerate() {
+                for (prev_fingering_idx, prev_fingering) in
+                    chord_fingerings[chord_idx - 1].iter().enumerate()
+                {
                     let prev_total_cost = dp[chord_idx - 1][prev_fingering_idx].0;
-                    
+
                     // Calculate transition cost
-                    let transition_cost = self.difficulty_evaluator
+                    let transition_cost = self
+                        .difficulty_evaluator
                         .calculate_transition_cost(prev_fingering, curr_fingering);
-                    
+
                     // Calculate total cost for this path
                     let total_cost = prev_total_cost
                         + (transition_cost * self.transition_weight)
@@ -137,21 +142,19 @@ impl VoiceLeadingOptimizer {
 
                 current_chord_costs.push((best_cost, best_prev_idx));
             }
-            
+
             dp.push(current_chord_costs);
         }
 
         // Backtrack to find the optimal sequence
         let mut result = Vec::new();
-        
+
         // Find the best fingering for the last chord
         let last_chord_idx = num_chords - 1;
         let (best_last_fingering_idx, _) = dp[last_chord_idx]
             .iter()
             .enumerate()
-            .min_by(|(_, (cost_a, _)), (_, (cost_b, _))| {
-                cost_a.partial_cmp(cost_b).unwrap()
-            })
+            .min_by(|(_, (cost_a, _)), (_, (cost_b, _))| cost_a.partial_cmp(cost_b).unwrap())
             .unwrap();
 
         // Backtrack through the DP table
@@ -160,7 +163,7 @@ impl VoiceLeadingOptimizer {
 
         loop {
             result.push(chord_fingerings[current_chord_idx][current_fingering_idx].clone());
-            
+
             if let Some(prev_idx) = dp[current_chord_idx][current_fingering_idx].1 {
                 if current_chord_idx == 0 {
                     break;
@@ -195,7 +198,8 @@ impl VoiceLeadingOptimizer {
 
         // Add transition costs
         for window in fingering_sequence.windows(2) {
-            let transition_cost = self.difficulty_evaluator
+            let transition_cost = self
+                .difficulty_evaluator
                 .calculate_transition_cost(&window[0], &window[1]);
             total_cost += transition_cost * self.transition_weight;
         }
@@ -219,41 +223,42 @@ impl VoiceLeadingOptimizer {
         }
 
         let total_cost = self.calculate_sequence_cost(fingering_sequence);
-        let average_difficulty = fingering_sequence
-            .iter()
-            .map(|f| f.difficulty)
-            .sum::<f32>() / fingering_sequence.len() as f32;
+        let average_difficulty = fingering_sequence.iter().map(|f| f.difficulty).sum::<f32>()
+            / fingering_sequence.len() as f32;
 
         let mut transition_costs = Vec::new();
         let mut difficult_transitions = Vec::new();
 
         for (i, window) in fingering_sequence.windows(2).enumerate() {
-            let transition_cost = self.difficulty_evaluator
+            let transition_cost = self
+                .difficulty_evaluator
                 .calculate_transition_cost(&window[0], &window[1]);
             transition_costs.push(transition_cost);
 
             // Flag transitions that are significantly more difficult than average
-            if transition_cost > 0.5 {  // Threshold for "difficult" transition
-                difficult_transitions.push((i, transition_cost));
+            if transition_cost > 0.5 {
+                // Threshold for "difficult" transition
+                difficult_transitions.push(format!("Transition {}: {:.2}", i, transition_cost));
             }
         }
 
-        let max_transition_cost = transition_costs
-            .iter()
-            .fold(0.0f32, |acc, &x| acc.max(x));
+        let max_transition_cost = transition_costs.iter().fold(0.0f32, |acc, &x| acc.max(x));
 
         let mut suggestions = Vec::new();
-        
+
         if average_difficulty > 0.6 {
             suggestions.push("Consider using easier fingerings for some chords".to_string());
         }
-        
+
         if max_transition_cost > 0.7 {
-            suggestions.push("Some transitions are very difficult - consider alternative fingerings".to_string());
+            suggestions.push(
+                "Some transitions are very difficult - consider alternative fingerings".to_string(),
+            );
         }
-        
+
         if difficult_transitions.len() > fingering_sequence.len() / 3 {
-            suggestions.push("Many transitions are difficult - review the entire sequence".to_string());
+            suggestions
+                .push("Many transitions are difficult - review the entire sequence".to_string());
         }
 
         if suggestions.is_empty() {
@@ -286,8 +291,8 @@ pub struct SequenceAnalysis {
     pub average_difficulty: f32,
     /// Maximum transition cost in the sequence
     pub max_transition_cost: f32,
-    /// List of difficult transitions (index, cost)
-    pub difficult_transitions: Vec<(usize, f32)>,
+    /// List of difficult transitions (index, cost) - simplified for UniFFI
+    pub difficult_transitions: Vec<String>,
     /// Optimization suggestions
     pub suggestions: Vec<String>,
 }
@@ -297,6 +302,7 @@ mod voice_leading_tests {
     use super::*;
     use crate::core::chord::ChordQuality;
     use crate::fret::presets::InstrumentPresets;
+    use crate::fret::types::{Finger, FingerPosition, Fingering, PlayingTechnique, StringedPosition};
     use crate::Tuning;
     use std::str::FromStr;
 
@@ -306,8 +312,7 @@ mod voice_leading_tests {
         assert_eq!(optimizer.transition_weight, 0.7);
         assert_eq!(optimizer.difficulty_weight, 0.3);
 
-        let custom_optimizer = VoiceLeadingOptimizer::new()
-            .with_weights(0.5, 0.5);
+        let custom_optimizer = VoiceLeadingOptimizer::new().with_weights(0.5, 0.5);
         assert_eq!(custom_optimizer.transition_weight, 0.5);
         assert_eq!(custom_optimizer.difficulty_weight, 0.5);
     }
@@ -315,9 +320,11 @@ mod voice_leading_tests {
     #[test]
     fn test_empty_progression() {
         let optimizer = VoiceLeadingOptimizer::new();
-        let fretboard = StringedFretboard::new(InstrumentPresets::get_preset("guitar_standard").unwrap()).unwrap();
+        let fretboard =
+            StringedFretboard::new(InstrumentPresets::get_preset("guitar_standard").unwrap())
+                .unwrap();
         let generator = ChordFingeringGenerator::new();
-        
+
         let result = optimizer.optimize_progression(&fretboard, &[], &generator);
         assert!(result.is_ok());
         assert!(result.unwrap().is_empty());
@@ -326,14 +333,13 @@ mod voice_leading_tests {
     #[test]
     fn test_single_chord_progression() {
         let optimizer = VoiceLeadingOptimizer::new();
-        let fretboard = StringedFretboard::new(InstrumentPresets::get_preset("guitar_standard").unwrap()).unwrap();
+        let fretboard =
+            StringedFretboard::new(InstrumentPresets::get_preset("guitar_standard").unwrap())
+                .unwrap();
         let generator = ChordFingeringGenerator::new();
-        
-        let c_major = Chord::new(
-            Tuning::from_str("C4").unwrap(),
-            ChordQuality::Major
-        ).unwrap();
-        
+
+        let c_major = Chord::new(Tuning::from_str("C4").unwrap(), ChordQuality::Major).unwrap();
+
         let result = optimizer.optimize_progression(&fretboard, &[c_major], &generator);
         assert!(result.is_ok());
         let sequence = result.unwrap();
@@ -343,30 +349,23 @@ mod voice_leading_tests {
     #[test]
     fn test_simple_chord_progression() {
         let optimizer = VoiceLeadingOptimizer::new();
-        let fretboard = StringedFretboard::new(InstrumentPresets::get_preset("guitar_standard").unwrap()).unwrap();
+        let fretboard =
+            StringedFretboard::new(InstrumentPresets::get_preset("guitar_standard").unwrap())
+                .unwrap();
         let generator = ChordFingeringGenerator::new();
-        
+
         // Use simpler chords that are definitely playable on standard guitar
-        let a_minor = Chord::new(
-            Tuning::from_str("A2").unwrap(),
-            ChordQuality::Minor
-        ).unwrap();
-        let d_minor = Chord::new(
-            Tuning::from_str("D3").unwrap(),
-            ChordQuality::Minor
-        ).unwrap();
-        let e_major = Chord::new(
-            Tuning::from_str("E2").unwrap(),
-            ChordQuality::Major
-        ).unwrap();
-        
+        let a_minor = Chord::new(Tuning::from_str("A2").unwrap(), ChordQuality::Minor).unwrap();
+        let d_minor = Chord::new(Tuning::from_str("D3").unwrap(), ChordQuality::Minor).unwrap();
+        let e_major = Chord::new(Tuning::from_str("E2").unwrap(), ChordQuality::Major).unwrap();
+
         let progression = vec![a_minor, d_minor, e_major];
         let result = optimizer.optimize_progression(&fretboard, &progression, &generator);
-        
+
         if result.is_ok() {
             let sequence = result.unwrap();
             assert_eq!(sequence.len(), 3);
-            
+
             // Verify that the sequence has reasonable costs
             let total_cost = optimizer.calculate_sequence_cost(&sequence);
             assert!(total_cost > 0.0);
@@ -381,22 +380,18 @@ mod voice_leading_tests {
     #[test]
     fn test_sequence_analysis() {
         let optimizer = VoiceLeadingOptimizer::new();
-        let fretboard = StringedFretboard::new(InstrumentPresets::get_preset("guitar_standard").unwrap()).unwrap();
+        let fretboard =
+            StringedFretboard::new(InstrumentPresets::get_preset("guitar_standard").unwrap())
+                .unwrap();
         let generator = ChordFingeringGenerator::new();
-        
+
         // Use simple chords that should be playable
-        let a_minor = Chord::new(
-            Tuning::from_str("A2").unwrap(),
-            ChordQuality::Minor
-        ).unwrap();
-        let e_major = Chord::new(
-            Tuning::from_str("E2").unwrap(),
-            ChordQuality::Major
-        ).unwrap();
-        
+        let a_minor = Chord::new(Tuning::from_str("A2").unwrap(), ChordQuality::Minor).unwrap();
+        let e_major = Chord::new(Tuning::from_str("E2").unwrap(), ChordQuality::Major).unwrap();
+
         let progression = vec![a_minor, e_major];
         let result = optimizer.optimize_progression(&fretboard, &progression, &generator);
-        
+
         if let Ok(sequence) = result {
             let analysis = optimizer.analyze_sequence(&sequence);
             assert!(analysis.total_cost > 0.0);
@@ -416,18 +411,16 @@ mod voice_leading_tests {
     #[test]
     fn test_cost_calculation() {
         let optimizer = VoiceLeadingOptimizer::new();
-        
+
         // Test empty sequence
         assert_eq!(optimizer.calculate_sequence_cost(&[]), 0.0);
-        
+
         // Test single fingering
-        let single_fingering = vec![
-            Fingering::new(
-                vec![FingerPosition::open(StringedPosition::new(1, 0))],
-                PlayingTechnique::Standard,
-                0.2
-            )
-        ];
+        let single_fingering = vec![Fingering::new(
+            vec![FingerPosition::open(StringedPosition::new(1, 0))],
+            PlayingTechnique::Standard,
+            0.2,
+        )];
         let single_cost = optimizer.calculate_sequence_cost(&single_fingering);
         assert!(single_cost > 0.0);
         assert!(single_cost < 1.0);
@@ -437,28 +430,32 @@ mod voice_leading_tests {
     fn test_weight_impact() {
         let transition_focused = VoiceLeadingOptimizer::new().with_weights(0.9, 0.1);
         let difficulty_focused = VoiceLeadingOptimizer::new().with_weights(0.1, 0.9);
-        
+
         let fingering1 = Fingering::new(
             vec![FingerPosition::open(StringedPosition::new(1, 0))],
             PlayingTechnique::Standard,
-            0.1  // Easy fingering
+            0.1, // Easy fingering
         );
         let fingering2 = Fingering::new(
-            vec![FingerPosition::pressed(StringedPosition::new(1, 5), Finger::Index)],
+            vec![FingerPosition::pressed(
+                StringedPosition::new(1, 5),
+                Finger::Index,
+            )],
             PlayingTechnique::Standard,
-            0.8  // Hard fingering
+            0.8, // Hard fingering
         );
-        
+
         let sequence = vec![fingering1, fingering2];
-        
+
         let transition_cost = transition_focused.calculate_sequence_cost(&sequence);
         let difficulty_cost = difficulty_focused.calculate_sequence_cost(&sequence);
-        
+
         // Both should be positive but may have different relative magnitudes
         assert!(transition_cost > 0.0);
         assert!(difficulty_cost > 0.0);
     }
 }
+
 #[cfg(test)]
 mod voice_leading_prop_tests {
     use super::*;
@@ -497,24 +494,24 @@ mod voice_leading_prop_tests {
                 Tuning::new(PitchClass::E, 2),
                 Tuning::new(PitchClass::G, 2),
             ];
-            
+
             let chord_qualities = [ChordQuality::Major, ChordQuality::Minor];
-            
+
             let mut progression = Vec::new();
             for i in 0..progression_length {
                 let root = chord_roots[i % chord_roots.len()];
                 let quality = chord_qualities[i % chord_qualities.len()];
-                
+
                 if let Ok(chord) = Chord::new(root, quality) {
                     progression.push(chord);
                 }
             }
-            
+
             prop_assume!(!progression.is_empty());
             prop_assume!(progression.len() >= 2);
 
             let generator = ChordFingeringGenerator::new();
-            
+
             // Check if all chords in progression can be played
             let mut all_playable = true;
             for chord in &progression {
@@ -531,12 +528,12 @@ mod voice_leading_prop_tests {
                     }
                 }
             }
-            
+
             prop_assume!(all_playable);
 
             // Test voice leading optimization
             let optimizer = VoiceLeadingOptimizer::new();
-            
+
             match optimizer.optimize_progression(&fretboard, &progression, &generator) {
                 Ok(optimized_sequence) => {
                     // Property 1: Sequence length should match progression length
@@ -553,7 +550,7 @@ mod voice_leading_prop_tests {
                             "Fingering {} should have at least one position",
                             i
                         );
-                        
+
                         prop_assert!(
                             fingering.difficulty >= 0.0 && fingering.difficulty <= 1.0,
                             "Fingering {} should have valid difficulty: {}",
@@ -570,11 +567,11 @@ mod voice_leading_prop_tests {
                             }
                         }
                     }
-                    
+
                     if naive_sequence.len() == progression.len() {
                         let optimized_cost = optimizer.calculate_sequence_cost(&optimized_sequence);
                         let naive_cost = optimizer.calculate_sequence_cost(&naive_sequence);
-                        
+
                         // Optimized sequence should be better or equal to naive approach
                         prop_assert!(
                             optimized_cost <= naive_cost + 0.1, // Allow small tolerance for floating point
@@ -585,25 +582,25 @@ mod voice_leading_prop_tests {
 
                     // Property 4: Sequence analysis should be consistent
                     let analysis = optimizer.analyze_sequence(&optimized_sequence);
-                    
+
                     prop_assert!(
                         analysis.total_cost >= 0.0,
                         "Analysis total cost should be non-negative: {}",
                         analysis.total_cost
                     );
-                    
+
                     prop_assert!(
                         analysis.average_difficulty >= 0.0 && analysis.average_difficulty <= 1.0,
                         "Analysis average difficulty should be in [0,1]: {}",
                         analysis.average_difficulty
                     );
-                    
+
                     prop_assert!(
                         analysis.max_transition_cost >= 0.0,
                         "Analysis max transition cost should be non-negative: {}",
                         analysis.max_transition_cost
                     );
-                    
+
                     prop_assert!(
                         !analysis.suggestions.is_empty(),
                         "Analysis should always provide suggestions"
@@ -612,10 +609,10 @@ mod voice_leading_prop_tests {
                     // Property 5: Weight changes should affect costs predictably
                     let transition_focused = VoiceLeadingOptimizer::new().with_weights(0.9, 0.1);
                     let difficulty_focused = VoiceLeadingOptimizer::new().with_weights(0.1, 0.9);
-                    
+
                     let transition_cost = transition_focused.calculate_sequence_cost(&optimized_sequence);
                     let difficulty_cost = difficulty_focused.calculate_sequence_cost(&optimized_sequence);
-                    
+
                     prop_assert!(
                         transition_cost >= 0.0 && difficulty_cost >= 0.0,
                         "Both weighted costs should be non-negative: transition={:.3}, difficulty={:.3}",
@@ -646,19 +643,19 @@ mod voice_leading_prop_tests {
 
             let generator = ChordFingeringGenerator::new();
             let optimizer = VoiceLeadingOptimizer::new();
-            
+
             // Test with a simple two-chord progression
             let chord1 = Chord::new(Tuning::new(PitchClass::A, 2), ChordQuality::Major).unwrap();
             let chord2 = Chord::new(Tuning::new(PitchClass::D, 3), ChordQuality::Major).unwrap();
-            
+
             let progression = vec![chord1.clone(), chord2.clone()];
-            
+
             // Check if chords are playable
             let chord1_playable = generator.generate_chord_fingerings(&fretboard, &chord1)
                 .map(|f| !f.is_empty()).unwrap_or(false);
             let chord2_playable = generator.generate_chord_fingerings(&fretboard, &chord2)
                 .map(|f| !f.is_empty()).unwrap_or(false);
-                
+
             prop_assume!(chord1_playable && chord2_playable);
 
             match optimizer.optimize_progression(&fretboard, &progression, &generator) {
@@ -667,7 +664,7 @@ mod voice_leading_prop_tests {
                     if let Ok(sequence2) = optimizer.optimize_progression(&fretboard, &progression, &generator) {
                         let cost1 = optimizer.calculate_sequence_cost(&sequence);
                         let cost2 = optimizer.calculate_sequence_cost(&sequence2);
-                        
+
                         prop_assert!(
                             (cost1 - cost2).abs() < 0.001,
                             "Repeated optimization should give consistent costs: {:.6} vs {:.6}",
@@ -692,7 +689,7 @@ mod voice_leading_prop_tests {
                             2,
                             "Reversed progression should return two fingerings"
                         );
-                        
+
                         let reversed_cost = optimizer.calculate_sequence_cost(&reversed_sequence);
                         prop_assert!(
                             reversed_cost >= 0.0,

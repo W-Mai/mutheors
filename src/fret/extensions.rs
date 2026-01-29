@@ -5,12 +5,10 @@
 
 use super::{
     traits::{
-        CustomEvaluationCriteria, CustomFingeringAlgorithm, CustomInstrument, ExtensionRegistry,
-        Fretboard,
+        CustomInstrument, ExtensionRegistry,
     },
-    Fingering, FretboardError, FretboardResult,
+    FretboardError, FretboardResult,
 };
-use crate::Chord;
 use std::any::Any;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
@@ -172,95 +170,92 @@ impl InstrumentConfigValidator {
     }
 }
 
-/// Example custom instrument implementation for demonstration
-///
-/// This shows how to implement a custom instrument using the extension system.
-#[derive(Debug, Clone)]
-pub struct ExampleCustomInstrument {
-    config: ExampleInstrumentConfig,
-}
+// Example types only used in tests
+#[cfg(test)]
+mod examples {
+    use super::*;
 
-#[derive(Debug, Clone)]
-pub struct ExampleInstrumentConfig {
-    pub name: String,
-    pub string_count: usize,
-    pub fret_count: usize,
-    pub tunings: Vec<crate::Tuning>,
-}
+    #[derive(Debug, Clone)]
+    pub struct ExampleCustomInstrument {
+        pub config: ExampleInstrumentConfig,
+    }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct ExamplePosition {
-    pub string: usize,
-    pub fret: usize,
-}
+    #[derive(Debug, Clone)]
+    pub struct ExampleInstrumentConfig {
+        pub name: String,
+        pub string_count: usize,
+        pub fret_count: usize,
+        pub tunings: Vec<crate::Tuning>,
+    }
 
-impl CustomInstrument for ExampleCustomInstrument {
-    type Position = ExamplePosition;
-    type Config = ExampleInstrumentConfig;
+    #[derive(Debug, Clone, PartialEq)]
+    pub struct ExamplePosition {
+        pub string: usize,
+        pub fret: usize,
+    }
 
-    fn new(config: Self::Config) -> FretboardResult<Self> {
-        if !Self::validate_config(&config) {
-            return Err(FretboardError::invalid_configuration(
-                "Invalid example instrument configuration",
-            ));
+    impl super::super::traits::CustomInstrument for ExampleCustomInstrument {
+        type Position = ExamplePosition;
+        type Config = ExampleInstrumentConfig;
+
+        fn new(config: Self::Config) -> FretboardResult<Self> {
+            if !Self::validate_config(&config) {
+                return Err(FretboardError::invalid_configuration(
+                    "Invalid example instrument configuration",
+                ));
+            }
+            Ok(Self { config })
         }
 
-        Ok(Self { config })
+        fn validate_config(config: &Self::Config) -> bool {
+            !config.name.is_empty()
+                && config.string_count > 0
+                && config.string_count <= 12
+                && config.fret_count > 0
+                && config.fret_count <= 30
+                && config.tunings.len() == config.string_count
+        }
+
+        fn instrument_name(&self) -> &'static str {
+            "example_custom"
+        }
+
+        fn instrument_category(&self) -> &'static str {
+            "custom"
+        }
+
+        fn supported_techniques(&self) -> Vec<&'static str> {
+            vec!["normal", "barre", "hammer_on", "pull_off"]
+        }
     }
 
-    fn validate_config(config: &Self::Config) -> bool {
-        !config.name.is_empty()
-            && config.string_count > 0
-            && config.string_count <= 12  // Reasonable limit
-            && config.fret_count > 0
-            && config.fret_count <= 30    // Reasonable limit
-            && config.tunings.len() == config.string_count
+    #[derive(Debug, Clone)]
+    pub struct ExampleCustomAlgorithm {
+        pub config: ExampleAlgorithmConfig,
     }
 
-    fn instrument_name(&self) -> &'static str {
-        "example_custom"
+    #[derive(Debug, Clone)]
+    pub struct ExampleAlgorithmConfig {
+        pub prefer_open_strings: bool,
+        pub max_fret_span: usize,
+        pub difficulty_weight: f32,
     }
 
-    fn instrument_category(&self) -> &'static str {
-        "custom"
-    }
-
-    fn supported_techniques(&self) -> Vec<&'static str> {
-        vec!["normal", "barre", "hammer_on", "pull_off"]
-    }
-}
-
-/// Example custom fingering algorithm
-///
-/// This demonstrates how to implement a custom algorithm using the extension system.
-#[derive(Debug, Clone)]
-pub struct ExampleCustomAlgorithm {
-    pub config: ExampleAlgorithmConfig,
-}
-
-#[derive(Debug, Clone)]
-pub struct ExampleAlgorithmConfig {
-    pub prefer_open_strings: bool,
-    pub max_fret_span: usize,
-    pub difficulty_weight: f32,
-}
-
-impl ExampleCustomAlgorithm {
-    /// Create a new instance of the algorithm
-    pub fn new(config: ExampleAlgorithmConfig) -> Self {
-        Self { config }
-    }
-
-    /// Get the algorithm name
-    pub fn algorithm_name(&self) -> &'static str {
-        "example_custom_algorithm"
-    }
-
-    /// Get the algorithm description
-    pub fn algorithm_description(&self) -> &'static str {
-        "Example custom fingering algorithm for demonstration purposes"
+    impl ExampleCustomAlgorithm {
+        pub fn new(config: ExampleAlgorithmConfig) -> Self {
+            Self { config }
+        }
+        pub fn algorithm_name(&self) -> &'static str {
+            "example_custom_algorithm"
+        }
+        pub fn algorithm_description(&self) -> &'static str {
+            "Example custom fingering algorithm for demonstration purposes"
+        }
     }
 }
+
+#[cfg(test)]
+pub(crate) use examples::*;
 
 #[cfg(test)]
 mod tests {
@@ -591,7 +586,7 @@ mod property_tests {
                             _ => None,
                         };
                         FingerPosition {
-                            position: StringedPosition { string, fret },
+                            position: StringedPosition { string: string.try_into().unwrap(), fret: fret.try_into().unwrap() },
                             finger,
                             pressure: 1.0,
                         }
@@ -741,7 +736,7 @@ mod property_tests {
                         pressure: 1.0,
                     },
                     FingerPosition {
-                        position: StringedPosition { string: 1, fret: 2 + fret_span },
+                        position: StringedPosition { string: 1, fret: (2 + fret_span).try_into().unwrap() },
                         finger: Some(Finger::Pinky),
                         pressure: 1.0,
                     },
@@ -787,12 +782,12 @@ mod property_tests {
 ///
 /// This shows how to implement custom evaluation criteria for fingering quality assessment.
 #[derive(Debug, Clone)]
-pub struct ExampleEvaluationCriteria {
+pub(crate) struct ExampleEvaluationCriteria {
     config: ExampleEvaluationConfig,
 }
 
 #[derive(Debug, Clone)]
-pub struct ExampleEvaluationConfig {
+pub(crate) struct ExampleEvaluationConfig {
     pub weight: f32,
     pub prefer_lower_frets: bool,
     pub penalize_stretches: bool,
@@ -862,12 +857,12 @@ impl ExampleEvaluationCriteria {
 ///
 /// This demonstrates how to implement custom playing techniques for specific instruments.
 #[derive(Debug, Clone)]
-pub struct StringedInstrumentTechniques {
+pub(crate) struct StringedInstrumentTechniques {
     config: TechniqueConfig,
 }
 
 #[derive(Debug, Clone)]
-pub struct TechniqueConfig {
+pub(crate) struct TechniqueConfig {
     pub allow_harmonics: bool,
     pub allow_slides: bool,
     pub allow_bends: bool,
@@ -970,13 +965,13 @@ impl StringedInstrumentTechniques {
 /// Plugin system for integrating custom algorithms and criteria
 ///
 /// This provides a unified interface for managing and applying custom extensions.
-pub struct PluginSystem {
+pub(crate) struct PluginSystem {
     evaluation_criteria: Vec<Box<dyn EvaluationCriteriaPlugin>>,
     technique_handlers: Vec<Box<dyn TechniquePlugin>>,
 }
 
 /// Trait for evaluation criteria plugins
-pub trait EvaluationCriteriaPlugin: Send + Sync {
+pub(crate) trait EvaluationCriteriaPlugin: Send + Sync {
     fn name(&self) -> &str;
     fn evaluate_stringed(
         &self,
@@ -986,7 +981,7 @@ pub trait EvaluationCriteriaPlugin: Send + Sync {
 }
 
 /// Trait for technique plugins
-pub trait TechniquePlugin: Send + Sync {
+pub(crate) trait TechniquePlugin: Send + Sync {
     fn name(&self) -> &str;
     fn supported_techniques(&self) -> Vec<&str>;
     fn can_apply(&self, technique: &str) -> bool;
@@ -1126,8 +1121,13 @@ impl TechniquePlugin for StringedInstrumentTechniques {
         self.technique_difficulty_modifier(technique)
     }
 }
-#[test]
-fn test_custom_evaluation_criteria() {
+
+#[cfg(test)]
+mod plugin_tests {
+    use super::*;
+
+    #[test]
+    fn test_custom_evaluation_criteria() {
     use crate::fret::{Finger, FingerPosition, Fingering, PlayingTechnique, StringedPosition};
     use crate::{PitchClass, Tuning};
 
@@ -1298,4 +1298,5 @@ fn test_plugin_system_empty() {
     // Should have no supported techniques
     assert!(plugin_system.get_supported_techniques().is_empty());
     assert!(!plugin_system.supports_technique("any"));
+}
 }

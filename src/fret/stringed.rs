@@ -948,7 +948,7 @@ mod tests {
 
             // Test with capo at various positions
             for capo_fret in 1..=std::cmp::min(config.fret_count / 2, 5) {
-                if let Ok(capo_fretboard) = fretboard.with_capo(capo_fret) {
+                if let Ok(capo_fretboard) = fretboard.with_capo(capo_fret.try_into().unwrap()) {
                     // Test that all open strings are raised by exactly capo_fret semitones
                     for string_idx in 0..config.strings.len() {
                         let original_open = StringedPosition::new(string_idx as u32, 0);
