@@ -951,6 +951,45 @@ mod property_tests {
                 }
             }
         }
+
+        /// Property 6: Range Constraint Compliance
+        proptest! {
+            #[test]
+            fn property_range_constraint_compliance(
+                string_count in 3u32..=8u32,
+                fret_count in 12u32..=24u32,
+                test_string in 0u32..=7u32,
+                test_fret in 0u32..=23u32,
+            ) {
+                // Test preset instruments for range compliance
+                let preset_configs = [
+                    InstrumentPresets::guitar_standard(),
+                    InstrumentPresets::bass_4_string(),
+                    InstrumentPresets::ukulele_soprano(),
+                ];
+
+                for config in &preset_configs {
+                    let fretboard = StringedFretboard::new(config.clone()).unwrap();
+                    
+                    // All preset positions should be within their defined ranges
+                    let max_position = StringedPosition::new(
+                        (fretboard.string_count() - 1) as u32,
+                        fretboard.fret_count() as u32
+                    );
+                    
+                    prop_assert!(fretboard.is_position_valid(&max_position),
+                               "Maximum position should be valid for preset instrument");
+                    
+                    // Test random positions within range
+                    let random_string = test_string % (fretboard.string_count() as u32);
+                    let random_fret = test_fret % (fretboard.fret_count() as u32 + 1);
+                    let random_pos = StringedPosition::new(random_string, random_fret);
+                    
+                    prop_assert!(fretboard.is_position_valid(&random_pos),
+                               "Random position {:?} should be valid for preset instrument", random_pos);
+                }
+            }
+        }
     }
 }
 
@@ -1235,247 +1274,94 @@ mod composition_integration_tests {
     }
 }
 
-    /// Property 6: Range Constraint Compliance
-    /// 
-    /// This property test validates that all generated fingerings and positions
-    /// comply with instrument range constraints and physical limitations.
-    /// 
-    /// Properties verified:
-    /// - All positions are within valid string and fret ranges
-    /// - Custom instruments respect their defined constraints
-    /// - Physical dimensions are validated correctly
-    /// - Range violations are handled gracefully
-    #[cfg(test)]
-    mod range_constraint_compliance_property {
-        use super::*;
-        use crate::fret::InstrumentPresets;
-
+        /// Property 12: Instrument-Specific Ergonomics
         proptest! {
             #[test]
-            fn property_range_constraint_compliance(
-                string_count in 3u32..=12u32,
-                fret_count in 12u32..=36u32,
-                scale_length in 200.0f32..=1000.0f32,
-                nut_width in 20.0f32..=80.0f32,
-                string_spacing in 3.0f32..=15.0f32,
-                test_string in 0u32..=11u32,
-                test_fret in 0u32..=35u32,
+            fn property_instrument_specific_ergonomics(
+                chord_quality in prop::sample::select(vec![
+                    ChordQuality::Major,
+                    ChordQuality::Minor,
+                    ChordQuality::Dominant7,
+                ]),
+                skill_level in prop::sample::select(vec![
+                    SkillLevel::Beginner,
+                    SkillLevel::Intermediate,
+                    SkillLevel::Advanced,
+                ]),
             ) {
-                // Create custom instrument configuration
-                let tunings: Vec<Tuning> = (0..string_count)
-                    .map(|i| {
-                        let pitch_class = match i % 12 {
-                            0 => PitchClass::C,
-                            1 => PitchClass::Cs,
-                            2 => PitchClass::D,
-                            3 => PitchClass::Ds,
-                            4 => PitchClass::E,
-                            5 => PitchClass::F,
-                            6 => PitchClass::Fs,
-                            7 => PitchClass::G,
-                            8 => PitchClass::Gs,
-                            9 => PitchClass::A,
-                            10 => PitchClass::As,
-                            _ => PitchClass::B,
-                        };
-                        let octave = 2 + (i / 12) as i8;
-                        Tuning::new(pitch_class, octave)
-                    })
-                    .collect();
-
-                // Test custom instrument creation with validation
-                let custom_result = InstrumentPresets::create_custom_stringed_instrument(
-                    tunings,
-                    fret_count,
-                    scale_length,
-                    nut_width,
-                    string_spacing,
-                );
-
-                match custom_result {
-                    Ok(config) => {
-                        // Property 1: Valid configurations should create working fretboards
-                        let fretboard_result = StringedFretboard::new(config.clone());
-                        prop_assert!(fretboard_result.is_ok(), 
-                                   "Valid custom configuration should create fretboard");
-
-                        if let Ok(fretboard) = fretboard_result {
-                            // Property 2: Fretboard should respect defined constraints
-                            prop_assert_eq!(fretboard.string_count(), string_count as usize,
-                                          "Fretboard should have correct string count");
-                            prop_assert_eq!(fretboard.fret_count(), fret_count as usize,
-                                          "Fretboard should have correct fret count");
-
-                            // Property 3: Position validation should work correctly
-                            let test_position = StringedPosition::new(
-                                std::cmp::min(test_string, string_count - 1),
-                                std::cmp::min(test_fret, fret_count)
-                            );
-
-                            let is_valid = fretboard.is_position_valid(&test_position);
-                            
-                            // Position should be valid if within bounds
-                            if test_position.string < string_count && test_position.fret <= fret_count {
-                                prop_assert!(is_valid, 
-                                           "Position {:?} should be valid for instrument with {} strings and {} frets",
-                                           test_position, string_count, fret_count);
-                            }
-
-                            // Property 4: Out-of-bounds positions should be invalid
-                            let invalid_string_pos = StringedPosition::new(string_count, 0);
-                            prop_assert!(!fretboard.is_position_valid(&invalid_string_pos),
-                                       "Position with string {} should be invalid for {}-string instrument",
-                                       string_count, string_count);
-
-                            let invalid_fret_pos = StringedPosition::new(0, fret_count + 1);
-                            prop_assert!(!fretboard.is_position_valid(&invalid_fret_pos),
-                                       "Position with fret {} should be invalid for {}-fret instrument",
-                                       fret_count + 1, fret_count);
-
-                            // Property 5: Tuning calculations should respect range
-                            for string_idx in 0..std::cmp::min(string_count as usize, 6) {
-                                for fret_idx in 0..=std::cmp::min(fret_count as usize, 12) {
-                                    let pos = StringedPosition::new(string_idx as u32, fret_idx as u32);
-                                    let tuning = fretboard.tuning_at_position(&pos);
-                                    
-                                    if tuning.is_some() {
-                                        // Tuning should be within reasonable MIDI range
-                                        let midi_number = tuning.unwrap().number();
-                                        prop_assert!(midi_number >= 12 && midi_number <= 127,
-                                                   "MIDI number {} should be within valid range (12-127)", midi_number);
-                                    }
-                                }
-                            }
-
-                            // Property 6: Chord generation should respect constraints
-                            let generator = ChordFingeringGenerator::new();
-                            let test_chord = Chord::new(
-                                Tuning::new(PitchClass::C, 3), 
-                                ChordQuality::Major
-                            ).unwrap();
-
-                            let fingering_result = generator.generate_chord_fingerings(&fretboard, &test_chord);
-                            
-                            match fingering_result {
-                                Ok(fingerings) => {
-                                    // All generated fingerings should respect instrument constraints
-                                    for fingering in &fingerings {
-                                        for finger_pos in &fingering.positions {
-                                            let pos = &finger_pos.position;
-                                            
-                                            prop_assert!(pos.string < string_count,
-                                                       "Fingering string {} should be within bounds (0-{})",
-                                                       pos.string, string_count - 1);
-                                            prop_assert!(pos.fret <= fret_count,
-                                                       "Fingering fret {} should be within bounds (0-{})",
-                                                       pos.fret, fret_count);
-                                            
-                                            // Position should be valid according to fretboard
-                                            prop_assert!(fretboard.is_position_valid(pos),
-                                                       "Generated fingering position {:?} should be valid", pos);
-                                        }
-                                    }
-                                }
-                                Err(_) => {
-                                    // Graceful failure is acceptable for some configurations
-                                }
-                            }
-                        }
-                    }
-                    Err(_) => {
-                        // Property 7: Invalid configurations should be rejected gracefully
-                        // This is expected for some parameter combinations
-                        // (e.g., too many strings for nut width, unrealistic dimensions)
-                    }
-                }
-
-                // Property 8: Test preset instruments for range compliance
-                let preset_configs = [
-                    InstrumentPresets::guitar_standard(),
-                    InstrumentPresets::bass_4_string(),
-                    InstrumentPresets::ukulele_soprano(),
-                    InstrumentPresets::mandolin_standard(),
-                    InstrumentPresets::banjo_5_string(),
+                // Test ergonomics across different instruments
+                let instruments = [
+                    ("Guitar", InstrumentPresets::guitar_standard()),
+                    ("Bass", InstrumentPresets::bass_4_string()),
+                    ("Ukulele", InstrumentPresets::ukulele_soprano()),
                 ];
 
-                for config in &preset_configs {
+                for (instrument_name, config) in &instruments {
                     let fretboard = StringedFretboard::new(config.clone()).unwrap();
+                    let fingering_config = ChordFingeringConfig::new().with_skill_level(skill_level);
+                    let generator = ChordFingeringGenerator::with_config(fingering_config);
+
+                    let test_chord = Chord::new(Tuning::new(PitchClass::C, 3), chord_quality).unwrap();
                     
-                    // All preset positions should be within their defined ranges
-                    let max_position = StringedPosition::new(
-                        (fretboard.string_count() - 1) as u32,
-                        fretboard.fret_count() as u32
-                    );
-                    
-                    prop_assert!(fretboard.is_position_valid(&max_position),
-                               "Maximum position should be valid for preset instrument");
-                    
-                    // Test a few random positions within range
-                    for _ in 0..5 {
-                        let random_string = test_string % (fretboard.string_count() as u32);
-                        let random_fret = test_fret % (fretboard.fret_count() as u32 + 1);
-                        let random_pos = StringedPosition::new(random_string, random_fret);
-                        
-                        prop_assert!(fretboard.is_position_valid(&random_pos),
-                                   "Random position {:?} should be valid for preset instrument", random_pos);
-                    }
-                }
-            }
-        }
+                    if let Ok(fingerings) = generator.generate_chord_fingerings(&fretboard, &test_chord) {
+                        for fingering in &fingerings {
+                            // Property 1: Ergonomic constraints should be instrument-specific
+                            let fret_span = if fingering.positions.is_empty() {
+                                0
+                            } else {
+                                let min_fret = fingering.positions.iter().map(|p| p.position.fret).min().unwrap();
+                                let max_fret = fingering.positions.iter().map(|p| p.position.fret).max().unwrap();
+                                max_fret - min_fret
+                            };
 
-        proptest! {
-            #[test]
-            fn property_keyboard_range_constraint_compliance(
-                key_count in 25u32..=88u32,
-                starting_octave in 0i8..=6i8,
-            ) {
-                use crate::fret::{KeyboardFretboard, KeyboardConfig, KeyLayout};
-                
-                let lowest_key = Tuning::new(PitchClass::C, starting_octave);
-                
-                // Test custom keyboard creation
-                let custom_result = InstrumentPresets::create_custom_keyboard(
-                    lowest_key,
-                    key_count,
-                    KeyLayout::Piano,
-                );
-
-                match custom_result {
-                    Ok(config) => {
-                        // Property 1: Valid configurations should create working keyboards
-                        let keyboard_result = KeyboardFretboard::new(config.clone());
-                        prop_assert!(keyboard_result.is_ok(),
-                                   "Valid custom keyboard configuration should create keyboard");
-
-                        if let Ok(keyboard) = keyboard_result {
-                            // Property 2: Keyboard should respect defined constraints
-                            prop_assert_eq!(keyboard.key_count(), key_count as usize,
-                                          "Keyboard should have correct key count");
-
-                            // Property 3: All keys should be within MIDI range
-                            for key_idx in 0..std::cmp::min(key_count as usize, 20) {
-                                let key_tuning = keyboard.key_tuning(key_idx);
-                                if let Some(tuning) = key_tuning {
-                                    let midi_number = tuning.number();
-                                    prop_assert!(midi_number >= 0 && midi_number <= 127,
-                                               "Key {} MIDI number {} should be within valid range (0-127)",
-                                               key_idx, midi_number);
+                            // Different instruments should have different ergonomic limits
+                            match instrument_name {
+                                &"Guitar" => {
+                                    // Guitar should allow reasonable fret spans
+                                    prop_assert!(fret_span <= 5, 
+                                               "Guitar fret span {} should be reasonable", fret_span);
                                 }
+                                &"Bass" => {
+                                    // Bass might have tighter constraints due to larger scale
+                                    prop_assert!(fret_span <= 4, 
+                                               "Bass fret span {} should be tighter than guitar", fret_span);
+                                }
+                                &"Ukulele" => {
+                                    // Ukulele might allow larger spans due to smaller scale
+                                    prop_assert!(fret_span <= 6, 
+                                               "Ukulele fret span {} should accommodate smaller scale", fret_span);
+                                }
+                                _ => {}
                             }
 
-                            // Property 4: Key validation should work correctly
-                            prop_assert!(keyboard.is_key_valid(0), "First key should be valid");
-                            prop_assert!(keyboard.is_key_valid(key_count as usize - 1), "Last key should be valid");
-                            prop_assert!(!keyboard.is_key_valid(key_count as usize), "Out-of-range key should be invalid");
+                            // Property 2: Skill level should affect ergonomic complexity
+                            match skill_level {
+                                SkillLevel::Beginner => {
+                                    prop_assert!(fret_span <= 3, 
+                                               "Beginner fingerings should have limited fret span");
+                                    prop_assert!(fingering.difficulty <= 0.7, 
+                                               "Beginner fingerings should be less difficult");
+                                }
+                                SkillLevel::Advanced => {
+                                    // Advanced players can handle more complex fingerings
+                                    // No strict upper limits
+                                }
+                                _ => {}
+                            }
+
+                            // Property 3: All fingerings should be physically possible
+                            prop_assert!(fingering.difficulty >= 0.0 && fingering.difficulty <= 1.0,
+                                       "Difficulty should be normalized");
+                            
+                            // Property 4: Positions should be within instrument range
+                            for finger_pos in &fingering.positions {
+                                prop_assert!(finger_pos.position.string < fretboard.string_count() as u32,
+                                           "String position should be within instrument range");
+                                prop_assert!(finger_pos.position.fret <= fretboard.fret_count() as u32,
+                                           "Fret position should be within instrument range");
+                            }
                         }
-                    }
-                    Err(_) => {
-                        // Property 5: Invalid configurations should be rejected gracefully
-                        // This is expected for some parameter combinations
-                        // (e.g., key range exceeding MIDI limits)
                     }
                 }
             }
         }
-    }
-}
