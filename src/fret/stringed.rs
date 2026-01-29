@@ -60,7 +60,7 @@ impl StringedFretboard {
 
         Ok(Self {
             config,
-            position_cache: RefCell::new(HashMap::new()),
+            position_cache: HashMap::new(),
         })
     }
 
@@ -91,12 +91,12 @@ impl StringedFretboard {
 
     /// Get the number of strings on this instrument
     pub fn string_count(&self) -> usize {
-        self.config.string_count()
+        self.config.string_count() as usize
     }
 
     /// Get the number of frets on this instrument
     pub fn fret_count(&self) -> usize {
-        self.config.fret_count
+        self.config.fret_count as usize
     }
 
     /// Get the tuning of a specific string
@@ -121,7 +121,7 @@ impl StringedFretboard {
     /// * `Some(Tuning)` if the position is valid
     /// * `None` if the string index or fret is out of range
     fn calculate_tuning_at_fret(&self, string_index: usize, fret: usize) -> Option<Tuning> {
-        if fret > self.config.fret_count {
+        if fret > self.config.fret_count as usize {
             return None;
         }
 
@@ -170,7 +170,7 @@ impl StringedFretboard {
                     {
                         // Compare pitch numbers to handle enharmonic equivalents correctly
                         if calculated_tuning.number() == tuning.number() {
-                            positions.push(StringedPosition::new(string_index, fret));
+                            positions.push(StringedPosition::new(string_index as u32, fret as u32));
                         }
                     }
                 }
@@ -181,17 +181,13 @@ impl StringedFretboard {
     }
 
     /// Clear the position cache
-    pub fn clear_cache(&self) {
-        if let Ok(mut cache) = self.position_cache.try_borrow_mut() {
-            cache.clear();
-        }
+    pub fn clear_cache(&mut self) {
+        self.position_cache.clear();
     }
 
     /// Get the current cache size
     pub fn cache_size(&self) -> usize {
-        self.position_cache
-            .try_borrow()
-            .map_or(0, |cache| cache.len())
+        self.position_cache.len()
     }
 
     /// Check if a string index is valid
@@ -201,7 +197,7 @@ impl StringedFretboard {
 
     /// Check if a fret number is valid
     pub fn is_fret_valid(&self, fret: usize) -> bool {
-        fret <= self.config.fret_count
+        fret <= self.config.fret_count as usize
     }
 
     /// Apply a capo at the specified fret
@@ -216,10 +212,13 @@ impl StringedFretboard {
     /// * `Ok(StringedFretboard)` with capo applied
     /// * `Err(FretboardError)` if capo fret is invalid
     pub fn with_capo(&self, capo_fret: usize) -> FretboardResult<Self> {
-        if capo_fret > self.config.fret_count {
+        if capo_fret > self.config.fret_count as usize {
             return Err(FretboardError::invalid_position_with_context(
-                format!("Capo fret {} exceeds fret count {}", capo_fret, self.config.fret_count),
-                "Capo position is outside valid range"
+                format!(
+                    "Capo fret {} exceeds fret count {}",
+                    capo_fret, self.config.fret_count
+                ),
+                "Capo position is outside valid range",
             ));
         }
 
@@ -231,15 +230,16 @@ impl StringedFretboard {
         let mut new_strings = Vec::new();
         for &base_tuning in &self.config.strings {
             let interval = Interval::from_semitones(capo_fret as i8).map_err(|_| {
-                FretboardError::invalid_configuration_with_fix(
-                    format!("Invalid capo fret: {}", capo_fret)
-                )
+                FretboardError::invalid_configuration_with_fix(format!(
+                    "Invalid capo fret: {}",
+                    capo_fret
+                ))
             })?;
 
             let new_tuning = base_tuning.add_interval(&interval).map_err(|_| {
                 FretboardError::tuning_out_of_range_with_range(
                     &base_tuning,
-                    "Check instrument's playable range with capo"
+                    "Check instrument's playable range with capo",
                 )
             })?;
 
@@ -249,7 +249,7 @@ impl StringedFretboard {
         // Create new config with adjusted fret count
         let new_config = StringedInstrumentConfig::new(
             new_strings,
-            self.config.fret_count - capo_fret,
+            (self.config.fret_count as usize - capo_fret) as u32,
             self.config.scale_length,
             self.config.nut_width,
             self.config.string_spacing,
@@ -272,8 +272,12 @@ impl StringedFretboard {
         for (string_index, new_tuning) in string_tunings {
             if string_index >= new_strings.len() {
                 return Err(FretboardError::invalid_position_with_context(
-                    format!("String index {} exceeds string count {}", string_index, new_strings.len()),
-                    "String index is outside valid range"
+                    format!(
+                        "String index {} exceeds string count {}",
+                        string_index,
+                        new_strings.len()
+                    ),
+                    "String index is outside valid range",
                 ));
             }
             new_strings[string_index] = new_tuning;
@@ -311,39 +315,28 @@ impl Fretboard for StringedFretboard {
     type Config = StringedInstrumentConfig;
 
     fn tuning_at_position(&self, position: &Self::Position) -> Option<Tuning> {
-        self.calculate_tuning_at_fret(position.string, position.fret)
+        self.calculate_tuning_at_fret(position.string as usize, position.fret as usize)
     }
 
     fn positions_for_tuning(&self, tuning: &Tuning) -> Vec<Self::Position> {
         // Use alternate format to include octave information in cache key
         let cache_key = format!("{:#}", tuning);
 
-        // Try to get from cache
-        if let Ok(cache) = self.position_cache.try_borrow() {
-            if let Some(cached_positions) = cache.get(&cache_key) {
-                return cached_positions.clone();
-            }
-        }
-
-        // Calculate positions if not in cache
+        // Calculate positions directly without caching for now
+        // TODO: Implement thread-safe caching solution
         let positions = self.find_positions_uncached(tuning);
-
-        // Try to cache the result
-        if let Ok(mut cache) = self.position_cache.try_borrow_mut() {
-            cache.insert(cache_key, positions.clone());
-        }
 
         positions
     }
 
     fn is_position_valid(&self, position: &Self::Position) -> bool {
-        self.is_string_valid(position.string) && self.is_fret_valid(position.fret)
+        self.is_string_valid(position.string as usize) && self.is_fret_valid(position.fret as usize)
     }
 
     fn get_range(&self) -> (Self::Position, Self::Position) {
         let min_position = StringedPosition::new(0, 0);
         let max_position = StringedPosition::new(
-            self.string_count().saturating_sub(1),
+            (self.string_count().saturating_sub(1)) as u32,
             self.config.fret_count,
         );
         (min_position, max_position)
@@ -358,7 +351,7 @@ impl Fretboard for StringedFretboard {
 
         for string in 0..self.string_count() {
             for fret in 0..=self.config.fret_count {
-                positions.push(StringedPosition::new(string, fret));
+                positions.push(StringedPosition::new(string as u32, fret as u32));
             }
         }
 
@@ -569,7 +562,7 @@ mod tests {
     #[test]
     fn test_cache_operations() {
         let config = create_standard_guitar_config();
-        let fretboard = StringedFretboard::new(config).unwrap();
+        let mut fretboard = StringedFretboard::new(config).unwrap();
 
         assert_eq!(fretboard.cache_size(), 0);
 
@@ -710,7 +703,7 @@ mod tests {
             |(strings, fret_count, scale_length, nut_width, string_spacing)| {
                 StringedInstrumentConfig::new(
                     strings,
-                    fret_count,
+                    fret_count as u32,
                     scale_length,
                     nut_width,
                     string_spacing,
@@ -770,7 +763,7 @@ mod tests {
             // Test multiple positions across the fretboard
             for string in 0..std::cmp::min(config.strings.len(), 3) { // Test first 3 strings
                 for fret in 0..=std::cmp::min(config.fret_count, 12) { // Test first 12 frets
-                    let position = StringedPosition::new(string, fret);
+                    let position = StringedPosition::new(string as u32, fret as u32);
 
                     if let Some(tuning) = fretboard.tuning_at_position(&position) {
                         let found_positions = fretboard.positions_for_tuning(&tuning);
@@ -832,8 +825,8 @@ mod tests {
             for string_idx in 0..config.strings.len() {
                 // Test that adjacent frets are exactly one semitone apart
                 for fret in 0..std::cmp::min(config.fret_count, 12) {
-                    let pos1 = StringedPosition::new(string_idx, fret);
-                    let pos2 = StringedPosition::new(string_idx, fret + 1);
+                    let pos1 = StringedPosition::new(string_idx as u32, fret as u32);
+                    let pos2 = StringedPosition::new(string_idx as u32, (fret + 1) as u32);
 
                     if let (Some(tuning1), Some(tuning2)) = (
                         fretboard.tuning_at_position(&pos1),
@@ -855,7 +848,7 @@ mod tests {
                 // Each fret should raise the pitch by exactly the expected number of semitones
                 if let Some(open_tuning) = fretboard.string_tuning(string_idx) {
                     for fret in 1..=std::cmp::min(config.fret_count, 12) {
-                        let position = StringedPosition::new(string_idx, fret);
+                        let position = StringedPosition::new(string_idx as u32, fret as u32);
 
                         if let Some(fretted_tuning) = fretboard.tuning_at_position(&position) {
                             let expected_pitch_number = open_tuning.number() + fret as i8;
@@ -919,8 +912,8 @@ mod tests {
                             // Test that other strings remain unaffected
                             if config.strings.len() > 1 {
                                 for string_idx in 1..std::cmp::min(config.strings.len(), 3) {
-                                    let original_pos = StringedPosition::new(string_idx, 0);
-                                    let alt_pos = StringedPosition::new(string_idx, 0);
+                                    let original_pos = StringedPosition::new(string_idx as u32, 0);
+                                    let alt_pos = StringedPosition::new(string_idx as u32, 0);
 
                                     if let (Some(original_tuning), Some(alt_tuning)) = (
                                         fretboard.tuning_at_position(&original_pos),
@@ -958,8 +951,8 @@ mod tests {
                 if let Ok(capo_fretboard) = fretboard.with_capo(capo_fret) {
                     // Test that all open strings are raised by exactly capo_fret semitones
                     for string_idx in 0..config.strings.len() {
-                        let original_open = StringedPosition::new(string_idx, 0);
-                        let capo_open = StringedPosition::new(string_idx, 0);
+                        let original_open = StringedPosition::new(string_idx as u32, 0);
+                        let capo_open = StringedPosition::new(string_idx as u32, 0);
 
                         if let (Some(original_tuning), Some(capo_tuning)) = (
                             fretboard.tuning_at_position(&original_open),
@@ -981,8 +974,8 @@ mod tests {
                     // Test that chromatic consistency is maintained with capo
                     for string_idx in 0..std::cmp::min(config.strings.len(), 2) {
                         for fret in 0..std::cmp::min(capo_fretboard.fret_count(), 6) {
-                            let pos1 = StringedPosition::new(string_idx, fret);
-                            let pos2 = StringedPosition::new(string_idx, fret + 1);
+                            let pos1 = StringedPosition::new(string_idx as u32, fret as u32);
+                            let pos2 = StringedPosition::new(string_idx as u32, (fret + 1) as u32);
 
                             if let (Some(tuning1), Some(tuning2)) = (
                                 capo_fretboard.tuning_at_position(&pos1),

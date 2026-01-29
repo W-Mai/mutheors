@@ -311,7 +311,7 @@ impl DifficultyEvaluator {
                     })
                     .count();
 
-                let partial_barre_bonus = if actual_barre_positions < barre_span {
+                let partial_barre_bonus = if actual_barre_positions < barre_span as usize {
                     -0.1 // Slight reduction for partial barre
                 } else {
                     0.0
@@ -561,13 +561,13 @@ impl ChordFingeringConfig {
 
     /// Set the maximum fret span
     pub fn with_max_fret_span(mut self, span: usize) -> Self {
-        self.max_fret_span = span;
+        self.max_fret_span = span as u32;
         self
     }
 
     /// Set the maximum string span
     pub fn with_max_string_span(mut self, span: usize) -> Self {
-        self.max_string_span = span;
+        self.max_string_span = span as u32;
         self
     }
 
@@ -585,14 +585,14 @@ impl ChordFingeringConfig {
 
     /// Set the maximum number of fingerings to generate
     pub fn with_max_fingerings(mut self, max: usize) -> Self {
-        self.max_fingerings = max;
+        self.max_fingerings = max as u32;
         self
     }
 
     /// Set the fret range
     pub fn with_fret_range(mut self, min_fret: usize, max_fret: usize) -> Self {
-        self.min_fret = min_fret;
-        self.max_fret = max_fret;
+        self.min_fret = min_fret as u32;
+        self.max_fret = max_fret as u32;
         self
     }
 }
@@ -952,7 +952,7 @@ impl ChordFingeringGenerator {
         for (&fret, &count) in &fret_counts {
             if count >= 2 {
                 // Additional validation: check if strings are suitable for barre
-                if self.is_barre_feasible_at_fret(positions, fret) {
+                if self.is_barre_feasible_at_fret(positions, fret as usize) {
                     return true;
                 }
             }
@@ -965,8 +965,8 @@ impl ChordFingeringGenerator {
     fn is_barre_feasible_at_fret(&self, positions: &[StringedPosition], fret: usize) -> bool {
         let strings_at_fret: Vec<usize> = positions
             .iter()
-            .filter(|pos| pos.fret == fret)
-            .map(|pos| pos.string)
+            .filter(|pos| pos.fret == fret as u32)
+            .map(|pos| pos.string as usize)
             .collect();
 
         if strings_at_fret.len() < 2 {
@@ -1008,7 +1008,7 @@ impl ChordFingeringGenerator {
         let mut best_score = 0.0f32;
 
         for (&fret, strings) in &fret_strings {
-            if strings.len() >= 2 && self.is_barre_feasible_at_fret(positions, fret) {
+            if strings.len() >= 2 && self.is_barre_feasible_at_fret(positions, fret as usize) {
                 let mut sorted_strings = strings.clone();
                 sorted_strings.sort_unstable();
 
@@ -1023,9 +1023,9 @@ impl ChordFingeringGenerator {
                 score += (25 - fret) as f32 * 0.1;
 
                 // Prefer continuous string spans
-                let continuity_bonus = if span == strings.len() {
+                let continuity_bonus = if span == strings.len() as u32 {
                     2.0 // Perfect continuity
-                } else if span - strings.len() <= 1 {
+                } else if span as usize >= strings.len() && (span as usize - strings.len()) <= 1 {
                     1.0 // One gap allowed
                 } else {
                     0.5 // Multiple gaps penalty
@@ -1085,7 +1085,7 @@ impl ChordFingeringGenerator {
                     if let Some(fingering) = self.try_barre_at_position(
                         fretboard,
                         &chord_notes,
-                        barre_fret,
+                        barre_fret as usize,
                         start_string,
                         end_string,
                     ) {
@@ -1123,7 +1123,8 @@ impl ChordFingeringGenerator {
 
         // Add barre positions
         for string in start_string..=end_string {
-            let pos = StringedPosition::new(string, barre_fret);
+            let pos =
+                StringedPosition::new(string.try_into().unwrap(), barre_fret.try_into().unwrap());
             if let Some(tuning) = fretboard.tuning_at_position(&pos) {
                 positions.push(FingerPosition::pressed(pos, Finger::Index));
 
@@ -1155,11 +1156,11 @@ impl ChordFingeringGenerator {
                 // Look for positions above the barre fret within configured range
                 let note_positions = fretboard.positions_for_tuning(remaining_note);
                 for note_pos in note_positions {
-                    if note_pos.fret > barre_fret
-                        && note_pos.fret <= std::cmp::min(barre_fret + 4, self.config.max_fret) // Reasonable stretch within range
+                    if note_pos.fret > barre_fret.try_into().unwrap()
+                        && note_pos.fret <= std::cmp::min((barre_fret + 4).try_into().unwrap(), self.config.max_fret) // Reasonable stretch within range
                         && note_pos.fret >= self.config.min_fret // Respect minimum fret
-                        && note_pos.string >= start_string
-                        && note_pos.string <= end_string
+                        && note_pos.string >= start_string.try_into().unwrap()
+                        && note_pos.string <= end_string.try_into().unwrap()
                     {
                         positions.push(FingerPosition::pressed(
                             note_pos,
@@ -1192,9 +1193,9 @@ impl ChordFingeringGenerator {
             }
 
             let technique = PlayingTechnique::Barre {
-                start_string,
-                end_string,
-                fret: barre_fret,
+                start_string: start_string.try_into().unwrap(),
+                end_string: end_string.try_into().unwrap(),
+                fret: barre_fret.try_into().unwrap(),
             };
 
             let mut fingering = Fingering::new(positions, technique, 0.0);
@@ -1232,9 +1233,10 @@ impl FingeringGenerator<StringedFretboard> for ChordFingeringGenerator {
         // Check if all notes can be played
         for (note, positions) in &note_positions {
             if positions.is_empty() {
-                return Err(FretboardError::no_valid_fingerings(
-                    format!("{} - note {} cannot be played in range", chord, note)
-                ));
+                return Err(FretboardError::no_valid_fingerings(format!(
+                    "{} - note {} cannot be played in range",
+                    chord, note
+                )));
             }
         }
 
@@ -1248,7 +1250,7 @@ impl FingeringGenerator<StringedFretboard> for ChordFingeringGenerator {
                 fingerings.push(fingering);
 
                 // Limit number of standard fingerings to leave room for barre fingerings
-                if fingerings.len() >= self.config.max_fingerings / 2 {
+                if fingerings.len() >= (self.config.max_fingerings / 2) as usize {
                     break;
                 }
             }
@@ -1260,7 +1262,7 @@ impl FingeringGenerator<StringedFretboard> for ChordFingeringGenerator {
 
             // Add barre fingerings to the collection
             for barre_fingering in barre_fingerings {
-                if fingerings.len() < self.config.max_fingerings {
+                if fingerings.len() < self.config.max_fingerings as usize {
                     fingerings.push(barre_fingering);
                 } else {
                     break;
@@ -1269,9 +1271,10 @@ impl FingeringGenerator<StringedFretboard> for ChordFingeringGenerator {
         }
 
         if fingerings.is_empty() {
-            return Err(FretboardError::no_valid_fingerings(
-                format!("{} - no physically possible fingerings found", chord)
-            ));
+            return Err(FretboardError::no_valid_fingerings(format!(
+                "{} - no physically possible fingerings found",
+                chord
+            )));
         }
 
         // Apply skill level optimization
@@ -2250,7 +2253,7 @@ mod tests {
             |(strings, fret_count, scale_length, nut_width, string_spacing)| {
                 StringedInstrumentConfig::new(
                     strings,
-                    fret_count,
+                    fret_count as u32,
                     scale_length,
                     nut_width,
                     string_spacing,

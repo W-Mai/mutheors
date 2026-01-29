@@ -244,7 +244,7 @@ pub trait VoiceLeadingOptimizer<F: Fretboard> {
 pub trait CustomInstrument {
     /// Position type for this custom instrument
     type Position: Clone + Debug + PartialEq + Send + Sync;
-    
+
     /// Configuration type for this custom instrument
     type Config: Clone + Debug + Send + Sync;
 
@@ -429,11 +429,7 @@ pub trait ExtensionRegistry {
     ///
     /// # Returns
     /// * `true` if registration was successful
-    fn register_instrument<I, C, F>(
-        &mut self,
-        name: &str,
-        factory: F,
-    ) -> bool
+    fn register_instrument<I, C, F>(&mut self, name: &str, factory: F) -> bool
     where
         I: CustomInstrument<Config = C> + 'static,
         C: Clone + Debug + Send + Sync + 'static,
@@ -447,11 +443,7 @@ pub trait ExtensionRegistry {
     ///
     /// # Returns
     /// * `true` if registration was successful
-    fn register_algorithm<A, C, F>(
-        &mut self,
-        name: &str,
-        factory: F,
-    ) -> bool
+    fn register_algorithm<A, C, F>(&mut self, name: &str, factory: F) -> bool
     where
         A: 'static,
         C: Clone + Debug + Send + Sync + 'static,
@@ -465,11 +457,7 @@ pub trait ExtensionRegistry {
     ///
     /// # Returns
     /// * `true` if registration was successful
-    fn register_criteria<E, C, F>(
-        &mut self,
-        name: &str,
-        factory: F,
-    ) -> bool
+    fn register_criteria<E, C, F>(&mut self, name: &str, factory: F) -> bool
     where
         E: 'static,
         C: Clone + Debug + Send + Sync + 'static,
@@ -553,11 +541,7 @@ pub trait InstrumentTechniques<F: Fretboard> {
     ///
     /// # Returns
     /// * `true` if the technique can be applied
-    fn can_apply_technique(
-        &self,
-        fingering: &Fingering<F::Position>,
-        technique: &str,
-    ) -> bool;
+    fn can_apply_technique(&self, fingering: &Fingering<F::Position>, technique: &str) -> bool;
 
     /// Get technique-specific difficulty modifier
     ///
@@ -576,9 +560,5 @@ pub trait InstrumentTechniques<F: Fretboard> {
     ///
     /// # Returns
     /// * `true` if the configuration is valid for this technique
-    fn validate_technique_config(
-        &self,
-        technique: &str,
-        config: &Self::TechniqueConfig,
-    ) -> bool;
+    fn validate_technique_config(&self, technique: &str, config: &Self::TechniqueConfig) -> bool;
 }

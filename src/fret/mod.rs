@@ -19,7 +19,7 @@ pub mod voice_leading;
 #[cfg(test)]
 mod integration_tests;
 
-// Re-export specific items to avoid naming conflicts
+// Re-export core types
 pub use continuous::ContinuousFretboard;
 pub use errors::{FretboardError, FretboardResult};
 pub use extensions::{DefaultExtensionRegistry, InstrumentConfigValidator};
@@ -31,9 +31,11 @@ pub use presets::InstrumentPresets;
 pub use stringed::StringedFretboard;
 pub use traits::*;
 pub use types::*;
+pub use voice_leading::{SequenceAnalysis, VoiceLeadingOptimizer};
+
+// Re-export visualization types
 pub use visualization::{
     DiagramConfig, DiagramData, DiagramOrientation, ExportConfig, ExportFormat,
     FingeringExportData, FingeringMetadata, FretRange, FretboardDiagramGenerator, PositionInfo,
     StringInfo,
 };
-pub use voice_leading::{SequenceAnalysis, VoiceLeadingOptimizer};

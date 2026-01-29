@@ -319,6 +319,203 @@ impl InstrumentPresets {
     /// 5-string banjo in open G tuning (D-G-D-G-B)
     ///
     /// # Configuration
+    /// - Tuning: G5-D3-G3-B3-D4 (open G tuning with drone string)
+    /// - Frets: 22 (standard banjo)
+    /// - Scale Length: 670mm (26.25" - standard banjo scale)
+    /// - Nut Width: 32mm (banjo neck width)
+    /// - String Spacing: 6.5mm (standard banjo spacing)
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, StringedFretboard};
+    ///
+    /// let config = InstrumentPresets::banjo_5_string();
+    /// let fretboard = StringedFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 5);
+    /// ```
+    pub fn banjo_5_string() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::G, 5), // G5 (5th string, drone)
+            Tuning::new(PitchClass::D, 3), // D3 (4th string)
+            Tuning::new(PitchClass::G, 3), // G3 (3rd string)
+            Tuning::new(PitchClass::B, 3), // B3 (2nd string)
+            Tuning::new(PitchClass::D, 4), // D4 (1st string)
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings, 22,    // Fret count
+            670.0, // Scale length in mm (26.25 inches)
+            32.0,  // Nut width in mm
+            6.5,   // String spacing in mm
+        )
+    }
+
+    /// Create a mandolin with octave courses (traditional Italian style)
+    ///
+    /// Octave mandolin tuning: G2-G3, D3-D4, A3-A4, E4-E5
+    /// The lower courses have octave pairs instead of unison pairs.
+    ///
+    /// # Returns
+    /// A StringedInstrumentConfig for octave mandolin
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, StringedFretboard};
+    ///
+    /// let config = InstrumentPresets::mandolin_octave();
+    /// let fretboard = StringedFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 8);
+    /// ```
+    pub fn mandolin_octave() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::G, 2), // G2 (course 1, low string)
+            Tuning::new(PitchClass::G, 3), // G3 (course 1, high string)
+            Tuning::new(PitchClass::D, 3), // D3 (course 2, low string)
+            Tuning::new(PitchClass::D, 4), // D4 (course 2, high string)
+            Tuning::new(PitchClass::A, 3), // A3 (course 3, low string)
+            Tuning::new(PitchClass::A, 4), // A4 (course 3, high string)
+            Tuning::new(PitchClass::E, 4), // E4 (course 4, low string)
+            Tuning::new(PitchClass::E, 5), // E5 (course 4, high string)
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings, 24,    // Fret count
+            330.0, // Scale length in mm
+            28.0,  // Nut width in mm
+            3.5,   // String spacing in mm
+        )
+    }
+
+    /// Create a 4-string banjo configuration (tenor banjo)
+    ///
+    /// Standard tenor banjo tuning: C3, G3, D4, A4 (like viola)
+    ///
+    /// # Returns
+    /// A StringedInstrumentConfig for 4-string tenor banjo
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, StringedFretboard};
+    ///
+    /// let config = InstrumentPresets::banjo_4_string();
+    /// let fretboard = StringedFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 4);
+    /// ```
+    pub fn banjo_4_string() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::C, 3), // C3
+            Tuning::new(PitchClass::G, 3), // G3
+            Tuning::new(PitchClass::D, 4), // D4
+            Tuning::new(PitchClass::A, 4), // A4
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings, 19,    // Fret count
+            584.0, // Scale length in mm (23 inches)
+            28.0,  // Nut width in mm
+            7.0,   // String spacing in mm
+        )
+    }
+
+    /// Create a concert ukulele configuration
+    ///
+    /// Standard concert ukulele tuning: G4, C4, E4, A4 (same as soprano)
+    /// Larger body and longer scale length than soprano.
+    ///
+    /// # Returns
+    /// A StringedInstrumentConfig for concert ukulele
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, StringedFretboard};
+    ///
+    /// let config = InstrumentPresets::ukulele_concert();
+    /// let fretboard = StringedFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 4);
+    /// ```
+    pub fn ukulele_concert() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::G, 4), // G4 (re-entrant)
+            Tuning::new(PitchClass::C, 4), // C4
+            Tuning::new(PitchClass::E, 4), // E4
+            Tuning::new(PitchClass::A, 4), // A4
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings, 18,    // Fret count
+            381.0, // Scale length in mm (15 inches)
+            38.0,  // Nut width in mm
+            9.0,   // String spacing in mm
+        )
+    }
+
+    /// Create a tenor ukulele configuration
+    ///
+    /// Standard tenor ukulele tuning: G4, C4, E4, A4 (same as soprano/concert)
+    /// Larger body and longer scale length than concert.
+    ///
+    /// # Returns
+    /// A StringedInstrumentConfig for tenor ukulele
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, StringedFretboard};
+    ///
+    /// let config = InstrumentPresets::ukulele_tenor();
+    /// let fretboard = StringedFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 4);
+    /// ```
+    pub fn ukulele_tenor() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::G, 4), // G4 (re-entrant)
+            Tuning::new(PitchClass::C, 4), // C4
+            Tuning::new(PitchClass::E, 4), // E4
+            Tuning::new(PitchClass::A, 4), // A4
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings, 20,    // Fret count
+            432.0, // Scale length in mm (17 inches)
+            38.0,  // Nut width in mm
+            9.5,   // String spacing in mm
+        )
+    }
+
+    /// Create a baritone ukulele configuration
+    ///
+    /// Standard baritone ukulele tuning: D3, G3, B3, E4 (like top 4 guitar strings)
+    /// Larger body and longer scale length than tenor.
+    ///
+    /// # Returns
+    /// A StringedInstrumentConfig for baritone ukulele
+    ///
+    /// # Example
+    /// ```
+    /// use mutheors::{InstrumentPresets, StringedFretboard};
+    ///
+    /// let config = InstrumentPresets::ukulele_baritone();
+    /// let fretboard = StringedFretboard::new(config).unwrap();
+    /// assert_eq!(fretboard.string_count(), 4);
+    /// ```
+    pub fn ukulele_baritone() -> StringedInstrumentConfig {
+        let tunings = vec![
+            Tuning::new(PitchClass::D, 3), // D3 (like guitar 4th string)
+            Tuning::new(PitchClass::G, 3), // G3 (like guitar 3rd string)
+            Tuning::new(PitchClass::B, 3), // B3 (like guitar 2nd string)
+            Tuning::new(PitchClass::E, 4), // E4 (like guitar 1st string)
+        ];
+
+        StringedInstrumentConfig::new(
+            tunings, 20,    // Fret count
+            508.0, // Scale length in mm (20 inches)
+            38.0,  // Nut width in mm
+            10.0,  // String spacing in mm
+        )
+    }
+
+    /// 5-string banjo in open G tuning (D-G-D-G-B)
+    ///
+    /// # Configuration
     /// - Tuning: D4-G2-D3-G3-B3 (open G banjo tuning with short 5th string)
     /// - Frets: 22 (typical banjo)
     /// - Scale Length: 673mm (26.5" - long scale for tension)
@@ -333,23 +530,6 @@ impl InstrumentPresets {
     /// let fretboard = StringedFretboard::new(config).unwrap();
     /// assert_eq!(fretboard.string_count(), 5);
     /// ```
-    pub fn banjo_5_string() -> StringedInstrumentConfig {
-        let tunings = vec![
-            Tuning::new(PitchClass::D, 4), // 5th string (short drone string)
-            Tuning::new(PitchClass::G, 2), // 4th string (lowest full-length)
-            Tuning::new(PitchClass::D, 3), // 3rd string
-            Tuning::new(PitchClass::G, 3), // 2nd string
-            Tuning::new(PitchClass::B, 3), // 1st string (highest)
-        ];
-
-        StringedInstrumentConfig::new(
-            tunings, 22,    // frets
-            673.0, // scale length (mm) - 26.5"
-            32.0,  // nut width (mm)
-            8.0,   // string spacing (mm)
-        )
-    }
-
     // Keyboard Presets
 
     /// Standard 88-key piano (A0 to C8)
@@ -496,8 +676,7 @@ impl InstrumentPresets {
         ];
 
         StringedInstrumentConfig::new(
-            tunings,
-            0,     // No frets for continuous instruments
+            tunings, 0,     // No frets for continuous instruments
             330.0, // scale length (mm) - 13" violin scale
             24.0,  // nut width (mm)
             7.0,   // string spacing (mm)
@@ -530,8 +709,7 @@ impl InstrumentPresets {
         ];
 
         StringedInstrumentConfig::new(
-            tunings,
-            0,     // No frets for continuous instruments
+            tunings, 0,     // No frets for continuous instruments
             370.0, // scale length (mm) - 14.5" viola scale
             26.0,  // nut width (mm)
             8.0,   // string spacing (mm)
@@ -564,8 +742,7 @@ impl InstrumentPresets {
         ];
 
         StringedInstrumentConfig::new(
-            tunings,
-            0,     // No frets for continuous instruments
+            tunings, 0,     // No frets for continuous instruments
             690.0, // scale length (mm) - 27.2" cello scale
             45.0,  // nut width (mm)
             12.0,  // string spacing (mm)
@@ -598,8 +775,7 @@ impl InstrumentPresets {
         ];
 
         StringedInstrumentConfig::new(
-            tunings,
-            0,      // No frets for continuous instruments
+            tunings, 0,      // No frets for continuous instruments
             1060.0, // scale length (mm) - 41.7" 3/4 double bass scale
             55.0,   // nut width (mm)
             15.0,   // string spacing (mm)
@@ -633,8 +809,7 @@ impl InstrumentPresets {
         ];
 
         StringedInstrumentConfig::new(
-            tunings,
-            0,      // No frets for continuous instruments
+            tunings, 0,      // No frets for continuous instruments
             1060.0, // scale length (mm) - 41.7" 3/4 double bass scale
             65.0,   // nut width (mm)
             13.0,   // string spacing (mm)
@@ -670,8 +845,7 @@ impl InstrumentPresets {
         ];
 
         StringedInstrumentConfig::new(
-            tunings,
-            0,     // No frets for continuous instruments
+            tunings, 0,     // No frets for continuous instruments
             330.0, // scale length (mm) - 13" violin scale
             24.0,  // nut width (mm)
             7.0,   // string spacing (mm)
@@ -785,276 +959,6 @@ impl InstrumentPresets {
     ///
     /// let presets = InstrumentPresets::list_presets();
     /// assert!(presets.contains(&"guitar_standard".to_string()));
-    /// ```
-    pub fn mandolin_standard() -> StringedInstrumentConfig {
-        let tunings = vec![
-            Tuning::new(PitchClass::G, 3), // G3 (course 1, string 1)
-            Tuning::new(PitchClass::G, 3), // G3 (course 1, string 2)
-            Tuning::new(PitchClass::D, 4), // D4 (course 2, string 1)
-            Tuning::new(PitchClass::D, 4), // D4 (course 2, string 2)
-            Tuning::new(PitchClass::A, 4), // A4 (course 3, string 1)
-            Tuning::new(PitchClass::A, 4), // A4 (course 3, string 2)
-            Tuning::new(PitchClass::E, 5), // E5 (course 4, string 1)
-            Tuning::new(PitchClass::E, 5), // E5 (course 4, string 2)
-        ];
-
-        StringedInstrumentConfig::new(
-            tunings,
-            24,    // Fret count
-            330.0, // Scale length in mm (similar to violin)
-            28.0,  // Nut width in mm (wider than violin for 8 strings)
-            3.5,   // String spacing in mm
-        )
-    }
-
-    /// Create a mandolin with octave courses (traditional Italian style)
-    ///
-    /// Octave mandolin tuning: G2-G3, D3-D4, A3-A4, E4-E5
-    /// The lower courses have octave pairs instead of unison pairs.
-    ///
-    /// # Returns
-    /// A StringedInstrumentConfig for octave mandolin
-    ///
-    /// # Example
-    /// ```
-    /// use mutheors::{InstrumentPresets, StringedFretboard};
-    ///
-    /// let config = InstrumentPresets::mandolin_octave();
-    /// let fretboard = StringedFretboard::new(config).unwrap();
-    /// assert_eq!(fretboard.string_count(), 8);
-    /// ```
-    pub fn mandolin_octave() -> StringedInstrumentConfig {
-        let tunings = vec![
-            Tuning::new(PitchClass::G, 2), // G2 (course 1, low string)
-            Tuning::new(PitchClass::G, 3), // G3 (course 1, high string)
-            Tuning::new(PitchClass::D, 3), // D3 (course 2, low string)
-            Tuning::new(PitchClass::D, 4), // D4 (course 2, high string)
-            Tuning::new(PitchClass::A, 3), // A3 (course 3, low string)
-            Tuning::new(PitchClass::A, 4), // A4 (course 3, high string)
-            Tuning::new(PitchClass::E, 4), // E4 (course 4, low string)
-            Tuning::new(PitchClass::E, 5), // E5 (course 4, high string)
-        ];
-
-        StringedInstrumentConfig::new(
-            tunings,
-            24,    // Fret count
-            330.0, // Scale length in mm
-            28.0,  // Nut width in mm
-            3.5,   // String spacing in mm
-        )
-    }
-
-    /// Create a 5-string banjo configuration (standard G tuning)
-    ///
-    /// Standard 5-string banjo tuning: G5, D3, G3, B3, D4
-    /// The 5th string (G5) is shorter and starts at the 5th fret.
-    ///
-    /// # Returns
-    /// A StringedInstrumentConfig for 5-string banjo
-    ///
-    /// # Example
-    /// ```
-    /// use mutheors::{InstrumentPresets, StringedFretboard};
-    ///
-    /// let config = InstrumentPresets::banjo_5_string();
-    /// let fretboard = StringedFretboard::new(config).unwrap();
-    /// assert_eq!(fretboard.string_count(), 5);
-    /// ```
-    pub fn banjo_5_string() -> StringedInstrumentConfig {
-        let tunings = vec![
-            Tuning::new(PitchClass::G, 5), // G5 (5th string, drone)
-            Tuning::new(PitchClass::D, 3), // D3 (4th string)
-            Tuning::new(PitchClass::G, 3), // G3 (3rd string)
-            Tuning::new(PitchClass::B, 3), // B3 (2nd string)
-            Tuning::new(PitchClass::D, 4), // D4 (1st string)
-        ];
-
-        StringedInstrumentConfig::new(
-            tunings,
-            22,    // Fret count
-            670.0, // Scale length in mm (26.25 inches)
-            32.0,  // Nut width in mm
-            6.5,   // String spacing in mm
-        )
-    }
-
-    /// Create a 4-string banjo configuration (tenor banjo)
-    ///
-    /// Standard tenor banjo tuning: C3, G3, D4, A4 (like viola)
-    ///
-    /// # Returns
-    /// A StringedInstrumentConfig for 4-string tenor banjo
-    ///
-    /// # Example
-    /// ```
-    /// use mutheors::{InstrumentPresets, StringedFretboard};
-    ///
-    /// let config = InstrumentPresets::banjo_4_string();
-    /// let fretboard = StringedFretboard::new(config).unwrap();
-    /// assert_eq!(fretboard.string_count(), 4);
-    /// ```
-    pub fn banjo_4_string() -> StringedInstrumentConfig {
-        let tunings = vec![
-            Tuning::new(PitchClass::C, 3), // C3
-            Tuning::new(PitchClass::G, 3), // G3
-            Tuning::new(PitchClass::D, 4), // D4
-            Tuning::new(PitchClass::A, 4), // A4
-        ];
-
-        StringedInstrumentConfig::new(
-            tunings,
-            19,    // Fret count
-            584.0, // Scale length in mm (23 inches)
-            28.0,  // Nut width in mm
-            7.0,   // String spacing in mm
-        )
-    }
-
-    /// Create a soprano ukulele configuration
-    ///
-    /// Standard soprano ukulele tuning: G4, C4, E4, A4 (re-entrant tuning)
-    /// The G string is tuned higher than the C string.
-    ///
-    /// # Returns
-    /// A StringedInstrumentConfig for soprano ukulele
-    ///
-    /// # Example
-    /// ```
-    /// use mutheors::{InstrumentPresets, StringedFretboard};
-    ///
-    /// let config = InstrumentPresets::ukulele_soprano();
-    /// let fretboard = StringedFretboard::new(config).unwrap();
-    /// assert_eq!(fretboard.string_count(), 4);
-    /// ```
-    pub fn ukulele_soprano() -> StringedInstrumentConfig {
-        let tunings = vec![
-            Tuning::new(PitchClass::G, 4), // G4 (re-entrant, higher than C)
-            Tuning::new(PitchClass::C, 4), // C4
-            Tuning::new(PitchClass::E, 4), // E4
-            Tuning::new(PitchClass::A, 4), // A4
-        ];
-
-        StringedInstrumentConfig::new(
-            tunings,
-            15,    // Fret count
-            346.0, // Scale length in mm (13.625 inches)
-            35.0,  // Nut width in mm
-            8.5,   // String spacing in mm
-        )
-    }
-
-    /// Create a concert ukulele configuration
-    ///
-    /// Standard concert ukulele tuning: G4, C4, E4, A4 (same as soprano)
-    /// Larger body and longer scale length than soprano.
-    ///
-    /// # Returns
-    /// A StringedInstrumentConfig for concert ukulele
-    ///
-    /// # Example
-    /// ```
-    /// use mutheors::{InstrumentPresets, StringedFretboard};
-    ///
-    /// let config = InstrumentPresets::ukulele_concert();
-    /// let fretboard = StringedFretboard::new(config).unwrap();
-    /// assert_eq!(fretboard.string_count(), 4);
-    /// ```
-    pub fn ukulele_concert() -> StringedInstrumentConfig {
-        let tunings = vec![
-            Tuning::new(PitchClass::G, 4), // G4 (re-entrant)
-            Tuning::new(PitchClass::C, 4), // C4
-            Tuning::new(PitchClass::E, 4), // E4
-            Tuning::new(PitchClass::A, 4), // A4
-        ];
-
-        StringedInstrumentConfig::new(
-            tunings,
-            18,    // Fret count
-            381.0, // Scale length in mm (15 inches)
-            38.0,  // Nut width in mm
-            9.0,   // String spacing in mm
-        )
-    }
-
-    /// Create a tenor ukulele configuration
-    ///
-    /// Standard tenor ukulele tuning: G4, C4, E4, A4 (same as soprano/concert)
-    /// Larger body and longer scale length than concert.
-    ///
-    /// # Returns
-    /// A StringedInstrumentConfig for tenor ukulele
-    ///
-    /// # Example
-    /// ```
-    /// use mutheors::{InstrumentPresets, StringedFretboard};
-    ///
-    /// let config = InstrumentPresets::ukulele_tenor();
-    /// let fretboard = StringedFretboard::new(config).unwrap();
-    /// assert_eq!(fretboard.string_count(), 4);
-    /// ```
-    pub fn ukulele_tenor() -> StringedInstrumentConfig {
-        let tunings = vec![
-            Tuning::new(PitchClass::G, 4), // G4 (re-entrant)
-            Tuning::new(PitchClass::C, 4), // C4
-            Tuning::new(PitchClass::E, 4), // E4
-            Tuning::new(PitchClass::A, 4), // A4
-        ];
-
-        StringedInstrumentConfig::new(
-            tunings,
-            19,    // Fret count
-            432.0, // Scale length in mm (17 inches)
-            40.0,  // Nut width in mm
-            9.5,   // String spacing in mm
-        )
-    }
-
-    /// Create a baritone ukulele configuration
-    ///
-    /// Standard baritone ukulele tuning: D3, G3, B3, E4 (like top 4 guitar strings)
-    /// Linear tuning (not re-entrant like smaller ukuleles).
-    ///
-    /// # Returns
-    /// A StringedInstrumentConfig for baritone ukulele
-    ///
-    /// # Example
-    /// ```
-    /// use mutheors::{InstrumentPresets, StringedFretboard};
-    ///
-    /// let config = InstrumentPresets::ukulele_baritone();
-    /// let fretboard = StringedFretboard::new(config).unwrap();
-    /// assert_eq!(fretboard.string_count(), 4);
-    /// ```
-    pub fn ukulele_baritone() -> StringedInstrumentConfig {
-        let tunings = vec![
-            Tuning::new(PitchClass::D, 3), // D3 (linear tuning)
-            Tuning::new(PitchClass::G, 3), // G3
-            Tuning::new(PitchClass::B, 3), // B3
-            Tuning::new(PitchClass::E, 4), // E4
-        ];
-
-        StringedInstrumentConfig::new(
-            tunings,
-            19,    // Fret count
-            508.0, // Scale length in mm (20 inches)
-            42.0,  // Nut width in mm
-            10.0,  // String spacing in mm
-        )
-    }
-
-    /// Get all available preset names
-    ///
-    /// # Returns
-    /// Vector of all available preset configuration names
-    ///
-    /// # Example
-    /// ```
-    /// use mutheors::InstrumentPresets;
-    ///
-    /// let presets = InstrumentPresets::list_presets();
-    /// assert!(presets.contains(&"guitar_standard".to_string()));
-    /// assert!(presets.contains(&"piano_88_key".to_string()));
-    /// assert!(presets.contains(&"violin_standard".to_string()));
     /// ```
     pub fn list_presets() -> Vec<String> {
         vec![
@@ -1401,8 +1305,8 @@ impl InstrumentPresets {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::StringedFretboard;
     use crate::fret::ContinuousFretboard;
+    use crate::StringedFretboard;
 
     #[test]
     fn test_guitar_standard_preset() {

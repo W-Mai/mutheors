@@ -329,9 +329,9 @@ impl FretboardDiagramGenerator {
         } = &fingering.technique
         {
             diagram.push_str(&self.generate_barre_indication(
-                *start_string,
-                *end_string,
-                *fret,
+                *start_string as usize,
+                *end_string as usize,
+                *fret as usize,
                 min_fret,
                 max_fret,
                 string_count,
@@ -388,12 +388,13 @@ impl FretboardDiagramGenerator {
         let min_fret = if min_used_fret <= 1 {
             0 // Show nut if we're in the first few frets
         } else {
-            (min_used_fret.saturating_sub(1)).max(self.config.min_fret)
+            std::cmp::max(min_used_fret.saturating_sub(1), self.config.min_fret as u32)
         };
 
-        let max_fret = (max_used_fret + 1).min(min_fret + self.config.max_frets);
+        let max_fret =
+            (max_used_fret + 1).min(min_fret as u32 + self.config.max_frets as u32) as usize;
 
-        Ok((min_fret, max_fret))
+        Ok((min_fret as usize, max_fret))
     }
 
     /// Generate string labels header
@@ -412,7 +413,7 @@ impl FretboardDiagramGenerator {
             let tuning = fretboard.string_tuning(string_num).ok_or_else(|| {
                 super::errors::FretboardError::invalid_position_with_context(
                     format!("String index {}", string_num),
-                    "String index out of range"
+                    "String index out of range",
                 )
             })?;
             header.push_str(&format!(" {} ", tuning.class()));
@@ -479,7 +480,7 @@ impl FretboardDiagramGenerator {
 
         // Generate string positions
         for string_num in 0..string_count {
-            let position = StringedPosition::new(string_num, fret);
+            let position = StringedPosition::new(string_num as u32, fret as u32);
             let symbol = self.get_position_symbol(fingering, &position);
 
             line.push(self.config.string_char);
@@ -675,7 +676,7 @@ impl FretboardDiagramGenerator {
             let finger_pos = fingering
                 .positions
                 .iter()
-                .find(|fp| fp.position.string == string_num);
+                .find(|fp| fp.position.string == string_num as u32);
 
             match finger_pos {
                 Some(fp) => {
@@ -704,7 +705,7 @@ impl FretboardDiagramGenerator {
         serde_json::to_string_pretty(&export_data).map_err(|e| {
             super::errors::FretboardError::invalid_position_with_context(
                 "JSON export",
-                format!("JSON serialization failed: {}", e)
+                format!("JSON serialization failed: {}", e),
             )
         })
     }
@@ -719,7 +720,7 @@ impl FretboardDiagramGenerator {
         serde_yaml::to_string(&export_data).map_err(|e| {
             super::errors::FretboardError::invalid_position_with_context(
                 "YAML export",
-                format!("YAML serialization failed: {}", e)
+                format!("YAML serialization failed: {}", e),
             )
         })
     }
@@ -742,7 +743,7 @@ impl FretboardDiagramGenerator {
             let tuning = fretboard.string_tuning(string_num).ok_or_else(|| {
                 super::errors::FretboardError::invalid_position_with_context(
                     format!("String index {}", string_num),
-                    "String index out of range for export data"
+                    "String index out of range for export data",
                 )
             })?;
 
@@ -759,14 +760,16 @@ impl FretboardDiagramGenerator {
         for finger_pos in &fingering.positions {
             let tuning = fretboard
                 .tuning_at_position(&finger_pos.position)
-                .ok_or_else(|| super::errors::FretboardError::invalid_position_with_context(
-                    finger_pos.position.to_string(),
-                    "Position not found on fretboard"
-                ))?;
+                .ok_or_else(|| {
+                    super::errors::FretboardError::invalid_position_with_context(
+                        finger_pos.position.to_string(),
+                        "Position not found on fretboard",
+                    )
+                })?;
 
             positions.push(PositionInfo {
-                string: finger_pos.position.string,
-                fret: finger_pos.position.fret,
+                string: finger_pos.position.string as usize,
+                fret: finger_pos.position.fret as usize,
                 finger: finger_pos.finger.map(|f| f.to_string()),
                 pressure: finger_pos.pressure,
                 tuning: tuning.to_string(),
@@ -840,13 +843,13 @@ impl FretboardDiagramGenerator {
             ExportFormat::Json => serde_json::to_string_pretty(&export_data).map_err(|e| {
                 super::errors::FretboardError::invalid_position_with_context(
                     "JSON export",
-                    format!("JSON serialization failed: {}", e)
+                    format!("JSON serialization failed: {}", e),
                 )
             }),
             ExportFormat::Yaml => serde_yaml::to_string(&export_data).map_err(|e| {
                 super::errors::FretboardError::invalid_position_with_context(
-                    "YAML export", 
-                    format!("YAML serialization failed: {}", e)
+                    "YAML export",
+                    format!("YAML serialization failed: {}", e),
                 )
             }),
         }
@@ -1351,9 +1354,9 @@ mod property_tests {
                 let finger = fingers[i % fingers.len()];
 
                 if fret == 0 {
-                    positions.push(FingerPosition::open(StringedPosition::new(string, fret)));
+                    positions.push(FingerPosition::open(StringedPosition::new(string as u32, fret as u32)));
                 } else {
-                    positions.push(FingerPosition::pressed(StringedPosition::new(string, fret), finger));
+                    positions.push(FingerPosition::pressed(StringedPosition::new(string as u32, fret as u32), finger));
                 }
             }
 
@@ -1459,8 +1462,8 @@ mod property_tests {
             // Create a simple fingering
             let fingering = Fingering::new(
                 vec![
-                    FingerPosition::pressed(StringedPosition::new(0, min_fret + 1), Finger::Index),
-                    FingerPosition::pressed(StringedPosition::new(1, min_fret + 2), Finger::Middle),
+                    FingerPosition::pressed(StringedPosition::new(0, (min_fret + 1) as u32), Finger::Index),
+                    FingerPosition::pressed(StringedPosition::new(1, (min_fret + 2) as u32), Finger::Middle),
                 ],
                 PlayingTechnique::Standard,
                 0.3,
@@ -1483,14 +1486,14 @@ mod property_tests {
             let generator = FretboardDiagramGenerator::new();
 
             let position = FingerPosition::pressed(
-                StringedPosition::new(string_idx, fret_num),
+                StringedPosition::new(string_idx as u32, fret_num as u32),
                 Finger::Index
             );
 
             // Test all technique types
             let techniques = vec![
                 PlayingTechnique::Standard,
-                PlayingTechnique::Barre { start_string: 0, end_string: 5, fret: fret_num },
+                PlayingTechnique::Barre { start_string: 0, end_string: 5, fret: fret_num as u32 },
                 PlayingTechnique::Hammer,
                 PlayingTechnique::Pull,
                 PlayingTechnique::Slide,

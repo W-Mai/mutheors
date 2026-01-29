@@ -61,7 +61,7 @@ impl KeyboardFretboard {
         Ok(Self {
             config,
             key_tunings,
-            position_cache: RefCell::new(HashMap::new()),
+            position_cache: HashMap::new(),
         })
     }
 
@@ -96,7 +96,7 @@ impl KeyboardFretboard {
     /// * `Ok(Vec<Tuning>)` with tunings for each key
     /// * `Err(FretboardError)` if any tuning calculation fails
     fn calculate_key_tunings(config: &KeyboardConfig) -> FretboardResult<Vec<Tuning>> {
-        let mut tunings = Vec::with_capacity(config.key_count);
+        let mut tunings = Vec::with_capacity(config.key_count as usize);
 
         // Get the starting MIDI note number
         let base_midi_number = config.lowest_key.number();
@@ -111,7 +111,7 @@ impl KeyboardFretboard {
             if midi_number > 127 {
                 return Err(FretboardError::tuning_out_of_range_with_range(
                     &config.lowest_key,
-                    "MIDI range 0-127"
+                    "MIDI range 0-127",
                 ));
             }
 
@@ -155,9 +155,12 @@ impl KeyboardFretboard {
                     }
                 }
 
-                found_tuning.ok_or_else(|| FretboardError::invalid_configuration_with_fix(
-                    format!("Could not find valid tuning for MIDI number {} at key {}", midi_number, key_index)
-                ))?
+                found_tuning.ok_or_else(|| {
+                    FretboardError::invalid_configuration_with_fix(format!(
+                        "Could not find valid tuning for MIDI number {} at key {}",
+                        midi_number, key_index
+                    ))
+                })?
             };
 
             // Verify our calculation is correct (this should always pass now)
@@ -171,7 +174,7 @@ impl KeyboardFretboard {
 
     /// Get the number of keys on this keyboard
     pub fn key_count(&self) -> usize {
-        self.config.key_count
+        self.config.key_count as usize
     }
 
     /// Get the tuning of a specific key
@@ -204,7 +207,7 @@ impl KeyboardFretboard {
         for (key_index, key_tuning) in self.key_tunings.iter().enumerate() {
             // Compare pitch numbers to handle enharmonic equivalents correctly
             if key_tuning.number() == tuning.number() {
-                positions.push(KeyboardPosition::new(key_index));
+                positions.push(KeyboardPosition::new(key_index as u32));
             }
         }
 
@@ -212,17 +215,13 @@ impl KeyboardFretboard {
     }
 
     /// Clear the position cache
-    pub fn clear_cache(&self) {
-        if let Ok(mut cache) = self.position_cache.try_borrow_mut() {
-            cache.clear();
-        }
+    pub fn clear_cache(&mut self) {
+        self.position_cache.clear();
     }
 
     /// Get the current cache size
     pub fn cache_size(&self) -> usize {
-        self.position_cache
-            .try_borrow()
-            .map_or(0, |cache| cache.len())
+        self.position_cache.len()
     }
 
     /// Check if a key index is valid
@@ -322,7 +321,7 @@ impl KeyboardFretboard {
 
         (0..self.key_count())
             .filter(|&key_index| self.is_white_key(key_index) == Some(true))
-            .map(KeyboardPosition::new)
+            .map(|key_index| KeyboardPosition::new(key_index as u32))
             .collect()
     }
 
@@ -338,7 +337,7 @@ impl KeyboardFretboard {
 
         (0..self.key_count())
             .filter(|&key_index| self.is_black_key(key_index) == Some(true))
-            .map(KeyboardPosition::new)
+            .map(|key_index| KeyboardPosition::new(key_index as u32))
             .collect()
     }
 
@@ -354,7 +353,7 @@ impl KeyboardFretboard {
         let new_lowest_key = self.config.lowest_key.add_interval(interval).map_err(|_| {
             FretboardError::tuning_out_of_range_with_range(
                 &self.config.lowest_key,
-                "Transposition result outside valid range"
+                "Transposition result outside valid range",
             )
         })?;
 
@@ -378,13 +377,13 @@ impl KeyboardFretboard {
     pub fn with_key_count(&self, new_key_count: usize) -> FretboardResult<Self> {
         if new_key_count == 0 {
             return Err(FretboardError::invalid_configuration_with_fix(
-                "Key count must be at least 1"
+                "Key count must be at least 1",
             ));
         }
 
         let new_config = KeyboardConfig::new(
             self.config.lowest_key,
-            new_key_count,
+            new_key_count as u32,
             self.config.key_layout,
         );
 
@@ -397,7 +396,7 @@ impl Fretboard for KeyboardFretboard {
     type Config = KeyboardConfig;
 
     fn tuning_at_position(&self, position: &Self::Position) -> Option<Tuning> {
-        self.key_tuning(position.key).copied()
+        self.key_tuning(position.key as usize).copied()
     }
 
     fn positions_for_tuning(&self, tuning: &Tuning) -> Vec<Self::Position> {
@@ -405,30 +404,24 @@ impl Fretboard for KeyboardFretboard {
         let cache_key = format!("{:#}", tuning);
 
         // Try to get from cache
-        if let Ok(cache) = self.position_cache.try_borrow() {
-            if let Some(cached_positions) = cache.get(&cache_key) {
-                return cached_positions.clone();
-            }
+        if let Some(cached_positions) = self.position_cache.get(&cache_key) {
+            return cached_positions.clone();
         }
 
-        // Calculate positions if not in cache
+        // Calculate positions directly without caching for now
+        // TODO: Implement thread-safe caching solution
         let positions = self.find_positions_uncached(tuning);
-
-        // Try to cache the result
-        if let Ok(mut cache) = self.position_cache.try_borrow_mut() {
-            cache.insert(cache_key, positions.clone());
-        }
 
         positions
     }
 
     fn is_position_valid(&self, position: &Self::Position) -> bool {
-        self.is_key_valid(position.key)
+        self.is_key_valid(position.key as usize)
     }
 
     fn get_range(&self) -> (Self::Position, Self::Position) {
         let min_position = KeyboardPosition::new(0);
-        let max_position = KeyboardPosition::new(self.key_count().saturating_sub(1));
+        let max_position = KeyboardPosition::new((self.key_count().saturating_sub(1)) as u32);
         (min_position, max_position)
     }
 
@@ -437,7 +430,9 @@ impl Fretboard for KeyboardFretboard {
     }
 
     fn get_all_positions(&self) -> Vec<Self::Position> {
-        (0..self.key_count()).map(KeyboardPosition::new).collect()
+        (0..self.key_count())
+            .map(|key_index| KeyboardPosition::new(key_index as u32))
+            .collect()
     }
 
     fn position_distance(&self, pos1: &Self::Position, pos2: &Self::Position) -> f32 {
@@ -611,7 +606,7 @@ mod tests {
     #[test]
     fn test_cache_operations() {
         let config = create_standard_piano_config();
-        let fretboard = KeyboardFretboard::new(config).unwrap();
+        let mut fretboard = KeyboardFretboard::new(config).unwrap();
 
         assert_eq!(fretboard.cache_size(), 0);
 
@@ -817,7 +812,7 @@ mod tests {
             ]),
         )
             .prop_map(|(lowest_key, key_count, layout)| {
-                KeyboardConfig::new(lowest_key, key_count, layout)
+                KeyboardConfig::new(lowest_key, key_count as u32, layout)
             })
     }
 

@@ -1,6 +1,6 @@
 //! Error types for the fretboard system
 
-use crate::{Tuning, Chord};
+use crate::{Chord, Tuning};
 use thiserror::Error;
 
 #[cfg(feature = "bindgen")]
@@ -12,56 +12,41 @@ use uniffi;
 pub enum FretboardError {
     /// Invalid position coordinates for the instrument
     #[error("Invalid position: {position}. Context: {context}")]
-    InvalidPosition { 
-        position: String,
-        context: String,
-    },
+    InvalidPosition { position: String, context: String },
 
     /// Tuning is outside the instrument's playable range
     #[error("Tuning out of range: {tuning}. Valid range: {valid_range}")]
-    TuningOutOfRange { 
-        tuning: String,
-        valid_range: String,
-    },
+    TuningOutOfRange { tuning: String, valid_range: String },
 
     /// No valid fingerings could be generated for the given chord
     #[error("No valid fingerings found for chord: {chord}. Suggestions: {suggestions}")]
-    NoValidFingerings { 
-        chord: String,
-        suggestions: String,
-    },
+    NoValidFingerings { chord: String, suggestions: String },
 
     /// Invalid instrument configuration parameters
     #[error("Invalid instrument configuration: {reason}. Fix: {fix_suggestion}")]
-    InvalidConfiguration { 
+    InvalidConfiguration {
         reason: String,
         fix_suggestion: String,
     },
 
     /// Requested fingering is physically impossible to play
     #[error("Fingering physically impossible: {reason}. Alternative: {alternative}")]
-    ImpossibleFingering { 
-        reason: String,
-        alternative: String,
-    },
+    ImpossibleFingering { reason: String, alternative: String },
 
     /// Error in tuning system calculations
     #[error("Tuning system error: {reason}. Recovery: {recovery_action}")]
-    TuningSystemError { 
+    TuningSystemError {
         reason: String,
         recovery_action: String,
     },
 
     /// Position calculation failed
     #[error("Position calculation failed: {reason}. Fallback: {fallback}")]
-    PositionCalculationError { 
-        reason: String,
-        fallback: String,
-    },
+    PositionCalculationError { reason: String, fallback: String },
 
     /// Instrument type not supported for this operation
     #[error("Unsupported instrument type: {instrument_type}. Supported types: {supported_types}")]
-    UnsupportedInstrument { 
+    UnsupportedInstrument {
         instrument_type: String,
         supported_types: String,
     },
@@ -83,10 +68,7 @@ pub enum FretboardError {
 
     /// Cache operation failed
     #[error("Cache operation failed: {operation}. Reason: {reason}")]
-    CacheError {
-        operation: String,
-        reason: String,
-    },
+    CacheError { operation: String, reason: String },
 
     /// Memory allocation or optimization failed
     #[error("Memory operation failed: {operation}. Available memory: {available_memory}")]
@@ -167,7 +149,10 @@ impl ErrorRecovery {
         } else if difficulty > 0.6 {
             format!("This fingering is intermediate level. Try: 1) Practice chord transitions slowly, 2) Use metronome for timing")
         } else {
-            format!("This fingering should be manageable for {} level", current_level)
+            format!(
+                "This fingering should be manageable for {} level",
+                current_level
+            )
         }
     }
 
@@ -192,7 +177,10 @@ impl ErrorRecovery {
 
 impl FretboardError {
     /// Create an invalid position error with context
-    pub fn invalid_position_with_context(position: impl std::fmt::Display, context: impl Into<String>) -> Self {
+    pub fn invalid_position_with_context(
+        position: impl std::fmt::Display,
+        context: impl Into<String>,
+    ) -> Self {
         Self::InvalidPosition {
             position: position.to_string(),
             context: context.into(),
@@ -316,7 +304,10 @@ impl FretboardError {
     }
 
     /// Create a partial voicing error
-    pub fn partial_voicing(missing_notes: impl Into<String>, available_notes: impl Into<String>) -> Self {
+    pub fn partial_voicing(
+        missing_notes: impl Into<String>,
+        available_notes: impl Into<String>,
+    ) -> Self {
         Self::PartialVoicing {
             missing_notes: missing_notes.into(),
             available_notes: available_notes.into(),
@@ -350,7 +341,10 @@ impl FretboardError {
     }
 
     /// Create an extension error
-    pub fn extension_error(extension_name: impl Into<String>, error_details: impl Into<String>) -> Self {
+    pub fn extension_error(
+        extension_name: impl Into<String>,
+        error_details: impl Into<String>,
+    ) -> Self {
         Self::ExtensionError {
             extension_name: extension_name.into(),
             error_details: error_details.into(),
