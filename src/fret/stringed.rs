@@ -6,7 +6,6 @@ use super::{
     types::{StringedInstrumentConfig, StringedPosition},
 };
 use crate::{Interval, Tuning};
-use std::cell::RefCell;
 use std::collections::HashMap;
 
 #[cfg(feature = "bindgen")]
@@ -319,14 +318,7 @@ impl Fretboard for StringedFretboard {
     }
 
     fn positions_for_tuning(&self, tuning: &Tuning) -> Vec<Self::Position> {
-        // Use alternate format to include octave information in cache key
-        let cache_key = format!("{:#}", tuning);
-
-        // Calculate positions directly without caching for now
-        // TODO: Implement thread-safe caching solution
-        let positions = self.find_positions_uncached(tuning);
-
-        positions
+        self.find_positions_uncached(tuning)
     }
 
     fn is_position_valid(&self, position: &Self::Position) -> bool {

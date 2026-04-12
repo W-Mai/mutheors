@@ -63,6 +63,7 @@ pub use fret::{
     // Types
     StringedPosition,
     VoiceLeadingOptimizer,
+    SequenceAnalysis,
 };
 pub use tests::*;
 

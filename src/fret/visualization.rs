@@ -6,7 +6,7 @@
 use super::{
     errors::FretboardResult,
     traits::Fretboard,
-    types::{Finger, FingerPosition, Fingering, PlayingTechnique, StringedPosition},
+    types::{Finger, Fingering, PlayingTechnique, StringedPosition},
     StringedFretboard,
 };
 
@@ -1313,6 +1313,7 @@ mod tests {
 mod property_tests {
     use super::*;
     use crate::fret::presets::InstrumentPresets;
+    use crate::fret::types::FingerPosition;
     use proptest::prelude::*;
 
     /// **Property 13: Diagram Generation Completeness**

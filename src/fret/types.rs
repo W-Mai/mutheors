@@ -339,22 +339,6 @@ pub struct StringedInstrumentConfig {
     pub string_spacing: f32,
 }
 
-/// Simplified configuration for UniFFI bindings
-#[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
-pub struct SimpleStringedInstrumentConfig {
-    /// Tuning for each string as strings
-    pub strings: Vec<String>,
-    /// Number of frets available
-    pub fret_count: u32,
-    /// Scale length in millimeters
-    pub scale_length: f32,
-    /// Nut width in millimeters
-    pub nut_width: f32,
-    /// String spacing in millimeters
-    pub string_spacing: f32,
-}
-
 impl StringedInstrumentConfig {
     /// Create a new stringed instrument configuration
     pub fn new(
@@ -420,18 +404,6 @@ pub enum KeyLayout {
 pub struct KeyboardConfig {
     /// Lowest key tuning
     pub lowest_key: Tuning,
-    /// Total number of keys
-    pub key_count: u32,
-    /// Keyboard layout type
-    pub key_layout: KeyLayout,
-}
-
-/// Simplified configuration for UniFFI bindings
-#[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "bindgen", derive(uniffi::Record))]
-pub struct SimpleKeyboardConfig {
-    /// Lowest key tuning as string
-    pub lowest_key: String,
     /// Total number of keys
     pub key_count: u32,
     /// Keyboard layout type

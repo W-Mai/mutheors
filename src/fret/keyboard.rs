@@ -6,7 +6,6 @@ use super::{
     types::{KeyboardConfig, KeyboardPosition},
 };
 use crate::{Interval, PitchClass, Tuning};
-use std::cell::RefCell;
 use std::collections::HashMap;
 
 #[cfg(feature = "bindgen")]
@@ -106,8 +105,7 @@ impl KeyboardFretboard {
             let midi_number = base_midi_number.saturating_add(key_index as i8);
 
             // Validate MIDI range (0-127)
-            // Note: Since i8 max is 127, this check is for documentation purposes
-            #[allow(clippy::absurd_extreme_comparisons)]
+            #[allow(unused_comparisons)]
             if midi_number > 127 {
                 return Err(FretboardError::tuning_out_of_range_with_range(
                     &config.lowest_key,

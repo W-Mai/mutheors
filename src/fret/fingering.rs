@@ -2,7 +2,7 @@
 
 use super::{
     errors::{FretboardError, FretboardResult},
-    traits::{BarreCapable, FingeringEvaluator, FingeringGenerator, Fretboard},
+    traits::{FingeringEvaluator, FingeringGenerator, Fretboard},
     types::{Finger, FingerPosition, Fingering, PlayingTechnique, SkillLevel, StringedPosition},
     StringedFretboard,
 };
@@ -857,25 +857,6 @@ impl ChordFingeringGenerator {
             SkillLevel::Beginner => false, // Beginners typically avoid barre chords
             SkillLevel::Intermediate => true, // Intermediate players can handle some barre chords
             SkillLevel::Advanced | SkillLevel::Expert => true, // Advanced players use all techniques
-        }
-    }
-
-    /// Calculate average fret position for a fingering (excluding open strings)
-    fn calculate_average_fret(&self, fingering: &Fingering<StringedPosition>) -> f32 {
-        let fretted_positions: Vec<_> = fingering
-            .positions
-            .iter()
-            .filter(|fp| fp.position.fret > 0)
-            .collect();
-
-        if fretted_positions.is_empty() {
-            0.0 // All open strings
-        } else {
-            fretted_positions
-                .iter()
-                .map(|fp| fp.position.fret as f32)
-                .sum::<f32>()
-                / fretted_positions.len() as f32
         }
     }
 

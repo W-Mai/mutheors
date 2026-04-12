@@ -32,15 +32,11 @@ impl DefaultExtensionRegistry {
 
     /// Get a shared instance of the registry (singleton pattern)
     pub fn global() -> Arc<RwLock<Self>> {
-        static mut INSTANCE: Option<Arc<RwLock<DefaultExtensionRegistry>>> = None;
-        static ONCE: std::sync::Once = std::sync::Once::new();
-
-        unsafe {
-            ONCE.call_once(|| {
-                INSTANCE = Some(Arc::new(RwLock::new(DefaultExtensionRegistry::new())));
-            });
-            INSTANCE.as_ref().unwrap().clone()
-        }
+        use std::sync::OnceLock;
+        static INSTANCE: OnceLock<Arc<RwLock<DefaultExtensionRegistry>>> = OnceLock::new();
+        INSTANCE
+            .get_or_init(|| Arc::new(RwLock::new(DefaultExtensionRegistry::new())))
+            .clone()
     }
 }
 

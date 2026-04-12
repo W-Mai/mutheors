@@ -22,7 +22,6 @@ mod integration_tests;
 // Re-export core types
 pub use continuous::ContinuousFretboard;
 pub use errors::{FretboardError, FretboardResult};
-pub use extensions::{DefaultExtensionRegistry, InstrumentConfigValidator};
 pub use fingering::{
     ChordFingeringConfig, ChordFingeringGenerator, DifficultyEvaluator, DifficultyWeights,
 };
@@ -32,10 +31,4 @@ pub use stringed::StringedFretboard;
 pub use traits::*;
 pub use types::*;
 pub use voice_leading::{SequenceAnalysis, VoiceLeadingOptimizer};
-
-// Re-export visualization types
-pub use visualization::{
-    DiagramConfig, DiagramData, DiagramOrientation, ExportConfig, ExportFormat,
-    FingeringExportData, FingeringMetadata, FretRange, FretboardDiagramGenerator, PositionInfo,
-    StringInfo,
-};
+pub use visualization::{DiagramConfig, FretboardDiagramGenerator};
