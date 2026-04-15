@@ -6,6 +6,7 @@ use super::{
     types::{KeyboardConfig, KeyboardPosition},
 };
 use crate::{Interval, PitchClass, Tuning};
+use std::cell::RefCell;
 use std::collections::HashMap;
 
 #[cfg(feature = "bindgen")]
@@ -23,7 +24,7 @@ pub struct KeyboardFretboard {
     /// Pre-calculated tunings for each key for performance
     key_tunings: Vec<Tuning>,
     /// Cache for position lookups to improve performance
-    position_cache: HashMap<String, Vec<KeyboardPosition>>,
+    position_cache: RefCell<HashMap<String, Vec<KeyboardPosition>>>,
 }
 
 impl KeyboardFretboard {
@@ -60,7 +61,7 @@ impl KeyboardFretboard {
         Ok(Self {
             config,
             key_tunings,
-            position_cache: HashMap::new(),
+            position_cache: RefCell::new(HashMap::new()),
         })
     }
 
@@ -213,13 +214,13 @@ impl KeyboardFretboard {
     }
 
     /// Clear the position cache
-    pub fn clear_cache(&mut self) {
-        self.position_cache.clear();
+    pub fn clear_cache(&self) {
+        self.position_cache.borrow_mut().clear();
     }
 
     /// Get the current cache size
     pub fn cache_size(&self) -> usize {
-        self.position_cache.len()
+        self.position_cache.borrow().len()
     }
 
     /// Check if a key index is valid
@@ -398,18 +399,16 @@ impl Fretboard for KeyboardFretboard {
     }
 
     fn positions_for_tuning(&self, tuning: &Tuning) -> Vec<Self::Position> {
-        // Use alternate format to include octave information in cache key
         let cache_key = format!("{:#}", tuning);
 
-        // Try to get from cache
-        if let Some(cached_positions) = self.position_cache.get(&cache_key) {
-            return cached_positions.clone();
+        if let Some(cached) = self.position_cache.borrow().get(&cache_key) {
+            return cached.clone();
         }
 
-        // Calculate positions directly without caching for now
-        // TODO: Implement thread-safe caching solution
         let positions = self.find_positions_uncached(tuning);
-
+        self.position_cache
+            .borrow_mut()
+            .insert(cache_key, positions.clone());
         positions
     }
 

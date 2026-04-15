@@ -6,6 +6,7 @@ use super::{
     types::{StringedInstrumentConfig, StringedPosition},
 };
 use crate::{Interval, Tuning};
+use std::cell::RefCell;
 use std::collections::HashMap;
 
 #[cfg(feature = "bindgen")]
@@ -21,7 +22,7 @@ pub struct StringedFretboard {
     /// Instrument configuration
     config: StringedInstrumentConfig,
     /// Cache for position lookups to improve performance
-    position_cache: HashMap<String, Vec<StringedPosition>>,
+    position_cache: RefCell<HashMap<String, Vec<StringedPosition>>>,
 }
 
 impl StringedFretboard {
@@ -59,7 +60,7 @@ impl StringedFretboard {
 
         Ok(Self {
             config,
-            position_cache: HashMap::new(),
+            position_cache: RefCell::new(HashMap::new()),
         })
     }
 
@@ -180,13 +181,13 @@ impl StringedFretboard {
     }
 
     /// Clear the position cache
-    pub fn clear_cache(&mut self) {
-        self.position_cache.clear();
+    pub fn clear_cache(&self) {
+        self.position_cache.borrow_mut().clear();
     }
 
     /// Get the current cache size
     pub fn cache_size(&self) -> usize {
-        self.position_cache.len()
+        self.position_cache.borrow().len()
     }
 
     /// Check if a string index is valid
@@ -318,7 +319,17 @@ impl Fretboard for StringedFretboard {
     }
 
     fn positions_for_tuning(&self, tuning: &Tuning) -> Vec<Self::Position> {
-        self.find_positions_uncached(tuning)
+        let cache_key = format!("{:#}", tuning);
+
+        if let Some(cached) = self.position_cache.borrow().get(&cache_key) {
+            return cached.clone();
+        }
+
+        let positions = self.find_positions_uncached(tuning);
+        self.position_cache
+            .borrow_mut()
+            .insert(cache_key, positions.clone());
+        positions
     }
 
     fn is_position_valid(&self, position: &Self::Position) -> bool {
