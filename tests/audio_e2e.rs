@@ -234,7 +234,7 @@ fn e2e_chord_detection_full_range() {
 
     for (name, freqs, expected_root, expected_quality) in &test_chords {
         let signal = generate_chord_signal(freqs, 44100.0, 0.2);
-        let mut detector = ChordDetector::triads_only(44100.0);
+        let mut detector = ChordDetector::realtime_triads(44100.0);
         let result = detector.detect(&signal)
             .unwrap_or_else(|| panic!("Failed to detect chord: {}", name));
 
@@ -262,15 +262,14 @@ fn generate_chord_signal(freqs: &[f32], sample_rate: f32, duration: f32) -> Vec<
 
 #[test]
 fn e2e_cqt_low_register_chord_detection() {
-    use mutheors::audio::{ChordDetector, Cqt};
+    use mutheors::audio::ChordDetector;
 
     let sr = 44100.0;
-    let mut cqt = Cqt::new(sr, 12);
-    let n = cqt.fft_size();
+    let mut det = ChordDetector::high_quality_triads(sr);
 
     // C2 major: C2(65.41) + E2(82.41) + G2(98.00)
     // This was misidentified as minor with FFT-based chroma
-    let signal: Vec<f32> = (0..n)
+    let signal: Vec<f32> = (0..32768)
         .map(|i| {
             let t = i as f32 / sr;
             (2.0 * std::f32::consts::PI * 65.41 * t).sin()
@@ -279,8 +278,7 @@ fn e2e_cqt_low_register_chord_detection() {
         })
         .collect();
 
-    let det = ChordDetector::triads_only(sr);
-    let result = det.detect_with_cqt(&mut cqt, &signal).unwrap();
+    let result = det.detect(&signal).unwrap();
 
     assert_eq!(
         result.chord.root().class(),
