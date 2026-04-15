@@ -20,6 +20,8 @@ pub struct OnsetDetector {
     frame_size: usize,
     /// Peak-picking threshold multiplier over median
     threshold: f32,
+    /// Minimum time between onsets in seconds (prevents double-triggers)
+    min_onset_interval: f32,
 }
 
 impl OnsetDetector {
@@ -28,7 +30,8 @@ impl OnsetDetector {
             sample_rate,
             hop_size: 512,
             frame_size: 1024,
-            threshold: 1.5,
+            threshold: 3.0,
+            min_onset_interval: 0.10, // 100ms minimum between onsets
         }
     }
 
@@ -39,6 +42,11 @@ impl OnsetDetector {
 
     pub fn with_threshold(mut self, t: f32) -> Self {
         self.threshold = t;
+        self
+    }
+
+    pub fn with_min_interval(mut self, secs: f32) -> Self {
+        self.min_onset_interval = secs;
         self
     }
 
@@ -79,29 +87,32 @@ impl OnsetDetector {
         flux
     }
 
-    /// Pick peaks from spectral flux using adaptive threshold (median-based)
+    /// Pick peaks from spectral flux using global adaptive threshold + minimum interval
     fn pick_peaks(&self, flux: &[f32]) -> Vec<f32> {
         if flux.is_empty() {
             return vec![];
         }
 
-        let window = 7; // median filter window
-        let half = window / 2;
+        // Global threshold: mean + threshold * stddev
+        let mean = flux.iter().sum::<f32>() / flux.len() as f32;
+        let variance = flux.iter().map(|x| (x - mean).powi(2)).sum::<f32>() / flux.len() as f32;
+        let stddev = variance.sqrt();
+        let adaptive_threshold = mean + self.threshold * stddev;
+
+        let min_frames =
+            (self.min_onset_interval * self.sample_rate / self.hop_size as f32) as usize;
         let mut onsets = Vec::new();
+        let mut last_onset_frame = 0usize;
 
         for i in 1..flux.len().saturating_sub(1) {
-            // Local median for adaptive threshold
-            let start = i.saturating_sub(half);
-            let end = (i + half + 1).min(flux.len());
-            let mut local: Vec<f32> = flux[start..end].to_vec();
-            local.sort_by(|a, b| a.partial_cmp(b).unwrap());
-            let median = local[local.len() / 2];
-
-            // Peak: above threshold and local maximum
-            if flux[i] > median * self.threshold && flux[i] > flux[i - 1] && flux[i] >= flux[i + 1]
+            if flux[i] > adaptive_threshold
+                && flux[i] > flux[i - 1]
+                && flux[i] >= flux[i + 1]
+                && (onsets.is_empty() || i - last_onset_frame >= min_frames)
             {
                 let time = i as f32 * self.hop_size as f32 / self.sample_rate;
                 onsets.push(time);
+                last_onset_frame = i;
             }
         }
         onsets
