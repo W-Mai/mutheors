@@ -293,3 +293,81 @@ fn e2e_cqt_low_register_chord_detection() {
         result.chord.quality()
     );
 }
+
+#[test]
+fn e2e_key_detection_from_audio() {
+    use mutheors::audio::{detect_key, Cqt};
+
+    let sr = 44100.0;
+    let mut cqt = Cqt::new(sr, 12);
+    let n = cqt.fft_size();
+
+    // Synthesize a C major scale: C4 D4 E4 F4 G4 A4 B4
+    let freqs = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88];
+    let signal: Vec<f32> = (0..n)
+        .map(|i| {
+            let t = i as f32 / sr;
+            freqs
+                .iter()
+                .map(|&f| (2.0 * std::f32::consts::PI * f * t).sin())
+                .sum::<f32>()
+                / freqs.len() as f32
+        })
+        .collect();
+
+    let chroma = cqt.transform(&signal).to_chroma();
+    let result = detect_key(&chroma).unwrap();
+
+    assert_eq!(
+        result.root,
+        PitchClass::C,
+        "Expected C major, got {:?} {:?}",
+        result.root,
+        result.scale_type
+    );
+}
+
+#[test]
+fn e2e_key_detection_g_major_chord_progression() {
+    use mutheors::audio::{ChordDetector, detect_key};
+
+    // Simulate a G major progression: G-C-D chords
+    // G(196,246.94,293.66) C(261.63,329.63,392) D(293.66,369.99,440)
+    let sr = 44100.0;
+    let mut combined_chroma = [0.0f32; 12];
+
+    let chords_freqs: Vec<Vec<f32>> = vec![
+        vec![196.0, 246.94, 293.66],  // G
+        vec![261.63, 329.63, 392.00], // C
+        vec![293.66, 369.99, 440.00], // D
+    ];
+
+    let mut det = ChordDetector::realtime(sr);
+    for freqs in &chords_freqs {
+        let signal: Vec<f32> = (0..8820) // 200ms
+            .map(|i| {
+                freqs
+                    .iter()
+                    .map(|&f| (2.0 * std::f32::consts::PI * f * i as f32 / sr).sin())
+                    .sum::<f32>()
+                    / freqs.len() as f32
+            })
+            .collect();
+
+        if let Some(result) = det.detect(&signal) {
+            for (i, &v) in result.chroma.iter().enumerate() {
+                combined_chroma[i] += v;
+            }
+        }
+    }
+
+    let key = detect_key(&combined_chroma).unwrap();
+    // G major or its relative E minor
+    let is_g_major = key.root == PitchClass::G && key.scale_type == ScaleType::Major;
+    let is_e_minor = key.root == PitchClass::E && key.scale_type == ScaleType::NaturalMinor;
+    assert!(
+        is_g_major || is_e_minor,
+        "Expected G major or E minor, got {:?} {:?}",
+        key.root, key.scale_type
+    );
+}
