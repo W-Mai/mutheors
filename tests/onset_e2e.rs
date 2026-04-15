@@ -11,13 +11,14 @@ fn synthesize_notes(notes: &[Note], tempo: f32, sample_rate: f32) -> Vec<f32> {
         let freq = note.tuning().frequency();
         let dur_secs = note.duration().in_seconds(tempo);
         let n = (sample_rate * dur_secs) as usize;
-        let attack = (sample_rate * 0.005) as usize;
+        let attack = (sample_rate * 0.002) as usize; // 2ms attack
+        let decay_time = sample_rate * 0.03; // 30ms decay — percussive envelope
 
         for i in 0..n {
             let env = if i < attack {
                 i as f32 / attack as f32
             } else {
-                (-(i as f32 - attack as f32) / (n as f32 * 0.3)).exp()
+                (-(i as f32 - attack as f32) / decay_time).exp()
             };
             samples.push(env * note.velocity() * (2.0 * PI * freq * i as f32 / sample_rate).sin());
         }
