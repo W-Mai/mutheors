@@ -20,8 +20,8 @@ impl ChromaExtractor {
         Self {
             fft: Fft::new(),
             sample_rate,
-            freq_min: 65.0,  // ~C2
-            freq_max: 2100.0, // ~C7
+            freq_min: 27.5,   // A0 — lowest piano key
+            freq_max: 4200.0, // ~C8 — highest piano key
         }
     }
 
@@ -40,7 +40,9 @@ impl ChromaExtractor {
                 continue;
             }
             // Map frequency to pitch class: C=0, C#=1, ..., B=11
-            let pitch = (12.0 * (freq / self.freq_min).log2()).round() as usize % 12;
+            // Use C1=32.703 as reference so that C maps to bin 0
+            let midi = 12.0 * (freq / 32.703).log2();
+            let pitch = ((midi.round() as i32 % 12) + 12) as usize % 12;
             chroma[pitch] += mag;
         }
 

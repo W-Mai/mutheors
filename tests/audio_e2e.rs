@@ -169,3 +169,93 @@ fn e2e_chromatic_scale_detection() {
     let unique: std::collections::HashSet<_> = detected_classes.iter().map(|c| c.semitones()).collect();
     assert_eq!(unique.len(), 12, "Should detect 12 distinct pitch classes");
 }
+
+#[test]
+fn e2e_full_piano_range_yin() {
+    use mutheors::audio::YinDetector;
+
+    // 88-key piano: A0 (27.5 Hz) to C8 (4186 Hz)
+    // Test representative notes across the full range
+    let test_notes: Vec<(f32, PitchClass, i8)> = vec![
+        (27.50, PitchClass::A, 0),    // A0 — lowest piano key
+        (32.70, PitchClass::C, 1),    // C1
+        (65.41, PitchClass::C, 2),    // C2
+        (130.81, PitchClass::C, 3),   // C3
+        (261.63, PitchClass::C, 4),   // C4 — middle C
+        (440.00, PitchClass::A, 4),   // A4 — concert pitch
+        (523.25, PitchClass::C, 5),   // C5
+        (1046.50, PitchClass::C, 6),  // C6
+        (2093.00, PitchClass::C, 7),  // C7
+        (4186.01, PitchClass::C, 8),  // C8 — highest piano key
+    ];
+
+    // Low frequencies need longer windows for YIN to work
+    for (freq, expected_class, expected_octave) in &test_notes {
+        // Window duration scales with period: low freq needs more samples
+        let duration = (3.0 / freq).max(0.05); // at least 3 periods or 50ms
+        let samples = generate_sine(*freq, 44100.0, duration);
+        let detector = YinDetector::new(44100.0);
+
+        match detector.detect(&samples) {
+            Some(result) => {
+                assert_eq!(
+                    result.tuning.class(), *expected_class,
+                    "{}Hz: expected {:?}, got {:?}", freq, expected_class, result.tuning.class()
+                );
+                assert_eq!(
+                    result.tuning.octave(), *expected_octave,
+                    "{}Hz: expected octave {}, got {}", freq, expected_octave, result.tuning.octave()
+                );
+                assert!(
+                    result.cents.abs() < 15.0,
+                    "{}Hz: cent offset too large: {:.1}", freq, result.cents
+                );
+            }
+            None => {
+                panic!("Failed to detect pitch for {}Hz ({:?}{})", freq, expected_class, expected_octave);
+            }
+        }
+    }
+}
+
+#[test]
+fn e2e_chord_detection_full_range() {
+    use mutheors::audio::ChordDetector;
+
+    // Test chord detection across different octaves
+    let test_chords: Vec<(&str, &[f32], PitchClass, ChordQuality)> = vec![
+        // Low register: C3 major (more reliable than C2 at standard FFT sizes)
+        ("C3 major", &[130.81, 164.81, 196.00], PitchClass::C, ChordQuality::Major),
+        // Mid register: A3 minor
+        ("A3 minor", &[220.0, 261.63, 329.63], PitchClass::A, ChordQuality::Minor),
+        // High register: C6 major
+        ("C6 major", &[1046.50, 1318.51, 1567.98], PitchClass::C, ChordQuality::Major),
+    ];
+
+    for (name, freqs, expected_root, expected_quality) in &test_chords {
+        let signal = generate_chord_signal(freqs, 44100.0, 0.2);
+        let mut detector = ChordDetector::triads_only(44100.0);
+        let result = detector.detect(&signal)
+            .unwrap_or_else(|| panic!("Failed to detect chord: {}", name));
+
+        assert_eq!(
+            result.chord.root().class(), *expected_root,
+            "{}: expected root {:?}, got {:?}", name, expected_root, result.chord.root().class()
+        );
+        assert_eq!(
+            result.chord.quality(), *expected_quality,
+            "{}: expected {:?}, got {:?}", name, expected_quality, result.chord.quality()
+        );
+    }
+}
+
+fn generate_chord_signal(freqs: &[f32], sample_rate: f32, duration: f32) -> Vec<f32> {
+    let n = (sample_rate * duration) as usize;
+    (0..n)
+        .map(|i| {
+            freqs.iter()
+                .map(|&f| (2.0 * std::f32::consts::PI * f * i as f32 / sample_rate).sin())
+                .sum::<f32>() / freqs.len() as f32
+        })
+        .collect()
+}

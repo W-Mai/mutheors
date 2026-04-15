@@ -21,8 +21,8 @@ impl Default for YinConfig {
     fn default() -> Self {
         Self {
             threshold: 0.15,
-            freq_min: 60.0,
-            freq_max: 1200.0,
+            freq_min: 27.5,   // A0 — lowest piano key
+            freq_max: 4200.0, // ~C8 — highest piano key
             silence_threshold: 0.01,
         }
     }
@@ -32,8 +32,8 @@ impl YinConfig {
     pub fn guitar_tuner() -> Self {
         Self {
             threshold: 0.10,
-            freq_min: 60.0,
-            freq_max: 1200.0,
+            freq_min: 60.0,   // below lowest guitar string (E2=82Hz)
+            freq_max: 1200.0, // above highest practical guitar note
             silence_threshold: 0.02,
         }
     }
@@ -122,10 +122,11 @@ impl YinDetector {
         }
 
         let tau_min = (self.sample_rate / self.config.freq_max).ceil() as usize;
-        let tau_max = (self.sample_rate / self.config.freq_min).floor() as usize;
+        let tau_max_config = (self.sample_rate / self.config.freq_min).floor() as usize;
         let w = samples.len() / 2;
+        let tau_max = tau_max_config.min(w - 1);
 
-        if tau_max >= w || tau_min >= tau_max {
+        if tau_min >= tau_max || w < 2 {
             return None;
         }
 
