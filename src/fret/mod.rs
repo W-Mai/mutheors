@@ -29,5 +29,5 @@ pub use presets::InstrumentPresets;
 pub use stringed::StringedFretboard;
 pub use traits::*;
 pub use types::*;
-pub use voice_leading::{SequenceAnalysis, VoiceLeadingOptimizer};
 pub use visualization::{DiagramConfig, FretboardDiagramGenerator};
+pub use voice_leading::{SequenceAnalysis, VoiceLeadingOptimizer};

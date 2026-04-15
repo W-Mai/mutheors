@@ -28,12 +28,8 @@ enum Backend {
 impl Backend {
     fn extract_chroma(&mut self, samples: &[f32]) -> Chroma {
         match self {
-            Backend::Realtime { fft, sample_rate } => {
-                fft_chroma(fft, samples, *sample_rate)
-            }
-            Backend::HighQuality { cqt } => {
-                cqt.transform(samples).to_chroma()
-            }
+            Backend::Realtime { fft, sample_rate } => fft_chroma(fft, samples, *sample_rate),
+            Backend::HighQuality { cqt } => cqt.transform(samples).to_chroma(),
         }
     }
 }
@@ -45,9 +41,18 @@ pub struct ChordDetector {
 }
 
 const ROOTS: [PitchClass; 12] = [
-    PitchClass::C, PitchClass::Cs, PitchClass::D, PitchClass::Ds,
-    PitchClass::E, PitchClass::F, PitchClass::Fs, PitchClass::G,
-    PitchClass::Gs, PitchClass::A, PitchClass::As, PitchClass::B,
+    PitchClass::C,
+    PitchClass::Cs,
+    PitchClass::D,
+    PitchClass::Ds,
+    PitchClass::E,
+    PitchClass::F,
+    PitchClass::Fs,
+    PitchClass::G,
+    PitchClass::Gs,
+    PitchClass::A,
+    PitchClass::As,
+    PitchClass::B,
 ];
 
 impl ChordDetector {
@@ -150,8 +155,7 @@ impl ChordDetector {
                 let mut chroma = [0.0f32; 12];
                 chroma[root_semitone as usize % 12] = 1.0;
                 for interval in &intervals {
-                    let idx =
-                        (root_semitone as i16 + interval.semitones() as i16) as usize % 12;
+                    let idx = (root_semitone as i16 + interval.semitones() as i16) as usize % 12;
                     chroma[idx] = 1.0;
                 }
                 let norm: f32 = chroma.iter().map(|x| x * x).sum::<f32>().sqrt();

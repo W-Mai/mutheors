@@ -302,7 +302,9 @@ mod voice_leading_tests {
     use super::*;
     use crate::core::chord::ChordQuality;
     use crate::fret::presets::InstrumentPresets;
-    use crate::fret::types::{Finger, FingerPosition, Fingering, PlayingTechnique, StringedPosition};
+    use crate::fret::types::{
+        Finger, FingerPosition, Fingering, PlayingTechnique, StringedPosition,
+    };
     use crate::Tuning;
     use std::str::FromStr;
 

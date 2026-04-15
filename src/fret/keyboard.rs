@@ -106,7 +106,7 @@ impl KeyboardFretboard {
             let midi_number = base_midi_number.saturating_add(key_index as i8);
 
             // Validate MIDI range (0-127)
-            #[allow(unused_comparisons)]
+            #[allow(unused_comparisons, clippy::absurd_extreme_comparisons)]
             if midi_number > 127 {
                 return Err(FretboardError::tuning_out_of_range_with_range(
                     &config.lowest_key,

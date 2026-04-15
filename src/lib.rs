@@ -60,13 +60,13 @@ pub use fret::{
     KeyboardFretboard,
     KeyboardPosition,
     PlayingTechnique,
+    SequenceAnalysis,
     SkillLevel,
     StringedFretboard,
     StringedInstrumentConfig,
     // Types
     StringedPosition,
     VoiceLeadingOptimizer,
-    SequenceAnalysis,
 };
 pub use tests::*;
 

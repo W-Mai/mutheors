@@ -48,3 +48,14 @@ required-features = ["bindgen"]
 [[test]]
 name = "test_midi"
 required-features = ["midi_io"]
+
+[[test]]
+name = "audio_e2e"
+required-features = ["audio"]
+
+[[test]]
+name = "onset_e2e"
+required-features = ["audio"]
+
+[workspace]
+members = [".", "xtask"]

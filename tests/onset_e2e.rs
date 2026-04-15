@@ -58,9 +58,15 @@ fn e2e_4_4_kick_120bpm() {
 fn e2e_rock_beat_100bpm() {
     // kick-hihat-snare-hihat at eighth notes, 100 BPM, 4 measures
     let e = Duration::new(DurationBase::Eighth);
-    let kick = Note::new(Tuning::new(PitchClass::A, 1)).with_duration(e).with_velocity(0.9);
-    let snare = Note::new(Tuning::new(PitchClass::D, 3)).with_duration(e).with_velocity(0.8);
-    let hihat = Note::new(Tuning::new(PitchClass::C, 6)).with_duration(e).with_velocity(0.4);
+    let kick = Note::new(Tuning::new(PitchClass::A, 1))
+        .with_duration(e)
+        .with_velocity(0.9);
+    let snare = Note::new(Tuning::new(PitchClass::D, 3))
+        .with_duration(e)
+        .with_velocity(0.8);
+    let hihat = Note::new(Tuning::new(PitchClass::C, 6))
+        .with_duration(e)
+        .with_velocity(0.4);
 
     let pattern: Vec<_> = [&kick, &hihat, &snare, &hihat]
         .iter()

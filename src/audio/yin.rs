@@ -115,8 +115,7 @@ impl YinDetector {
     /// Returns `None` if the signal is silent or no clear pitch is found.
     pub fn detect(&self, samples: &[f32]) -> Option<PitchResult> {
         // Silence gate
-        let rms =
-            (samples.iter().map(|&s| s * s).sum::<f32>() / samples.len() as f32).sqrt();
+        let rms = (samples.iter().map(|&s| s * s).sum::<f32>() / samples.len() as f32).sqrt();
         if rms < self.config.silence_threshold {
             return None;
         }
@@ -305,7 +304,9 @@ mod tests {
             let result = det.detect(&generate_sine(freq, 44100.0, 0.1)).unwrap();
             assert!(
                 (result.frequency - freq as f64).abs() < 2.0,
-                "freq={}, detected={}", freq, result.frequency
+                "freq={}, detected={}",
+                freq,
+                result.frequency
             );
             assert_eq!(result.tuning.class(), expected_class, "freq={}", freq);
         }

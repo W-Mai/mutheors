@@ -27,18 +27,20 @@ fn guitar_chord_fingerings() {
     let gen = ChordFingeringGenerator::new();
 
     let chords = [
-        ("C",  chord(PitchClass::C, ChordQuality::Major)),
+        ("C", chord(PitchClass::C, ChordQuality::Major)),
         ("Am", chord(PitchClass::A, ChordQuality::Minor)),
-        ("G",  chord(PitchClass::G, ChordQuality::Major)),
+        ("G", chord(PitchClass::G, ChordQuality::Major)),
         ("Em", chord(PitchClass::E, ChordQuality::Minor)),
-        ("D",  chord(PitchClass::D, ChordQuality::Major)),
+        ("D", chord(PitchClass::D, ChordQuality::Major)),
     ];
 
     for (name, c) in &chords {
         match gen.generate_chord_fingerings(&fb, c) {
             Ok(f) => println!(
                 "  {} — {} 种指法，最佳难度: {:.2}",
-                name, f.len(), f.first().map(|x| x.difficulty).unwrap_or(0.0)
+                name,
+                f.len(),
+                f.first().map(|x| x.difficulty).unwrap_or(0.0)
             ),
             Err(e) => println!("  {} — 生成失败: {}", name, e),
         }
@@ -67,10 +69,18 @@ fn voice_leading_demo() {
     match opt.optimize_progression(&fb, &progression, &gen) {
         Ok(seq) => {
             for (i, (name, fg)) in names.iter().zip(seq.iter()).enumerate() {
-                let frets: Vec<String> = fg.positions.iter()
+                let frets: Vec<String> = fg
+                    .positions
+                    .iter()
                     .map(|fp| format!("{}弦{}品", fp.position.string + 1, fp.position.fret))
                     .collect();
-                println!("  {}. {} (难度 {:.2}): {}", i + 1, name, fg.difficulty, frets.join(", "));
+                println!(
+                    "  {}. {} (难度 {:.2}): {}",
+                    i + 1,
+                    name,
+                    fg.difficulty,
+                    frets.join(", ")
+                );
             }
 
             let a = opt.analyze_sequence(&seq);
@@ -115,14 +125,19 @@ fn multi_instrument_demo() {
 
     let instruments: Vec<(&str, StringedInstrumentConfig)> = vec![
         ("吉他 (标准)", InstrumentPresets::guitar_standard()),
-        ("贝斯 (4弦)",  InstrumentPresets::bass_4_string()),
-        ("尤克里里",     InstrumentPresets::ukulele_soprano()),
-        ("曼陀林",       InstrumentPresets::mandolin_standard()),
+        ("贝斯 (4弦)", InstrumentPresets::bass_4_string()),
+        ("尤克里里", InstrumentPresets::ukulele_soprano()),
+        ("曼陀林", InstrumentPresets::mandolin_standard()),
     ];
 
     for (name, cfg) in instruments {
         let fb = StringedFretboard::new(cfg).unwrap();
-        println!("  {} — {}弦, {}品", name, fb.string_count(), fb.fret_count());
+        println!(
+            "  {} — {}弦, {}品",
+            name,
+            fb.string_count(),
+            fb.fret_count()
+        );
     }
 
     let piano = KeyboardFretboard::new(InstrumentPresets::piano_88_key()).unwrap();

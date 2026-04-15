@@ -30,9 +30,18 @@ pub struct KeyResult {
 }
 
 const PITCH_CLASSES: [PitchClass; 12] = [
-    PitchClass::C, PitchClass::Cs, PitchClass::D, PitchClass::Ds,
-    PitchClass::E, PitchClass::F, PitchClass::Fs, PitchClass::G,
-    PitchClass::Gs, PitchClass::A, PitchClass::As, PitchClass::B,
+    PitchClass::C,
+    PitchClass::Cs,
+    PitchClass::D,
+    PitchClass::Ds,
+    PitchClass::E,
+    PitchClass::F,
+    PitchClass::Fs,
+    PitchClass::G,
+    PitchClass::Gs,
+    PitchClass::A,
+    PitchClass::As,
+    PitchClass::B,
 ];
 
 /// Detect the musical key from a chroma vector.
@@ -118,12 +127,14 @@ mod tests {
         let chroma = chroma_from_notes(&[9, 11, 0, 2, 4, 5, 7]);
         let result = detect_key(&chroma).unwrap();
         // C major and A minor are relative keys — both valid
-        let is_a_minor = result.root == PitchClass::A && result.scale_type == ScaleType::NaturalMinor;
+        let is_a_minor =
+            result.root == PitchClass::A && result.scale_type == ScaleType::NaturalMinor;
         let is_c_major = result.root == PitchClass::C && result.scale_type == ScaleType::Major;
         assert!(
             is_a_minor || is_c_major,
             "Expected A minor or C major, got {:?} {:?}",
-            result.root, result.scale_type
+            result.root,
+            result.scale_type
         );
     }
 
@@ -148,7 +159,8 @@ mod tests {
         assert!(
             is_d_minor || is_f_major,
             "Expected D minor or F major, got {:?} {:?}",
-            result.root, result.scale_type
+            result.root,
+            result.scale_type
         );
     }
 }

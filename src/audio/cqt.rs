@@ -274,8 +274,23 @@ mod tests {
         let e2 = result.magnitudes[(40 - result.midi_min) as usize];
         let g2 = result.magnitudes[(43 - result.midi_min) as usize];
 
-        assert!(c2 > ds2 * 2.0, "C2 ({}) should be much stronger than D#2 ({})", c2, ds2);
-        assert!(e2 > ds2 * 2.0, "E2 ({}) should be much stronger than D#2 ({})", e2, ds2);
-        assert!(g2 > ds2, "G2 ({}) should be stronger than D#2 ({})", g2, ds2);
+        assert!(
+            c2 > ds2 * 2.0,
+            "C2 ({}) should be much stronger than D#2 ({})",
+            c2,
+            ds2
+        );
+        assert!(
+            e2 > ds2 * 2.0,
+            "E2 ({}) should be much stronger than D#2 ({})",
+            e2,
+            ds2
+        );
+        assert!(
+            g2 > ds2,
+            "G2 ({}) should be stronger than D#2 ({})",
+            g2,
+            ds2
+        );
     }
 }
