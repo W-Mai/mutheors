@@ -41,7 +41,7 @@ impl CqtResult {
     pub fn to_chroma(&self) -> [f32; 12] {
         let mut chroma = [0.0f32; 12];
         for (i, &mag) in self.magnitudes.iter().enumerate() {
-            let pitch_class = ((self.midi_min as usize + i) % 12) as usize;
+            let pitch_class = (self.midi_min as usize + i) % 12;
             chroma[pitch_class] += mag;
         }
         // Normalize

@@ -1,8 +1,14 @@
 [package]
 name = "mutheors"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Benign X <1341398182@qq.com>"]
+description = "Music theory library — pitch, interval, chord, scale, composition, fretboard, audio analysis"
+license = "MIT"
+repository = "https://github.com/w-mai/mutheors"
+homepage = "https://benign.host"
+keywords = ["music", "theory", "audio", "chord", "pitch"]
+categories = ["multimedia::audio", "science"]
 
 [lib]
 crate-type = ["lib", "staticlib"]

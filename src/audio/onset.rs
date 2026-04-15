@@ -95,6 +95,7 @@ impl OnsetDetector {
         let mut band_flux: Vec<Vec<f32>> = vec![vec![0.0; num_frames]; bands.len()];
         let mut prev_mag: Option<Vec<f32>> = None;
 
+        #[allow(clippy::needless_range_loop)]
         for frame_idx in 0..num_frames {
             let pos = frame_idx * self.hop_size;
             if pos + self.frame_size > samples.len() {
