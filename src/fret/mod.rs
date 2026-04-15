@@ -6,7 +6,6 @@
 
 pub mod continuous;
 pub mod errors;
-pub mod extensions;
 pub mod fingering;
 pub mod keyboard;
 pub mod presets;
