@@ -6,4 +6,4 @@ mod fft;
 mod yin;
 
 pub use fft::Fft;
-pub use yin::{detect_pitch, PitchResult, YinConfig};
+pub use yin::{detect_pitch, detect_pitch_with_config, PitchResult, YinConfig};
