@@ -55,16 +55,28 @@ impl ChordDetector {
         }
     }
 
-    /// Detect chord from audio samples.
+    /// Detect chord from audio samples (FFT-based chroma).
     pub fn detect(&mut self, samples: &[f32]) -> Option<ChordDetectionResult> {
         let chroma = self.extractor.extract(samples);
-
-        // Skip silent frames
         let energy: f32 = chroma.iter().sum();
         if energy < 1e-6 {
             return None;
         }
+        self.match_chroma(&chroma)
+    }
 
+    /// Detect chord using CQT-based chroma (better low-frequency resolution).
+    pub fn detect_with_cqt(
+        &self,
+        cqt: &mut super::cqt::Cqt,
+        samples: &[f32],
+    ) -> Option<ChordDetectionResult> {
+        let result = cqt.transform(samples);
+        let chroma = result.to_chroma();
+        let energy: f32 = chroma.iter().sum();
+        if energy < 1e-6 {
+            return None;
+        }
         self.match_chroma(&chroma)
     }
 

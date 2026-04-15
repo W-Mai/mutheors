@@ -259,3 +259,39 @@ fn generate_chord_signal(freqs: &[f32], sample_rate: f32, duration: f32) -> Vec<
         })
         .collect()
 }
+
+#[test]
+fn e2e_cqt_low_register_chord_detection() {
+    use mutheors::audio::{ChordDetector, Cqt};
+
+    let sr = 44100.0;
+    let mut cqt = Cqt::new(sr, 12);
+    let n = cqt.fft_size();
+
+    // C2 major: C2(65.41) + E2(82.41) + G2(98.00)
+    // This was misidentified as minor with FFT-based chroma
+    let signal: Vec<f32> = (0..n)
+        .map(|i| {
+            let t = i as f32 / sr;
+            (2.0 * std::f32::consts::PI * 65.41 * t).sin()
+                + (2.0 * std::f32::consts::PI * 82.41 * t).sin()
+                + (2.0 * std::f32::consts::PI * 98.00 * t).sin()
+        })
+        .collect();
+
+    let det = ChordDetector::triads_only(sr);
+    let result = det.detect_with_cqt(&mut cqt, &signal).unwrap();
+
+    assert_eq!(
+        result.chord.root().class(),
+        PitchClass::C,
+        "CQT should detect C as root, got {:?}",
+        result.chord.root().class()
+    );
+    assert_eq!(
+        result.chord.quality(),
+        ChordQuality::Major,
+        "CQT should detect Major quality, got {:?}",
+        result.chord.quality()
+    );
+}
