@@ -23,6 +23,9 @@ mod midi;
 #[cfg(feature = "midi_io")]
 pub use midi::*;
 
+#[cfg(feature = "audio")]
+pub mod audio;
+
 mod composition;
 mod core;
 mod fret;

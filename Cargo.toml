@@ -11,6 +11,7 @@ name = "mutheors"
 [features]
 default = []
 midi_io = ["midir"]
+audio = ["rustfft"]
 bindgen = ["uniffi/cli", "uniffi/build"]
 
 [dependencies]
@@ -21,6 +22,7 @@ serde_json = "1.0"
 serde_yaml = "0.9"
 
 midir = { version = "0.10.0", optional = true }
+rustfft = { version = "6.2", optional = true }
 
 uniffi = { version = "0.29.1", features = ["cli"], optional = true }
 

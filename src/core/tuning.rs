@@ -312,6 +312,35 @@ impl Tuning {
         })
     }
 
+    /// Convert a frequency (Hz) to the nearest Tuning and cent offset.
+    ///
+    /// Returns `(nearest_tuning, cents)` where cents is in -50..+50.
+    pub fn from_frequency(hz: f64) -> (Self, f64) {
+        let midi = 69.0 + 12.0 * (hz / 440.0).log2();
+        let nearest_midi = midi.round() as i32;
+        let cents = (midi - nearest_midi as f64) * 100.0;
+
+        let octave = (nearest_midi / 12) - 1;
+        // MIDI: C=0, C#=1, ..., B=11. PitchClass::semitones(): C=1, ..., B=12
+        let semitone_0based = ((nearest_midi % 12) + 12) % 12; // 0=C, 1=C#, ..., 11=B
+        let class = match semitone_0based {
+            0 => PitchClass::C,
+            1 => PitchClass::Cs,
+            2 => PitchClass::D,
+            3 => PitchClass::Ds,
+            4 => PitchClass::E,
+            5 => PitchClass::F,
+            6 => PitchClass::Fs,
+            7 => PitchClass::G,
+            8 => PitchClass::Gs,
+            9 => PitchClass::A,
+            10 => PitchClass::As,
+            11 => PitchClass::B,
+            _ => unreachable!(),
+        };
+        (Tuning::new(class, octave as i8), cents)
+    }
+
     pub fn class(&self) -> PitchClass {
         self.class
     }
